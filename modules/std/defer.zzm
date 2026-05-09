@@ -1,0 +1,28 @@
+=encoding utf8
+
+=head1 COPYRIGHT AND LICENCE
+
+B<< std/defer >> is copyright Toby Inkster.
+
+It is free software; you may redistribute it and/or modify it under
+the terms of either the Artistic License 1.0 or the GNU General Public
+License version 2.
+
+=cut
+
+class Guard {
+	let Boolean armed := true;
+	let Function callback;
+
+	method enable () {
+		armed := true;
+	}
+
+	method disable () {
+		armed := false;
+	}
+
+	method __demolish__ () {
+		callback();
+	}
+}

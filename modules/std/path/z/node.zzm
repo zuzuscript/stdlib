@@ -1,0 +1,901 @@
+=encoding utf8
+
+=head1 NAME
+
+std/path/z/node - Node wrapper used by std/path/z.
+
+=head1 DESCRIPTION
+
+Objects of this class wrap underlying values and provide traversal and
+coercion helpers used while evaluating ZPath expressions.
+
+=head1 COPYRIGHT AND LICENCE
+
+B<< std/path/z/node >> is copyright Toby Inkster.
+
+It is free software; you may redistribute it and/or modify it under
+the terms of either the Artistic License 1.0 or the GNU General Public
+License version 2.
+
+=cut
+
+from std/internals import ref_id;
+from std/math import Math;
+from std/string import index, substr;
+
+let determine_class;
+
+class Node {
+	let raw with set := null;
+	let parent but weak := null;
+	let _parent_keepalive := null;
+	let key := null;
+	let id := null;
+	let ix := null;
+	let tagged with set, has := null;
+
+	static method _xml_node_type_code ( value ) {
+		try {
+			return int( "" _ value.nodeType() );
+		}
+		catch {
+			return null;
+		}
+	}
+
+	static method from_root ( obj ) {
+		return self.wrap(obj);
+	}
+
+	static method wrap ( _obj, parent?, key?, ix? ) {
+		
+		let obj := _obj;
+
+		if ( obj instanceof Node ) {
+			return obj;
+		}
+
+		let Klass := determine_class( obj );
+		
+		let n := new Klass(
+			raw: obj,
+			parent: parent,
+			key: key,
+			ix: ix,
+		);
+		
+		if ( typeof obj eq "TaggedValue" ) {
+			n.set_tagged(obj);
+			while ( typeof obj eq "TaggedValue" ) {
+				obj := obj{value}
+			}
+			n.set_raw(obj);
+		}
+		
+		n._build_id_with_parent(parent);
+		
+		return n;
+	}
+
+	method hold_parent ( owner ) {
+		_parent_keepalive := owner;
+		return self;
+	}
+	
+	method _use_ref_as_id () {
+		return false;
+	}
+	
+	method _build_id () {
+		id := self._generate_id;
+	}
+
+	method _build_id_with_parent ( owner ) {
+		id := self._generate_id_with_parent(owner);
+	}
+	
+	method _generate_id () {
+		return self._generate_id_with_parent(parent);
+	}
+
+	method _generate_id_with_parent ( owner ) {
+		
+		if ( self._use_ref_as_id ) {
+			return "ref:" _ ref_id(raw);
+		}
+		
+		if ( owner ≡ null ) {
+			return "root";
+		}
+		
+		if ( ix ≢ null ) {
+			if ( key ≢ null ) {
+				return owner.id _ "/" _ key _ "#" _ ix;
+			}
+			return owner.id _ "/#" _ ix;
+		}
+		
+		if ( key ≢ null ) {
+			return owner.id _ "/" _ key;
+		}
+		
+		return "rand:" _ floor( 1000 * 1000 * 1000 * Math.rand() );
+	}
+	
+	method raw ()    { return raw; }
+	method parent () { return parent; }
+	method key ()    { return key; }
+	method id ()     { return id; }
+	method ix ()     { return ix; }
+	method index ()  { return ix; }
+	method tagged () { return tagged; }
+
+	method type () {
+		return typeof raw;
+	}
+
+	method value () {
+		return raw;
+	}
+
+	method primitive_value () {
+		return raw;
+	}
+
+	method string_value () {
+		let p := self.primitive_value;
+		return p ≡ null ? null : "" _ p;
+	}
+
+	method number_value () {
+		let v := self.primitive_value();
+		return 0 + v if v ~ /^-?(?:[0-9]+(?:\.[0-9]+)?|\.[0-9]+)$/;
+		return null;
+	}
+
+	method can_have_named_children () {
+		return false;
+	}
+
+	method can_have_indexed_children () {
+		return false;
+	}
+
+	method can_have_named_indexed_children () {
+		return false;
+	}
+
+	method named_child ( name ) {
+		self.children.first( fn kid → kid.key ≡ name );
+	}
+
+	method indexed_child ( i ) {
+		self.children.first( fn kid → kid.ix ≡ i );
+	}
+	
+	method named_indexed_child ( name, i ) {
+		self.children.first( fn kid → kid.ix ≡ i and kid.key ≡ name );
+	}
+	
+	method next_child ( child ) {
+		let i := child.ix;
+		return null if i ≡ null; 
+		return self.indexed_child( i + 1 );
+	}
+
+	method prev_child ( child ) {
+		let i := child.ix;
+		return null if i ≡ null; 
+		return null if i = 0;
+		return self.indexed_child( i - 1 );
+	}
+
+	method next_sibling () {
+		return self.parent.next_child( self );
+	}
+
+	method prev_sibling () {
+		return self.parent.prev_child( self );
+	}
+
+	method named_attribute ( name ) {
+		let attrname := ( name ~ /^@/ ) ? name : `@${name}`;
+		self.attributes.first( fn kid → kid.name ≡ attrname );
+	}
+
+	method children () {
+		return [];
+	}
+
+	method attributes () {
+		return [];
+	}
+	
+	method name () {
+		return key;
+	}
+
+	method dump () {
+		return {
+			"@type": self.type(),
+			"@id": self.id(),
+			"@key": self.key(),
+			"@index": self.index(),
+			"@value": self.primitive_value(),
+			children: self.children().map( fn c -> c.dump() ),
+			attributes: self.attributes().map( fn a -> a.dump() ),
+		};
+	}
+
+	method find ( zpath ) {
+		// Stub for now.
+		die "Node.find is not implemented yet";
+	}
+
+	method do_action ( action ) {
+		const container_node := self.parent();
+		die "Path assignment target has no parent node"
+			if container_node ≡ null;
+		return container_node.do_action_on_child( self, action );
+	}
+
+	method ref () {
+		const container_node := self.parent();
+		die "Path assignment target has no parent node"
+			if container_node ≡ null;
+		return container_node.ref_on_child(self);
+	}
+
+	method do_action_on_child ( child, action ) {
+		die `Path assignment target container '${self.type()}' is not assignable`;
+	}
+
+	method ref_on_child ( child ) {
+		die `Path assignment target container '${self.type()}' is not assignable`;
+	}
+}
+
+class SimpleNode extends Node {
+}
+
+class StringNode extends SimpleNode {
+	
+	method string_value () {
+		let raw := self.raw;
+		if ( typeof raw eq "BinaryString" ) {
+			return to_string( raw );
+		}
+		return raw;
+	}
+	
+	method type () {
+		return "string";
+	}
+}
+
+class NumberNode extends SimpleNode {
+	method number_value () {
+		let raw := self.raw;
+		return raw;
+	}
+	
+	method type () {
+		return "number";
+	}
+}
+
+class BooleanNode extends SimpleNode {
+	method type () {
+		return "boolean";
+	}
+}
+
+class NullNode extends SimpleNode {
+	method type () {
+		return "null";
+	}
+}
+
+class ArrayNode extends Node {
+
+	method _use_ref_as_id () {
+		return true;
+	}
+	
+	method type () {
+		return "list";
+	}
+	
+	method children () {
+		let raw := self.raw;
+		let out := [];
+		let i := 0;
+		while ( i < raw.length ) {
+			let child := Node.wrap( raw[i], self, null, i );
+			out.push(child);
+			i++;
+		}
+		return out;
+	}
+	
+	method can_have_indexed_children () {
+		return false;
+	}
+
+	method do_action_on_child ( child, action ) {
+		return super( child, action ) if action{op} ne ":=";
+
+		const ix := child.ix();
+		die "Path assignment expects numeric array index" if ix ≡ null;
+		let container := self.raw();
+		container[ix] := action{value};
+		return action{value};
+	}
+
+	method ref_on_child ( child ) {
+		const ix := child.ix();
+		die "Path assignment expects numeric array index" if ix ≡ null;
+		let container := self.raw();
+		return \ container[ix];
+	}
+}
+
+class SetNode extends Node {
+	
+	method _use_ref_as_id () {
+		return true;
+	}
+
+	method children () {
+		let raw := self.raw;
+		let out := [];
+		let i := 0;
+		while ( i < raw.length ) {
+			let child := Node.wrap( raw[i], self, null, null );
+			out.push(child);
+			i++;
+		}
+		return out;
+	}
+}
+
+class BagNode extends Node {
+	
+	method _use_ref_as_id () {
+		return true;
+	}
+
+	method children () {
+		let raw := self.raw;
+		let out := [];
+		let i := 0;
+		while ( i < raw.length ) {
+			let child := Node.wrap( raw[i], self, null, null );
+			out.push(child);
+			i++;
+		}
+		return out;
+	}
+}
+
+class DictNode extends Node {
+
+	method _use_ref_as_id () {
+		return true;
+	}
+	
+	method type () {
+		return "map";
+	}
+	
+	method children () {
+		let raw := self.raw;
+		let out := [];
+		for ( let k in raw.keys() ) {
+			let child := Node.wrap( raw.get(k), self, k );
+			out.push(child);
+		}
+		return out;
+	}
+	
+	method can_have_named_children () {
+		return true;
+	}
+
+	method do_action_on_child ( child, action ) {
+		return super( child, action ) if action{op} ne ":=";
+
+		const key := child.key();
+		die "Path assignment expects string dict key" if key ≡ null;
+		let container := self.raw();
+		container{(key)} := action{value};
+		return action{value};
+	}
+
+	method ref_on_child ( child ) {
+		const key := child.key();
+		die "Path assignment expects string dict key" if key ≡ null;
+		let container := self.raw();
+		return \ container{(key)};
+	}
+}
+
+class PairListNode extends Node {
+	
+	method _use_ref_as_id () {
+		return true;
+	}
+	
+	method children () {
+		die "TODO";
+	}
+	
+	method can_have_named_children () {
+		return true;
+	}
+	
+	method can_have_indexed_children () {
+		return true;
+	}
+	
+	method can_have_named_indexed_children () {
+		return true;
+	}
+
+	method do_action_on_child ( child, action ) {
+		return super( child, action ) if action{op} ne ":=";
+
+		const key := child.key();
+		die "Path assignment expects string pairlist key" if key ≡ null;
+
+		let hash := index( key, "#" );
+		let pair_key := hash < 0 ? key : substr( key, 0, hash );
+		let container := self.raw();
+		container.set( pair_key, action{value} );
+		return action{value};
+	}
+
+	method ref_on_child ( child ) {
+		const key := child.key();
+		die "Path assignment expects string pairlist key" if key ≡ null;
+
+		let hash := index( key, "#" );
+		let pair_key := hash < 0 ? key : substr( key, 0, hash );
+		let container := self.raw();
+		return \ container{(pair_key)};
+	}
+}
+
+class PairNode extends Node {
+	
+	method attributes () {
+		let raw := self.raw;
+		return [ "key", "value" ]
+			.map( fn a → Node.wrap( raw.(a)(), self, `@${a}` ) );
+	}
+}
+
+class KDLDocumentNode extends Node {
+
+	method _use_ref_as_id () {
+		return true;
+	}
+
+	method type () {
+		return "document";
+	}
+
+	method children () {
+		let raw := self.raw;
+		let out := [];
+		let i := 0;
+		while ( i < raw.nodes().length() ) {
+			let child := raw.nodes()[i];
+			out.push( Node.wrap( child, self, child.name(), i ) );
+			i++;
+		}
+		return out;
+	}
+
+	method can_have_named_children () {
+		return true;
+	}
+
+	method can_have_indexed_children () {
+		return true;
+	}
+
+	method can_have_named_indexed_children () {
+		return true;
+	}
+
+	method indexed_child ( i ) {
+		return self.children().get( i, null );
+	}
+
+	method named_indexed_child ( name, i ) {
+		let n := 0;
+		for ( let child in self.children() ) {
+			if ( child.key() ≡ name ) {
+				return child if n ≡ i;
+				n++;
+			}
+		}
+		return null;
+	}
+}
+
+class KDLNodeNode extends Node {
+
+	method _use_ref_as_id () {
+		return true;
+	}
+
+	method type () {
+		return "element";
+	}
+
+	method name () {
+		return self.raw().name();
+	}
+
+	method children () {
+		let raw := self.raw;
+		let out := [];
+		let i := 0;
+		for ( let arg in raw.args() ) {
+			out.push( Node.wrap( arg, self, null, i ) );
+			i++;
+		}
+		for ( let child in raw.children() ) {
+			out.push( Node.wrap( child, self, child.name(), i ) );
+			i++;
+		}
+		return out;
+	}
+
+	method attributes () {
+		let raw := self.raw;
+		let out := [];
+		let i := 0;
+		for ( let pair in raw.props().to_Array() ) {
+			out.push( Node.wrap( pair.value, self, "@" _ pair.key, i ) );
+			i++;
+		}
+		return out;
+	}
+
+	method can_have_named_children () {
+		return true;
+	}
+
+	method can_have_indexed_children () {
+		return true;
+	}
+
+	method can_have_named_indexed_children () {
+		return true;
+	}
+
+	method indexed_child ( i ) {
+		return self.children().get( i, null );
+	}
+
+	method named_indexed_child ( name, i ) {
+		let n := 0;
+		for ( let child in self.children() ) {
+			if ( child.key() ≡ name ) {
+				return child if n ≡ i;
+				n++;
+			}
+		}
+		return null;
+	}
+}
+
+class KDLValueNode extends Node {
+
+	method type () {
+		return self.raw().type();
+	}
+
+	method value () {
+		return self.raw().native_value();
+	}
+
+	method primitive_value () {
+		return self.raw().native_value();
+	}
+
+	method string_value () {
+		return self.raw().to_String();
+	}
+
+	method number_value () {
+		try {
+			return self.raw().to_Number();
+		}
+		catch {
+			return null;
+		}
+	}
+
+	method has_tagged () {
+		return true;
+	}
+
+	method tagged () {
+		let ann := self.raw().type_annotation();
+		return {
+			tag: ann ≡ null ? null : "" _ ann,
+			value: self.raw().native_value(),
+		};
+	}
+}
+
+class XmlNodeNode extends Node {
+
+	method _generate_id () {
+		return
+			try {
+				let i := self.raw.unique_id;
+				i ≡ null ? super() : `xml:${i}`;
+			}
+			catch {
+				super();
+			};
+	}
+
+	method type () {
+		let raw := self.raw;
+		if ( typeof raw eq "XMLDocument" ) {
+			return "document";
+		}
+		switch ( Node._xml_node_type_code(raw) ) {
+			case 1:
+				return "element";
+			case 2, 18:
+				return "attr";
+			case 3, 4:
+				return "text";
+			case 8:
+				return "comment";
+			case 9:
+				return "document";
+		}
+		
+		return super();
+	}
+	
+	method name () {
+		let raw := self.raw;
+		switch ( Node._xml_node_type_code(raw) ) {
+			case 1:
+				return raw.nodeName();
+			case 2, 18:
+				return "@" _ raw.nodeName();
+			case 3, 4:
+				return "#text";
+		}
+		
+		return super();
+	}
+
+	method next_child ( child ) {
+		return child.next_sibling;
+	}
+
+	method prev_child ( child ) {
+		return child.prev_sibling;
+	}
+
+	method next_sibling () {
+		let x := self.raw.nextSibling;
+		return null if x ≡ null;
+		return Node.wrap( x, self.parent, x.nodeName );
+	}
+
+	method prev_sibling () {
+		let x := self.raw.previousSibling;
+		return null if x ≡ null;
+		return Node.wrap( x, self.parent, x.nodeName );
+	}
+
+	method primitive_value () {
+		let raw := self.raw;
+		if ( typeof raw eq "XMLDocument" ) {
+			let de := raw.documentElement();
+			return de ≡ null ? null : de.textContent();
+		}
+		switch ( Node._xml_node_type_code(raw) ) {
+			case 1:
+				return raw.textContent;
+			case 2, 18:
+				return raw.nodeValue();
+			case 3, 4, 8:
+				return raw.data;
+			case 9:
+				let de := raw.documentElement();
+				return de ≡ null ? null : de.textContent();
+		}
+		
+		return super();
+	}
+	
+	method string_value () {
+		let raw := self.raw;
+		if ( typeof raw eq "XMLDocument" ) {
+			let de := raw.documentElement();
+			return de ≡ null ? null : de.textContent();
+		}
+		switch ( Node._xml_node_type_code(raw) ) {
+			case 1:
+				return raw.textContent;
+			case 2, 18:
+				return raw.nodeValue();
+			case 3, 4, 8:
+				return raw.data;
+			case 9:
+				let de := raw.documentElement();
+				return de ≡ null ? null : de.textContent();
+		}
+
+		return super();
+	}
+
+	method can_have_named_children () {
+		return true;
+	}
+	
+	method can_have_indexed_children () {
+		return true;
+	}
+	
+	method can_have_named_indexed_children () {
+		return true;
+	}
+	
+	method children () {
+		let raw := self.raw;
+		if ( typeof raw eq "XMLDocument" ) {
+			let de := raw.documentElement();
+			return de ≡ null ? []
+				: [ Node.wrap( de, self, de.nodeName(), 0 ) ];
+		}
+		let node_type := Node._xml_node_type_code(raw);
+		if ( node_type = 9 ) {
+			let de := raw.documentElement();
+			return de ≡ null ? []
+				: [ Node.wrap( de, self, de.nodeName(), 0 ) ];
+		}
+
+		if ( node_type = 1 ) {
+			let kids := [];
+			let count := {};
+			for ( let child in raw.childNodes() ) {
+				let nm := child.nodeName();
+				let n := count.exists(nm) ? count.get( nm ) : 0;
+				count.set( nm, n + 1 );
+				kids.push( Node.wrap( child, self, nm, n ) );
+			}
+			return kids;
+		}
+
+		return [];
+	}
+
+	method attributes () {
+		let raw := self.raw;
+		let out := super();
+		if ( Node._xml_node_type_code(raw) ≡ 1 ) {
+			for ( let attr in raw.attributes() ) {
+				let n := Node.wrap( attr, self, "@" _ attr.nodeName() );
+				out.push(n);
+			}
+		}
+		return out;
+	}
+}
+
+class TimeNode extends Node {
+	
+	method string_value () {
+		let raw := self.raw;
+		return raw.datetime;
+	}
+	
+	method number_value () {
+		let raw := self.raw;
+		return raw.epoch;
+	}
+	
+	method attributes () {
+		let raw := self.raw;
+		return [ "year", "month", "day", "hour", "min", "sec" ]
+			.map( fn a → Node.wrap( raw.(a)(), self, `@${a}` ) );
+	}
+}
+
+class PathNode extends Node {
+
+	method string_value () {
+		let raw := self.raw;
+		return raw.to_String;
+	}
+	
+	method attributes () {
+		let raw := self.raw;
+		if ( raw.is_file ) {
+			const stat := raw.stat;
+			return stat.keys.map( fn a → Node.wrap( stat{a}, self, `@${a}` ) );
+		}
+		
+		return super();
+	}
+}
+
+// Need to define the body of this function late so it can refer back to
+// classes that have been declared.
+
+determine_class := function ( obj ) {
+	let Klass;
+	
+	let real_obj := obj;
+	while ( typeof real_obj eq "TaggedValue" ) {
+		real_obj := real_obj{value};
+	}
+	
+	switch ( typeof real_obj : eq ) {
+		case "Null":
+			Klass := NullNode;
+		case "Boolean":
+			Klass := BooleanNode;
+		case "Number":
+			Klass := NumberNode;
+		case "String", "BinaryString":
+			Klass := StringNode;
+		case "Array":
+			Klass := ArrayNode;
+		case "Bag":
+			Klass := BagNode;
+		case "Set":
+			Klass := SetNode;
+		case "Dict":
+			Klass := DictNode;
+		case "PairList":
+			Klass := PairListNode;
+		case "Pair":
+			Klass := PairNode;
+		case "KDLDocument":
+			Klass := KDLDocumentNode;
+		case "KDLNode":
+			Klass := KDLNodeNode;
+		case "KDLValue":
+			Klass := KDLValueNode;
+		case "XMLNode", "XMLDocument", "DOMNode":
+			Klass := XmlNodeNode;
+		case "DOMElement", "DOMAttr", "DOMText", "DOMComment", "DOMDocument":
+			Klass := XmlNodeNode;
+		case "Time":
+			Klass := TimeNode;
+		case "Path":
+			Klass := PathNode;
+		default:
+			if ( real_obj instanceof "Object" ) {
+				if ( real_obj can __zpath_node_class__ ) {
+					Klass = real_obj.__zpath_node_class__;
+				}
+			}
+	}
+
+	if ( Klass ≡ null ) {
+		try {
+			let maybe_node_type := real_obj.nodeType();
+			Klass := XmlNodeNode if maybe_node_type ≢ null;
+		}
+		catch {
+		}
+	}
+	
+	return Klass ?: Node;
+};

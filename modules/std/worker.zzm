@@ -1,0 +1,203 @@
+=encoding utf8
+
+=head1 NAME
+
+std/worker - isolated workers for shared-nothing parallel work.
+
+=head1 SYNOPSIS
+
+  from std/worker import Worker;
+
+  async function __main__ () {
+    let task := Worker.spawn(
+      function ( x ) {
+        return x * 2;
+      },
+      [ 21 ],
+    );
+
+    say await {
+      task;
+    };
+  }
+
+=head1 DESCRIPTION
+
+This runtime-supported module provides isolated workers for CPU-heavy
+or host-isolated work. Workers run in a fresh runtime and communicate
+with their parent by copying values through C<std/marshal>. Worker
+transport is shared-nothing: parent and worker runtimes do not share
+mutable ZuzuScript values.
+
+The worker boundary is intended for cooperating trusted code. It uses
+C<std/marshal.load>, which may evaluate marshalled code records, so it
+must not be used as an untrusted data sandbox.
+
+=head1 EXPORTS
+
+=over
+
+=item C<Worker>
+
+The worker namespace class.
+
+=item C<Worker.spawn(callable, args?, ...options)>
+
+Starts one worker job and returns a C<Task>. C<args> defaults to an
+empty array. The worker calls C<callable(...args)> in its own runtime,
+awaits a returned task if needed, marshals the result, and fulfils the
+parent task with the unmarshalled value.
+
+If the worker throws, cancellation is requested, or marshalling fails,
+awaiting the task throws the corresponding exception value.
+
+=item C<Worker.spawn_handle(callable, args?, ...options)>
+
+Starts a worker with an explicit bidirectional message channel and
+returns a C<WorkerHandle>. The worker calls
+C<callable(inbox, ...args)>.
+
+This method is available in implementations that support message
+passing workers. Scripts that need to be portable to an older host may
+check C<< Worker can "spawn_handle" >> before using it.
+
+=item C<WorkerHandle.send(value)>
+
+Marshals and sends C<value> to the worker inbox. Returns a C<Task> that
+resolves when the local transport has accepted the message. It rejects
+with C<ChannelClosedException> if the handle is closed or cancelled.
+
+=item C<WorkerHandle.recv()>
+
+Returns a C<Task> for the next worker-to-parent message. C<null> is a
+valid message value, so receiving from a closed and drained worker
+handle rejects with C<ChannelClosedException>.
+
+=item C<WorkerHandle.close()>
+
+Half-closes the parent-to-worker send direction and returns a completed
+C<Task>.
+
+=item C<WorkerHandle.cancel(reason?)>
+
+Requests worker cancellation, closes the message directions, rejects
+pending receives, and cancels the result task with
+C<CancelledException>. CPU-heavy Rust worker code observes cancellation
+cooperatively at runtime checkpoints.
+
+=item C<WorkerHandle.result()>
+
+Returns the worker result C<Task>. Awaiting it gives the callable's
+return value after any worker-side task has been awaited.
+
+=item C<WorkerHandle.status()>
+
+Returns the status of the result task.
+
+=item C<WorkerHandle.done()>
+
+Returns true when the result task has fulfilled, rejected, or been
+cancelled.
+
+=item C<inbox.send(value)>
+
+Worker-side method for sending a message to the parent. It has the same
+marshal and close rules as C<WorkerHandle.send>.
+
+=item C<inbox.recv()>
+
+Worker-side method for receiving the next parent message. Like
+C<WorkerHandle.recv>, it rejects with C<ChannelClosedException> after
+the parent send direction is closed and drained.
+
+=item C<inbox.close()>
+
+Half-closes the worker-to-parent send direction.
+
+=back
+
+=head1 WORKER OPTIONS
+
+Workers inherit every denied capability from the parent runtime. A
+worker option can deny additional capabilities, but cannot relax a
+parent denial.
+
+Supported options are:
+
+=over
+
+=item * C<deny_fs: Boolean>
+
+=item * C<deny_net: Boolean>
+
+=item * C<deny_proc: Boolean>
+
+=item * C<deny_db: Boolean>
+
+=item * C<deny_clib: Boolean>
+
+=item * C<deny_gui: Boolean>
+
+=item * C<deny_worker: Boolean>
+
+=item * C<deny_js: Boolean>
+
+=item * C<deny_perl: Boolean>
+
+=back
+
+For example:
+
+  let task := Worker.spawn(
+    function () {
+      from std/io import Path;
+      return new Path("secret.txt").slurp_utf8();
+    },
+    [],
+    deny_fs: true,
+  );
+
+=head1 MESSAGE EXAMPLE
+
+  let handle := Worker.spawn_handle(
+    async function ( inbox ) {
+      let value := await {
+        inbox.recv();
+      };
+      await {
+        inbox.send( value * 2 );
+      };
+      inbox.close();
+      return "done";
+    },
+    [],
+  );
+
+  await {
+    handle.send(21);
+  };
+  say await {
+    handle.recv();
+  };
+  say await {
+    handle.result();
+  };
+
+=head1 PORTABILITY NOTES
+
+Perl uses C<fork>, Rust uses OS threads, Node uses C<worker_threads>,
+and browser-capable JavaScript uses Web Workers when the host supplies a
+worker bundle or worker factory. If C<std/worker> imports successfully,
+workers are assumed to be available.
+
+Live C<std/task.Channel>, C<Task>, and other runtime-backed resources
+are not transferable unless C<std/marshal> explicitly supports them.
+
+=head1 COPYRIGHT AND LICENCE
+
+B<< std/worker >> is copyright Toby Inkster.
+
+It is free software; you may redistribute it and/or modify it under
+the terms of either the Artistic License 1.0 or the GNU General Public
+License version 2.
+

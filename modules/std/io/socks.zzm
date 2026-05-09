@@ -1,0 +1,89 @@
+=encoding utf8
+
+=head1 NAME
+
+std/io/socks - socket programming helpers for Zuzu.
+
+=head1 SYNOPSIS
+
+  from std/io/socks import *;
+
+  let srv := listen_tcp( "127.0.0.1", 0 );
+  let cli := connect_tcp( "127.0.0.1", srv.port() );
+  let peer := srv.accept();
+
+  cli.say( "hello" );
+  let line := peer.next_line();
+
+=head1 DESCRIPTION
+
+This module provides a practical API for TCP, UDP, and Unix domain
+sockets.
+
+When possible, method names mirror other stream APIs:
+C<read>, C<write>, C<print>, C<say>, C<next_line>,
+C<each_line>, and C<close>.
+
+=head1 FUNCTIONS
+
+=over
+
+=item C<< listen_tcp(String host?, Number port?, Number backlog?) >>
+
+Create a TCP listening socket and return C<TCPServer>.
+
+=item C<< connect_tcp(String host, Number port, Bool raw?) >>
+
+Connect to a TCP server and return C<TCPSocket>.
+
+=item C<< bind_udp(String host?, Number port?, Bool raw?) >>
+
+Bind a UDP socket and return C<UDPSocket>.
+
+=item C<< connect_udp(String host, Number port, Bool raw?) >>
+
+Create a connected UDP socket and return C<UDPSocket>.
+
+=item C<< listen_unix(String path, Number backlog?) >>
+
+Create a Unix domain stream server and return C<UnixServer>.
+
+=item C<< connect_unix(String path, Bool raw?) >>
+
+Connect to a Unix domain stream server and return C<UnixSocket>.
+
+=back
+
+=head1 CLASSES
+
+=head2 Socket methods
+
+Common methods include C<read>, C<write>, C<print>, C<say>,
+C<next_line>, C<each_line>, C<close>, and C<is_open>.
+
+=head2 TCPSocket
+
+Adds C<peer_host> and C<peer_port>.
+
+=head2 TCPServer
+
+Provides C<accept>, C<port>, C<host>, and C<close>.
+
+=head2 UDPSocket
+
+Provides C<send>, C<recv>, C<port>, C<host>, and C<close>.
+
+=head2 UnixSocket / UnixServer
+
+Unix sockets support stream methods, and C<UnixServer> offers
+C<accept>, C<path>, and C<close>.
+
+=head1 COPYRIGHT AND LICENCE
+
+B<< std/io/socks >> is copyright Toby Inkster.
+
+It is free software; you may redistribute it and/or modify it under
+the terms of either the Artistic License 1.0 or the GNU General Public
+License version 2.
+
+=cut

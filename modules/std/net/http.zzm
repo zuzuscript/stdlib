@@ -1,0 +1,141 @@
+=encoding utf8
+
+=head1 NAME
+
+std/net/http - HTTP/web client foundation.
+
+=head1 SYNOPSIS
+
+  from std/net/http import CookieJar, UserAgent;
+
+  let jar := new CookieJar();
+  let ua  := new UserAgent(
+    cookie_jar: jar,
+    agent: "my-app/1.0"
+  );
+
+  let req := ua
+    .build_request("GET", "https://example.com/items")
+    .query({ page: "1" })
+    .auth_bearer("TOKEN");
+
+  let res := ua.send(req);
+  let data := res.expect_success().json();
+
+=head1 DESCRIPTION
+
+This module provides an HTTP client API with classes for cookie
+handling, request building, retries/timeouts, and JSON-first responses.
+
+=head2 Classes
+
+=over
+
+=item C<< CookieJar(config?) >>
+
+Create a cookie jar.
+
+Methods: C<add(url, set_cookie)>, C<cookie_header(url)>, C<clear()>.
+
+=item C<< UserAgent(config?) >>
+
+Create an HTTP user agent.
+
+Supported config keys include C<default_headers>, C<cookie_jar>,
+C<max_redirect>, C<timeout>, and TLS policy keys:
+C<tls_identity>, C<tls_ca>, C<tls_verify>, C<tls_server_name>,
+C<tls_min_version>, and C<tls_ciphers>.
+
+C<tls_identity> accepts a C<std/secure> C<TlsIdentity> or C<null>.
+C<tls_ca> accepts a C<std/secure> C<Certificate>, PEM certificate text,
+an array of those, or C<null>. C<tls_verify> defaults to true.
+C<tls_min_version> accepts C<"tls1.2"> or C<"tls1.3">. C<tls_ciphers>
+is a backend-native cipher string.
+
+Backends throw a clear unsupported error for non-default TLS settings
+they cannot honour. JS/Browser does not support script-selected TLS
+client configuration; any non-default TLS policy throws when sending.
+
+Builder and dispatch methods:
+
+=over
+
+=item * C<build_request(method, url)>
+
+=item * C<send(request)>
+
+=item * C<send_async(request)>
+
+=back
+
+Request methods:
+
+=over
+
+=item * Generic
+
+C<request(method, url, data?, headers?)>
+
+=item * Async generic
+
+C<request_async(method, url, data?, headers?)>
+
+=item * Convenience
+
+C<get>, C<head>, C<delete>, C<options>, C<post>, C<put>,
+C<patch>.
+
+C<get_async>, C<head_async>, C<delete_async>, C<options_async>,
+C<post_async>, C<put_async>, and C<patch_async> return awaitable
+C<Task> values which resolve to C<Response>.
+
+For C<post>, C<put>, and C<patch>, pass data then optional headers.
+For the others, the second argument can be headers.
+
+=back
+
+=head2 JS/Browser synchronous request support
+
+In the JS/Browser implementation, synchronous request methods do not
+perform real network requests. This includes C<send>, C<request>,
+C<get>, C<head>, C<delete>, C<options>, C<post>, C<put>, C<patch>,
+and C<Request.send>.
+
+These methods return a C<Response> with status C<599> and reason
+C<Synchronous HTTP is unsupported on JS/Browser>.
+
+Use the asynchronous methods in JS/Browser: C<send_async>,
+C<request_async>, C<get_async>, C<head_async>, C<delete_async>,
+C<options_async>, C<post_async>, C<put_async>, C<patch_async>, and
+C<Request.send_async>.
+
+=item C<Request>
+
+Mutable request builder.
+
+Methods: C<method>, C<url>, C<header>, C<headers>, C<query>, C<body>,
+C<json>, C<auth_bearer>, C<timeout>, C<retries>, C<download_to>,
+C<upload_from>, C<tls_identity>, C<multipart>, C<send(user_agent)>, and
+C<send_async(user_agent)>.
+
+C<tls_identity(identity_or_null)> overrides the user-agent TLS identity
+for that request only. Passing C<null> disables any user-agent identity
+for that request.
+
+=item C<Response>
+
+Represents an HTTP response.
+
+Methods: C<status>, C<reason>, C<url>, C<content>, C<headers>,
+C<header(name)>, C<success>, C<json>, C<expect_success>, C<to_Dict>.
+
+=back
+
+=head1 COPYRIGHT AND LICENCE
+
+B<< std/net/http >> is copyright Toby Inkster.
+
+It is free software; you may redistribute it and/or modify it under
+the terms of either the Artistic License 1.0 or the GNU General Public
+License version 2.
+

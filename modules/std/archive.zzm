@@ -1,0 +1,106 @@
+=encoding utf8
+
+=head1 NAME
+
+std/archive - Small archive and compression helpers.
+
+=head1 SYNOPSIS
+
+  from std/archive import Archive;
+  from std/io import Path;
+
+  let archive := {
+    entries: [
+      { path: "hello.txt", data: to_binary( "Hello\n" ) },
+      { path: "nested/world.txt", data: to_binary( "World\n" ) },
+    ],
+  };
+
+  let bytes := Archive.encode( archive, "tar.gz" );
+  let roundtrip := Archive.decode(bytes);
+
+  let path := Path.tempdir().child("hello.zip");
+  Archive.dump( path, archive );
+  let loaded := Archive.load(path);
+
+=head1 DESCRIPTION
+
+This module provides a small, runtime-supported archive API centred on
+one exported class, C<Archive>.
+
+The API intentionally stays small:
+
+=over
+
+=item * C<Archive.decode(bytes, format?)>
+
+=item * C<Archive.encode(archive, format?)>
+
+=item * C<Archive.load(path, format?)>
+
+=item * C<Archive.dump(path, archive, format?)>
+
+=back
+
+Archive values use this shape:
+
+  {
+    format: "zip",
+    entries: [
+      { path: "hello.txt", data: BinaryString },
+      { path: "nested/world.txt", data: BinaryString },
+    ],
+  }
+
+Only regular file payloads are preserved in this API. Directory
+entries and extended archive metadata are ignored so the interface
+remains practical to port to other backends later.
+
+When constructing archives for C<encode> or C<dump>, each entry may
+provide either:
+
+=over
+
+=item * C<data> as a C<BinaryString>
+
+=item * C<data_from> as a C<std/io::Path>
+
+=back
+
+For single-stream compression formats such as C<gz> and C<bz2>,
+C<entries> contains exactly one file entry.
+
+=head1 SUPPORTED FORMATS
+
+Perl and Rust currently support:
+
+=over
+
+=item * C<zip>
+
+=item * C<tar>
+
+=item * C<tar.gz> and C<tgz>
+
+=item * C<tar.bz2> and C<tbz2>
+
+=item * C<gz>
+
+=item * C<bz2>
+
+=back
+
+The Rust backend uses archive and compression crates directly and does
+not shell out. In C<zuzu-js>, this module is currently intended for the
+Node-hosted runtime. The JavaScript backend uses Node modules and built-in
+Node compression APIs for the underlying codec work, so it should not be
+assumed to work in the browser runner.
+
+=head1 COPYRIGHT AND LICENCE
+
+B<< std/archive >> is copyright Toby Inkster.
+
+It is free software; you may redistribute it and/or modify it under
+the terms of either the Artistic License 1.0 or the GNU General Public
+License version 2.
+

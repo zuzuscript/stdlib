@@ -1,0 +1,76 @@
+=encoding utf8
+
+=head1 NAME
+
+std/time - Time objects, formatting, and parsing.
+
+=head1 SYNOPSIS
+
+  from std/time import Time, TimeParser;
+
+  let now := new Time();
+  let t0  := new Time(0);
+
+  let parser := new TimeParser("%Y-%m-%d");
+  let d := parser.parse("2026-03-20");
+
+=head1 DESCRIPTION
+
+This module provides C<Time> for working with timestamps and
+C<TimeParser> for parsing strings using a strptime format.
+
+=head2 Classes
+
+=over
+
+=item C<< Time(Number epoch?) >>
+
+Construct a time from an epoch value in seconds, or use the current
+local time when omitted.
+
+Common instance methods include:
+
+=over
+
+=item * Components
+
+C<sec>, C<min>, C<hour>, C<day_of_month>, C<mon>, C<month>,
+C<year>, C<yy>, C<day_of_week>, C<day>, C<day_of_year>,
+C<month_last_day>, C<epoch>.
+
+=item * Formatting
+
+C<hms>, C<ymd>, C<mdy>, C<dmy>, C<date>, C<time>,
+C<datetime>, C<cdate>, C<strftime>, C<to_String>.
+
+=item * Calendar helpers
+
+C<tzoffset>, C<is_leap_year>, C<week>, C<week_year>,
+C<julian_day>.
+
+=item * Arithmetic
+
+C<add_seconds>, C<add_minutes>, C<add_hours>, C<add_days>,
+C<add_weeks>, and on supported builds C<add_months> and
+C<add_years>.
+
+=back
+
+=item C<< TimeParser(String format = "%Y-%m-%d") >>
+
+Create a parser for the given format string.
+
+=item C<< TimeParser->parse(String text) >>
+
+Parse text and return a C<Time> object.
+
+=back
+
+=head1 COPYRIGHT AND LICENCE
+
+B<< std/time >> is copyright Toby Inkster.
+
+It is free software; you may redistribute it and/or modify it under
+the terms of either the Artistic License 1.0 or the GNU General Public
+License version 2.
+

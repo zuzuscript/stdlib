@@ -1,0 +1,80 @@
+=encoding utf8
+
+=head1 NAME
+
+std/data/json - JSON encoding and decoding for ZuzuScript.
+
+=head1 SYNOPSIS
+
+  from std/data/json import JSON;
+  
+  let codec := new JSON( pretty: true );
+  let text  := codec.encode({ answer: 42 });
+  let data  := codec.decode(text);
+
+=head1 DESCRIPTION
+
+This module provides a C<JSON> class for turning ZuzuScript values
+into JSON text and parsing JSON text back into ZuzuScript values.
+
+=head2 Classes
+
+=over
+
+=item C<< JSON({ utf8?: Bool, pretty?: Bool, canonical?: Bool }) >>
+
+Construct a JSON codec.
+
+The constructor accepts named options:
+
+=over
+
+=item * C<utf8> (default true)
+
+Emit UTF-8 encoded bytes when encoding.
+
+=item * C<pretty> (default false)
+
+Pretty-print the JSON output.
+
+=item * C<canonical> (default false)
+
+Sort keys in objects while encoding.
+
+=item * C<pairlists> (default false)
+
+Decode JSON objects as PairLists instead of Dicts.
+
+(PairLists will always be encoded into JSON properly; this only affects
+decoding.)
+
+=back
+
+=item C<< encode(value) >>
+
+Encode a ZuzuScript value as a JSON string.
+
+=item C<< decode(String json) >>
+
+Decode JSON text into the equivalent ZuzuScript value.
+
+=item C<< load(Path path) >>
+
+Read JSON text from a C<std/io> C<Path> and decode it.
+Throws an exception if passed a plain string.
+
+=item C<< dump(Path path, value) >>
+
+Encode C<value> and write JSON text to a C<std/io> C<Path>.
+Throws an exception if passed a plain string.
+
+=back
+
+=head1 COPYRIGHT AND LICENCE
+
+B<< std/data/json >> is copyright Toby Inkster.
+
+It is free software; you may redistribute it and/or modify it under
+the terms of either the Artistic License 1.0 or the GNU General Public
+License version 2.
+

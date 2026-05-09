@@ -1,0 +1,62 @@
+=encoding utf8
+
+=head1 NAME
+
+std/math - Mathematical constants and functions.
+
+=head1 SYNOPSIS
+
+  from std/math import Math, π;
+
+  let r := 3;
+  let a := π * Math.pow(r, 2);
+  let s := Math.sin(Math.deg2rad(90));
+
+=head1 DESCRIPTION
+
+This module exports the C<Math> class with static math helpers and
+also exports the constant C<π>.
+
+=head2 Exports
+
+=over
+
+=item C<π>
+
+The value of pi.
+
+=item C<Math>
+
+Static methods include:
+
+=over
+
+=item * Trigonometric
+
+C<sin>, C<cos>, C<tan>, C<cosec>, C<sec>, C<cotan>,
+C<asin>, C<acos>, C<atan>, C<atan2>, C<acosec>, C<asec>,
+C<acotan>.
+
+=item * Hyperbolic
+
+C<sinh>, C<cosh>, C<tanh>, C<cosech>, C<sech>, C<cotanh>,
+C<asinh>, C<acosh>, C<atanh>, C<acosech>, C<asech>,
+C<acotanh>.
+
+=item * Utility
+
+C<pi>, C<rand>, C<exp>, C<log>, C<log10>, C<pow>, C<min>,
+C<max>, C<sum>, C<clamp>, C<hypot>, C<deg2rad>, C<rad2deg>.
+
+=back
+
+=back
+
+=head1 COPYRIGHT AND LICENCE
+
+B<< std/math >> is copyright Toby Inkster.
+
+It is free software; you may redistribute it and/or modify it under
+the terms of either the Artistic License 1.0 or the GNU General Public
+License version 2.
+

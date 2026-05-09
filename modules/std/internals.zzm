@@ -1,0 +1,125 @@
+=encoding utf8
+
+=head1 NAME
+
+std/internals - Runtime internals helpers for advanced modules.
+
+=head1 SYNOPSIS
+
+  from std/internals import class_name, object_slots, ansi_esc,
+    ref_id, to_String, to_Number, to_Boolean, to_Regexp,
+    make_instance, setprop, getprop, load_module;
+
+  let obj_class := class_name(some_object);
+  let slots := object_slots(some_object);
+  let id := ref_id(some_object);
+
+=head1 DESCRIPTION
+
+This module provides low-level reflection helpers used by advanced
+pure-Zuzu modules (for example C<std/dump>). These functions are
+not intended for general application code.
+
+Special properties are lexical metadata, not symbol bindings.
+Calling C<setprop("paths", SomeClass)> does not create an identifier
+named C<paths>.
+
+=head1 EXPORTED FUNCTIONS
+
+=over
+
+=item * C<class_name(value)>
+
+Returns the class name for object instances, else C<null>.
+
+=item * C<object_slots(value)>
+
+Returns a dictionary of object slots (excluding private underscore
+prefixed slots), else C<null>.
+
+=item * C<ansi_esc()>
+
+Returns a one-character ANSI escape string.
+
+=item * C<ref_id(value)>
+
+Returns a stable reference id for reference-like values to support
+cycle detection, else C<null>.
+
+=item * C<to_String(value)>
+
+Coerces C<value> using the same rules as string operators. Numbers are
+stringified, booleans become C<"true"> or C<"false">, C<null> becomes
+the empty string, regexps stringify to their pattern text, and objects
+must provide C<to_String>. Values that string operators reject also
+throw here.
+
+=item * C<to_Number(value)>
+
+Coerces C<value> using the same rules as numeric operators. Numeric
+strings are parsed, booleans become C<1> or C<0>, C<null> becomes C<0>,
+and objects must provide C<to_Number>. Values that numeric operators
+reject also throw here.
+
+=item * C<to_Boolean(value)>
+
+Coerces C<value> using the same rules as logical operators, ternary
+conditions, C<if>, and C<while>. C<null>, C<false>, C<0>, the empty
+string, and empty collections are false. Objects with C<to_Boolean>
+use that method and then boolify the result with the same rules.
+
+=item * C<to_Regexp(value)>
+
+Returns C<value> unchanged when it is already a regexp. Otherwise,
+coerces C<value> with the string-operator rules and compiles the result
+as a regexp pattern with no implicit flags. Invalid patterns throw.
+
+=item * C<make_instance(klass, dict := null)>
+
+Creates an instance of a user-defined class using the same field
+defaults and field type checks as C<new>, but does not call
+C<__build__>. When supplied, C<dict> provides slot values to install
+after field defaults have been evaluated.
+
+=item * C<load_module(module, symbol := null)>
+
+Loads C<module> using the runtime's normal module loader. With only the
+module name, returns a dictionary of the module's exports, including
+underscore-prefixed names. With C<symbol>, returns only that exported
+symbol. Missing modules or symbols throw an exception.
+
+=item * C<setprop(key, value)>
+
+Sets a lexically scoped runtime special property on the current frame.
+Keys must be strings.
+
+=item * C<getprop(key)>
+
+Returns a lexically scoped runtime special property via outward lexical
+lookup, else C<null>. Keys must be strings.
+
+=back
+
+=head1 EXAMPLES
+
+  from std/internals import setprop, getprop;
+  from std/path/z import ZPath;
+
+  setprop( "paths", ZPath );
+  say( getprop( "paths" ) );   // Class object
+
+  do {
+    setprop( "paths", null );
+    say( getprop( "paths" ) ); // null (shadowed in this block)
+  };
+
+  say( getprop( "paths" ) );   // ZPath (outer lexical value)
+
+=head1 COPYRIGHT AND LICENCE
+
+B<< std/internals >> is copyright Toby Inkster.
+
+It is free software; you may redistribute it and/or modify it under
+the terms of either the Artistic License 1.0 or the GNU General Public
+License version 2.
+

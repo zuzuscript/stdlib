@@ -1,0 +1,45 @@
+=encoding utf8
+
+=head1 NAME
+
+javascript - Evaluate JavaScript from ZuzuScript.
+
+=head1 SYNOPSIS
+
+  from javascript import JS, JSResult;
+
+  let r := JS.eval("[ 7, 8, 9 ]");
+  assert( r instanceof JSResult );
+
+  let j := r.toJSON();
+
+  let r2 := r.eval(" this[1] ");
+  assert( r2 instanceof JSResult );
+
+  let n;
+  n := r2.value() if r2.isSafe();
+
+=head1 DESCRIPTION
+
+This runtime-supported module is only implemented by C<zuzu-js>.
+
+C<JS.eval(String code)> evaluates JavaScript and returns C<JSResult>.
+
+C<JSResult.eval(String code)> evaluates more JavaScript with the wrapped
+value bound to C<this>, again returning C<JSResult>.
+
+C<JSResult.isSafe()> reports whether C<value()> can convert the wrapped
+JavaScript value into a native Zuzu value.
+
+C<JSResult.value()> returns the converted Zuzu value for safe results.
+
+C<JSResult.toJSON()> serializes the wrapped JavaScript value as JSON.
+
+=head1 COPYRIGHT AND LICENCE
+
+B<< javascript >> is copyright Toby Inkster.
+
+It is free software; you may redistribute it and/or modify it under
+the terms of either the Artistic License 1.0 or the GNU General Public
+License version 2.
+

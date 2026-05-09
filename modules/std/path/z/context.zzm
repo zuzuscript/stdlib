@@ -1,0 +1,94 @@
+=encoding utf8
+
+=head1 NAME
+
+std/path/z/context - Evaluation context used by std/path/z.
+
+=head1 DESCRIPTION
+
+This module ports the C<Data::ZPath::_Ctx> Perl class to pure
+ZuzuScript with a near line-by-line translation and matching public API.
+
+=head1 COPYRIGHT AND LICENCE
+
+B<< std/path/z/context >> is copyright Toby Inkster.
+
+It is free software; you may redistribute it and/or modify it under
+the terms of either the Artistic License 1.0 or the GNU General Public
+License version 2.
+
+=cut
+
+from std/path/z/node import Node;
+
+class Ctx {
+	let root := null;
+	let nodeset := null;
+	let parentset := null;
+	let meta := null;
+
+	method __build__ () {
+		if ( not ( root instanceof Node ) ) {
+			let root_obj := root;
+			let root_type := typeof root_obj;
+			let node_type := null;
+
+			try {
+				node_type := int( "" _ root_obj.nodeType() );
+			}
+			catch {
+			}
+
+			if (
+				root_type eq "XMLDocument"
+				or root_type eq "DOMDocument"
+				or node_type = 9
+			) {
+				try {
+					let de := root_obj.documentElement();
+					root_obj := de if de ≢ null;
+				}
+				catch {
+				}
+			}
+
+			root := Node.wrap( root_obj );
+		}
+
+		nodeset ?:= [ root ];
+		meta ?:= { level: 0 };
+	}
+
+	method with_nodeset ( ns, ps ) {
+		return new Ctx(
+			root: root,
+			nodeset: ns,
+			parentset: ps,
+			meta: meta,
+		);
+	}
+
+	method nested ( extras? ) {
+		let extra_meta := extras ?: {};
+
+		let next_meta := {
+			level: meta.get( "level", 0 ) + 1,
+		};
+
+		for ( let pair in extra_meta.enumerate ) {
+			next_meta.add( pair );
+		}
+
+		return new Ctx(
+			root: root,
+			nodeset: nodeset,
+			parentset: parentset,
+			meta: next_meta,
+		);
+	}
+
+	method root () { return root; }
+	method nodeset () { return nodeset; }
+	method parentset () { return parentset; }
+	method meta () { return meta; }
+}

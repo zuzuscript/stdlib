@@ -1,0 +1,125 @@
+=encoding utf8
+
+=head1 NAME
+
+std/proc - Process execution, environment, and signals.
+
+=head1 SYNOPSIS
+
+  from std/proc import Proc, Env, sleep;
+
+  let pid := Proc.pid();
+  let home := Env.get("HOME", "");
+
+  let res := Proc.run(
+    "perl",
+    [ "-e", "print qq<ok\\n>;" ]
+  );
+
+  let seen := 0;
+  Proc.onsignal( "USR1", function () {
+    seen++;
+  } );
+  Proc.kill( "USR1", Proc.pid() );
+
+  sleep(0.1);
+
+=head1 DESCRIPTION
+
+This module provides OS process helpers backed by C<IPC::Run3>,
+environment variable helpers, signal send/receive primitives,
+process-identification helpers, and process exit.
+
+=head2 Exports
+
+=over
+
+=item C<Proc>
+
+Static methods:
+
+=over
+
+=item * C<pid()>
+
+Returns the current process id.
+
+=item * C<< exit(code?) >>
+
+Exits the current process.
+
+=item * C<< run(command, argv?, options?) >>
+
+Options include C<stdin>, C<capture_stdout>, C<capture_stderr>,
+and C<merge_stderr>. Also supports C<env> injection, C<cwd>, and
+C<timeout>.
+
+Returns a result (dict).
+
+=item * C<< run_async(command, argv?, options?) >>
+
+Awaitable version of C<run>. Returns a C<Task> resolving to the same
+result dict.
+
+=item * C<< pipeline(commands, options?) >>
+
+Runs commands in sequence, piping captured stdout from each step
+to the next step's stdin. Options include C<stdin>, C<capture_stderr>,
+C<merge_stderr>, C<env>, C<cwd>, and C<timeout>.
+
+=item * C<< pipeline_async(commands, options?) >>
+
+Awaitable version of C<pipeline>. Returns a C<Task> resolving to the
+same result dict.
+
+=item * C<is_success(result)>
+
+=item * C<status_text(result)>
+
+=item * C<kill(String signal, Number pid?)>
+
+=item * C<onsignal(String signal, Function callback)>
+
+=back
+
+=item C<Env>
+
+Static methods:
+
+=over
+
+=item * C<get(String name, Any default?)>
+
+=item * C<set(String name, String value)>
+
+=item * C<remove(String name)>
+
+=back
+
+=item C<sleep>
+
+Function:
+
+=over
+
+=item * C<< sleep(seconds) >>
+
+Sleeps for the given number of seconds. Fractional seconds are allowed.
+
+=item * C<< sleep_async(seconds) >>
+
+Returns an awaitable C<Task> that completes after the requested delay
+without blocking the async scheduler.
+
+=back
+
+=back
+
+=head1 COPYRIGHT AND LICENCE
+
+B<< std/proc >> is copyright Toby Inkster.
+
+It is free software; you may redistribute it and/or modify it under
+the terms of either the Artistic License 1.0 or the GNU General Public
+License version 2.
+

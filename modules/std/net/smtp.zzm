@@ -1,0 +1,194 @@
+=encoding utf8
+
+=head1 NAME
+
+std/net/smtp - low-level mail delivery.
+
+=head1 SYNOPSIS
+
+  from std/net/smtp import Mailer, MailResult;
+
+  let headers := new PairList();
+  headers.add( "From", "sender@example.test" );
+  headers.add( "To", "recipient@example.test" );
+  headers.add( "Subject", "Example" );
+  headers.add( "Message-ID", "<example-1@example.test>" );
+
+  let mailer := new Mailer(
+    transport: "smtp",
+    host: "127.0.0.1",
+    port: 2525
+  );
+
+  let result := mailer.send(
+    "sender@example.test",
+    [ "recipient@example.test" ],
+    headers,
+    to_binary( "Hello\r\n" )
+  );
+
+=head1 DESCRIPTION
+
+This runtime-supported module provides a deliberately low-level mail
+delivery API. It works with an explicit envelope sender, explicit
+envelope recipients, ordered message headers, and a raw C<BinaryString>
+body.
+
+It does not construct MIME messages, encode display names, generate a
+C<Message-ID>, derive recipients from C<To>, C<Cc>, or C<Bcc> headers,
+or add attachments. Higher-level composition modules should build the
+headers and body, then call this module.
+
+=head2 Exports
+
+=over
+
+=item C<Mailer>
+
+Configured sender class.
+
+=item C<MailResult>
+
+Result object returned by successful deliveries.
+
+=back
+
+The module does not export a module-level C<capabilities()> function.
+Use C<< Mailer.capabilities() >>.
+
+=head2 Capabilities
+
+C<< Mailer.capabilities() >> returns a C<Dict> with stable keys:
+
+  {
+    smtp: true,
+    sendmail: true,
+    tls: true,
+    starttls: true,
+    auth: [ "plain", "login", "xoauth2" ],
+    async: true,
+  }
+
+Backends report C<false> or an empty array for features they cannot
+honestly provide. Browser hosts are importable but report no real
+delivery support.
+
+=head2 Mailer
+
+Create a sender with named options:
+
+  let mailer := new Mailer(
+    transport: "sendmail",
+    sendmail_path: "/usr/sbin/sendmail"
+  );
+
+Supported options include:
+
+=over
+
+=item C<transport>
+
+C<"smtp"> or C<"sendmail">. Defaults to C<"smtp">.
+
+=item C<host>, C<port>, C<timeout>
+
+SMTP host, port, and command timeout. Defaults are C<localhost>, C<25>,
+and C<30> seconds.
+
+=item C<submission>
+
+Uses submission-style defaults: port C<587> and STARTTLS requested.
+Backends without STARTTLS support will reject sending clearly.
+
+=item C<tls>, C<starttls>, C<tls_verify>, C<tls_server_name>
+
+TLS policy fields. C<tls_verify> defaults to true.
+
+=item C<username>, C<password>, C<auth>
+
+Authentication fields. C<auth> may be C<plain>, C<login>, or
+C<xoauth2>. Authentication on a plaintext connection requires explicit
+C<allow_insecure_auth: true>.
+
+=item C<smtputf8>
+
+Permit non-ASCII envelope addresses only when the backend and server can
+honour SMTPUTF8.
+
+=item C<reject_partial>
+
+For SMTP, throw if any recipient is rejected. The default returns a
+C<MailResult> when at least one recipient is accepted.
+
+=item C<sendmail_path>, C<sendmail_args>
+
+Sendmail-compatible binary path and extra fixed argument-vector items.
+The backend invokes:
+
+  sendmail_path sendmail_args... -i -f ENVELOPE_FROM RECIPIENT...
+
+No shell interpolation is used.
+
+=back
+
+=head2 Sending
+
+  mailer.send(envelope_from, envelope_to, headers, body, options := {})
+  mailer.send_async(envelope_from, envelope_to, headers, body, options := {})
+
+C<envelope_to> may be a single string or an array of strings. These are
+the only delivery recipients. Header fields are never used as envelope
+recipients.
+
+C<headers> must be a C<PairList>, preserving order and duplicate fields.
+C<Dict> headers are rejected. Header names must be strict RFC 5322 field
+name tokens with no colon or control characters. Header values must be
+C<String> or C<BinaryString> values and must not contain CR or LF.
+
+C<body> must be a C<BinaryString>. Passing a C<String> throws a clear
+type error so callers do not accidentally depend on host text encoding.
+
+Serialization is:
+
+=over
+
+=item 1.
+
+Headers in C<PairList> order using CRLF line endings.
+
+=item 2.
+
+One blank CRLF separator.
+
+=item 3.
+
+The body bytes exactly as supplied.
+
+=back
+
+SMTP dot-stuffing is a wire encoding detail and does not mutate caller
+bytes.
+
+=head2 MailResult
+
+A successful send returns a C<MailResult> with public fields:
+
+  {
+    transport: "smtp",
+    accepted: [ "recipient@example.test" ],
+    rejected: [],
+    message_id: "<example-1@example.test>",
+    response: "250 queued",
+  }
+
+C<message_id> is copied from a supplied C<Message-ID> header when one is
+present. This module never generates one automatically.
+
+=head1 COPYRIGHT AND LICENCE
+
+B<< std/net/smtp >> is copyright Toby Inkster.
+
+It is free software; you may redistribute it and/or modify it under
+the terms of either the Artistic License 1.0 or the GNU General Public
+License version 2.
+

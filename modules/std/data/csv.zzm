@@ -1,0 +1,184 @@
+=encoding utf8
+
+=head1 NAME
+
+std/data/csv - CSV/TSV and delimited text data handling.
+
+=head1 SYNOPSIS
+
+  from std/data/csv import CSV;
+  from std/io import Path;
+
+  let csv := new CSV(
+    headers: true,
+    sep_char: ",",
+  );
+
+  let rows := csv.load( Path.tempfile() );
+
+  let reader := csv.open( new Path("people.csv") );
+  for ( let row in reader ) {
+    say( row{name} );
+  }
+
+  let writer := csv.open_writer( new Path("people-out.csv") );
+  writer.write_header( [ "name", "age" ] );
+  writer.write_row( { name: "Ada", age: 32 } );
+  writer.close();
+
+=head1 DESCRIPTION
+
+This module provides CSV-style parsing and writing backed by the runtime.
+Its options are designed so the same API can also handle TSV and other
+character-delimited formats.
+
+=head2 Exports
+
+=over
+
+=item C<CSV>
+
+Constructor options include:
+C<sep_char>, C<quote_char>, C<escape_char>, C<eol>, C<binary>,
+C<always_quote>, C<allow_whitespace>, C<blank_is_undef>,
+C<empty_is_undef>, C<quote_empty>, C<quote_space>, C<quote_null>,
+C<verbatim>, C<headers>, C<columns>, C<encoding>, C<append>,
+C<skip_empty_rows>, C<comment_char>, C<skip_lines>, C<trim_headers>,
+C<lowercase_headers>, C<rename_headers>, C<duplicate_headers>,
+C<ragged>, C<fill_value>, C<types>, C<parsers>, C<formatters>,
+C<defaults>, C<required_columns>, C<unknown_columns>, and C<on_error>.
+
+Instance methods:
+
+=over
+
+=item * C<decode(text)>
+
+Parse a whole string into an Array of rows. With C<headers: true>, rows
+are returned as Dicts.
+
+=item * C<decode_report(text)>
+
+Decode while collecting parse errors instead of throwing immediately.
+Returns a Dict with C<rows> and C<errors>.
+
+=item * C<encode(rows)>
+
+Encode rows into a delimited text string.
+
+=item * C<encode_row(row)>
+
+Encode a single row as delimited text.
+
+=item * C<load(path)>
+
+Read and parse a full file from a C<std/io> C<Path>.
+
+=item * C<load_report(path)>
+
+Load while collecting parse errors instead of throwing immediately.
+
+=item * C<dump(path, rows)>
+
+Write rows to a C<std/io> C<Path>.
+
+=item * C<open(path)>
+
+Open a streaming reader and return a C<CSVReader>.
+
+=item * C<open_writer(path, options?)>
+
+Open a streaming writer and return a C<CSVWriter>.
+
+=item * C<sniff(text_or_path)>
+
+Guess delimiter and likely header presence.
+
+=item * C<transpose(rows)>
+
+Transpose a table represented as nested Arrays.
+
+=item * C<< dump_table(path, dbh, table, options?) >>
+
+Export a database table through C<std/db> to a delimited file.
+
+=item * C<< dump_query(path, dbh, sql, bind?, options?) >>
+
+Export the results of an arbitrary SQL query through C<std/db>.
+
+=item * C<< load_table(path, dbh, table, options?) >>
+
+Import a delimited file into a database table. Supports creating the
+table first when requested, plus batched transactional inserts and
+column mapping.
+
+=back
+
+=item C<CSVReader>
+
+Streaming reader returned by C<CSV.open>.
+
+Methods:
+
+=over
+
+=item * C<next_array()>
+
+=item * C<next_dict()>
+
+=item * C<next()>
+
+=item * C<all_array()>, C<all_dict()>
+
+=item * C<headers()>
+
+=item * C<columns()>, C<set_columns(columns)>
+
+=item * C<row_number()>
+
+=item * C<skip_lines(count)>
+
+=item * C<errors()>
+
+=item * C<close()>
+
+=item * C<to_Iterator()>
+
+Returns an iterator function suitable for C<for> loops. It yields Dict
+rows when headers/columns are configured; otherwise it yields Array
+rows.
+
+=back
+
+=item C<CSVWriter>
+
+Streaming writer returned by C<CSV.open_writer>.
+
+Methods:
+
+=over
+
+=item * C<write_header(columns?)>
+
+=item * C<write_row(row)>
+
+=item * C<print_row(row)>
+
+=item * C<columns()>
+
+=item * C<row_number()>
+
+=item * C<close()>
+
+=back
+
+=back
+
+=head1 COPYRIGHT AND LICENCE
+
+B<< std/data/csv >> is copyright Toby Inkster.
+
+It is free software; you may redistribute it and/or modify it under
+the terms of either the Artistic License 1.0 or the GNU General Public
+License version 2.
+

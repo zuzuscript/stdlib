@@ -1,0 +1,46 @@
+=encoding utf8
+
+=head1 NAME
+
+perl - Evaluate Perl code from ZuzuScript.
+
+=head1 SYNOPSIS
+
+  from perl import Perl, PerlResult;
+
+  let r := Perl.eval("[ 7, 8, 9 ]");
+  assert( r instanceof PerlResult );
+
+  let j := r.toJSON();
+
+  let r2 := r.eval(" $_->[1] ");
+  assert( r2 instanceof PerlResult );
+
+  let n;
+  n := r2.value() if r2.isSafe();
+
+=head1 DESCRIPTION
+
+This builtin module bridges to the host Perl interpreter.
+
+C<Perl.version()> returns the current Perl version string.
+
+C<Perl.eval(String code)> evaluates Perl in scalar context and
+returns C<PerlResult>.
+
+C<PerlResult> wraps the underlying Perl value. Use C<isSafe()> to
+check whether C<value()> can convert it into a native Zuzu value.
+
+C<toJSON()> attempts to encode the wrapped value as JSON text.
+
+C<eval(String code)> evaluates more Perl with the wrapped value in
+C<$_>, again returning C<PerlResult>.
+
+=head1 COPYRIGHT AND LICENCE
+
+B<< perl >> is copyright Toby Inkster.
+
+It is free software; you may redistribute it and/or modify it under
+the terms of either the Artistic License 1.0 or the GNU General Public
+License version 2.
+

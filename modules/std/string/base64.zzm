@@ -1,0 +1,57 @@
+=encoding utf8
+
+=head1 NAME
+
+std/string/base64 - Base64 encoders and decoders.
+
+=head1 SYNOPSIS
+
+  from std/string/base64 import *;
+
+  let raw := to_binary( "Hello, world!" );
+
+  let b64 := encode(raw);
+  let text := decode(b64);
+
+  let safe := encode_urlsafe(raw);
+  let original := decode_urlsafe(safe);
+
+=head1 DESCRIPTION
+
+This module provides Base64 encoding and decoding helpers.
+
+The URL-safe variant uses C<-> and C<_> instead of C<+>
+and C</>. It also omits trailing C<=> padding so encoded
+text can be placed into URLs more easily.
+
+=head1 EXPORTED FUNCTIONS
+
+=over
+
+=item * C<encode(BinaryString value)>
+
+Encode C<value> as standard Base64.
+
+=item * C<decode(String value)>
+
+Decode standard Base64 text into C<BinaryString>.
+
+=item * C<encode_urlsafe(BinaryString value)>
+
+Encode C<value> as URL-safe Base64.
+
+=item * C<decode_urlsafe(String value)>
+
+Decode URL-safe Base64 text into C<BinaryString>.
+Missing trailing padding is added automatically.
+
+=back
+
+=head1 COPYRIGHT AND LICENCE
+
+B<< std/string/base64 >> is copyright Toby Inkster.
+
+It is free software; you may redistribute it and/or modify it under
+the terms of either the Artistic License 1.0 or the GNU General Public
+License version 2.
+

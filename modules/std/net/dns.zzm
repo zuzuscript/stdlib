@@ -1,0 +1,84 @@
+=encoding utf8
+
+=head1 NAME
+
+std/net/dns - DNS lookup helpers.
+
+=head1 SYNOPSIS
+
+  from std/net/dns import lookup, addresses, reverse;
+
+  let ips := addresses("example.com");
+  let mx  := lookup("example.com", "MX");
+  let ptr := reverse("127.0.0.1");
+
+=head1 DESCRIPTION
+
+This runtime-supported module provides small DNS helper functions for
+forward lookups, common DNS record queries, and reverse DNS.
+
+=head2 Functions
+
+=over
+
+=item C<< lookup(name, type = "A") >>
+
+Look up records for C<name>. Supported record types are C<A>, C<AAAA>,
+C<CNAME>, C<MX>, C<NS>, C<TXT>, C<SRV>, and C<PTR>.
+
+Returns an array of dictionaries. All records include C<type>, C<name>,
+C<value>, and C<ttl>. Backends return C<ttl: null> when TTLs are not
+available.
+
+Record-specific keys include:
+
+=over
+
+=item * C<address> for C<A> and C<AAAA>
+
+=item * C<target> for C<CNAME>, C<NS>, C<PTR>, and C<SRV>
+
+=item * C<exchange> and C<preference> for C<MX>
+
+=item * C<text> and C<strings> for C<TXT>
+
+=item * C<port>, C<priority>, and C<weight> for C<SRV>
+
+=back
+
+=item C<< lookup_async(name, type = "A") >>
+
+Asynchronous version of C<lookup>. Returns a C<Task>.
+
+=item C<< addresses(name, family = "any") >>
+
+Return address strings for C<name>. C<family> may be C<any>, C<ipv4>,
+or C<ipv6>. The C<any> family returns IPv4 addresses followed by IPv6
+addresses.
+
+=item C<< addresses_async(name, family = "any") >>
+
+Asynchronous version of C<addresses>. Returns a C<Task>.
+
+=item C<< reverse(address) >>
+
+Return PTR names for an IPv4 or IPv6 address.
+
+=item C<< reverse_async(address) >>
+
+Asynchronous version of C<reverse>. Returns a C<Task>.
+
+=back
+
+No-data and NXDOMAIN responses return an empty array. Invalid input,
+internal resolver timeouts, and resolver failures throw runtime
+exceptions.
+
+=head1 COPYRIGHT AND LICENCE
+
+B<< std/net/dns >> is copyright Toby Inkster.
+
+It is free software; you may redistribute it and/or modify it under
+the terms of either the Artistic License 1.0 or the GNU General Public
+License version 2.
+

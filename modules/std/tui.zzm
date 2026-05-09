@@ -1,0 +1,74 @@
+=encoding utf8
+
+=head1 NAME
+
+std/tui - Terminal UI helpers.
+
+=head1 SYNOPSIS
+
+  from std/tui import supports_ansi, colour_text, readline, write_line;
+
+  write_line( "Warning", "yellow" );
+  let path := readline( "File: ", "", filename_completions );
+
+=head1 DESCRIPTION
+
+This runtime-supported module provides small terminal UI primitives for
+standard-library modules that need command-line fallbacks.
+
+=head1 EXPORTED FUNCTIONS
+
+=over
+
+=item * C<ansi_esc()>
+
+Returns a one-character ANSI escape string.
+
+=item * C<supports_ansi()>
+
+Returns true when stdout appears to be an ANSI-capable terminal.
+
+=item * C<colour_text(text, colour)>
+
+Returns C<text> wrapped in ANSI colour escapes when C<supports_ansi()> is
+true, otherwise returns C<text> unchanged. Supported colours include
+C<black>, C<red>, C<green>, C<yellow>, C<blue>, C<magenta>, C<cyan>, and
+C<white>.
+
+=item * C<write(text, colour)>
+
+Writes C<text> to stdout, optionally coloured.
+
+=item * C<write_line(text, colour)>
+
+Writes C<text> followed by a newline to stdout, optionally coloured.
+
+=item * C<readline(prompt, default, completion_callback)>
+
+Reads a line from stdin after displaying C<prompt>. C<completion_callback>
+may be C<null> or a function. The callback receives the string entered so
+far and returns an Array of possible completions.
+
+=item * C<readline_supports_completion()>
+
+Returns true when the runtime can provide native readline completion.
+
+=item * C<filename_completions(text)>
+
+Returns path completions for C<text>.
+
+=item * C<directory_completions(text)>
+
+Returns directory completions for C<text>.
+
+=back
+
+=head1 COPYRIGHT AND LICENCE
+
+B<< std/tui >> is copyright Toby Inkster.
+
+It is free software; you may redistribute it and/or modify it under
+the terms of either the Artistic License 1.0 or the GNU General Public
+License version 2.
+
+=cut

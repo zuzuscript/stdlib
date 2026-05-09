@@ -1,0 +1,162 @@
+=encoding utf8
+
+=head1 NAME
+
+std/cache/lru - Pure ZuzuScript in-memory LRU cache.
+
+=head1 SYNOPSIS
+
+  from std/cache/lru import Cache;
+
+  let cache := new Cache( capacity: 20 );
+
+  let item := cache.get( "item-key", function ( item_key ) {
+    # Called only on cache miss.
+    return calculate_some_expensive_value( item_key );
+  } );
+
+  cache.empty();
+
+=head1 DESCRIPTION
+
+This module provides a tiny in-memory least-recently-used (LRU)
+cache written in pure ZuzuScript.
+
+Keys are stored in an internal C<Dict>, and are assumed to be
+strings. Values may be any ZuzuScript value.
+
+=head2 Classes
+
+=over
+
+=item C<< Cache({ capacity?: Number }) >>
+
+Construct a cache with a maximum number of entries.
+Defaults to C<128>.
+
+=item C<< cache.get(String item_key, Function producer) >>
+
+Returns the cached value for C<item_key>.
+On a miss, calls C<producer(item_key)>, stores the return value,
+and returns it.
+
+=item C<< cache.peek(String item_key, fallback?) >>
+
+Returns the cached value for C<item_key>.
+On a miss, returns the fallback. Or null if no fallback provided.
+
+=item C<< cache.set(String item_key, value) >>
+
+Store a value for C<item_key> and mark it as recently used.
+
+=item C<< cache.has(String item_key) >>
+
+True if the cache currently contains C<item_key>.
+
+=item C<< cache.size() >>
+
+Current number of cached entries.
+
+=item C<< cache.capacity() >>
+
+Configured maximum number of entries.
+
+=item C<< cache.empty() >>
+
+Remove all entries from the cache.
+
+=back
+
+=head1 COPYRIGHT AND LICENCE
+
+B<< std/cache/lru >> is copyright Toby Inkster.
+
+It is free software; you may redistribute it and/or modify it under
+the terms of either the Artistic License 1.0 or the GNU General Public
+License version 2.
+
+=cut
+
+class Cache {
+	let Number capacity := 128;
+	let Dict _items := {};
+	let Array _order := [];
+
+	method __build__ () {
+		die "Cache capacity must be greater than zero" if capacity <= 0;
+	}
+
+	method _drop_key_from_order ( String item_key ) {
+		let kept := [];
+		let i := 0;
+		while ( i < _order.length() ) {
+			let key := _order[i];
+			if ( key ≢ item_key ) {
+				kept.push(key);
+			}
+			i++;
+		}
+		_order := kept;
+	}
+
+	method _touch ( String item_key ) {
+		self._drop_key_from_order(item_key);
+		_order.push(item_key);
+	}
+
+	method _evict_if_needed () {
+		while ( _order.length() > capacity ) {
+			let oldest := _order.shift();
+			if ( _items.exists(oldest) ) {
+				_items.remove(oldest);
+			}
+		}
+	}
+
+	method set ( String item_key, value ) {
+		_items.set( item_key, value );
+		self._touch(item_key);
+		self._evict_if_needed();
+		return value;
+	}
+
+	method get ( String item_key, producer ) {
+		if ( _items.exists(item_key) ) {
+			self._touch(item_key);
+			return _items.get(item_key);
+		}
+
+		die "Cache.get expects a producer Function" if not( typeof producer ≡ "Function" );
+
+		let value := producer(item_key);
+		self.set( item_key, value );
+		return value;
+	}
+
+	method peek ( String item_key, fallback? ) {
+		if ( _items.exists(item_key) ) {
+			self._touch(item_key);
+			return _items.get(item_key);
+		}
+
+		return fallback;
+	}
+
+	method has ( String item_key ) {
+		return _items.exists(item_key);
+	}
+
+	method size () {
+		return _items.length();
+	}
+
+	method capacity () {
+		return capacity;
+	}
+
+	method empty () {
+		_items.clear();
+		_order.clear();
+		return self;
+	}
+}

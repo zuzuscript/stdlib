@@ -1,0 +1,55 @@
+=encoding utf8
+
+=head1 NAME
+
+std/math/bignum - Arbitrary precision BigNum class.
+
+=head1 SYNOPSIS
+
+  from std/math/bignum import BigNum;
+
+  let n := BigNum.from_dec("12345");
+  let m := BigNum.from_hex("0xABCDEF");
+  let p := BigNum.from_dec("-12345.6789");
+
+  say m.badd(n).to_dec;
+  say p.babs.to_dec;
+
+=head1 DESCRIPTION
+
+This module exports C<BigNum>, a class for working with integers and
+floating-point numbers at arbitrary precision.
+
+=head2 Constructors
+
+=over
+
+=item * C<BigNum.from_dec( String )>
+
+=item * C<BigNum.from_hex( String )>
+
+=back
+
+=head2 Methods
+
+Comparison helpers:
+C<is_int>, C<bcmp>, C<beq>, C<bne>, C<blt>, C<ble>, C<bgt>, C<bge>.
+
+Unary operations:
+C<babs>, C<bneg>, C<binv>, C<bsin>, C<bcos>, C<btan>, C<bsqrt>,
+C<bround>, C<bfloor>, C<bceil>.
+
+Binary operations:
+C<badd>, C<bsub>, C<bmul>, C<bdiv>, C<bmod>, C<bpow>.
+
+Conversions:
+C<to_hex>, C<to_dec>, C<to_String>, C<to_Number>.
+
+=head1 COPYRIGHT AND LICENCE
+
+B<< std/math/bignum >> is copyright Toby Inkster.
+
+It is free software; you may redistribute it and/or modify it under
+the terms of either the Artistic License 1.0 or the GNU General Public
+License version 2.
+
