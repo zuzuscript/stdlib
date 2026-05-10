@@ -6,7 +6,7 @@ from std/clib import CLib;
 from std/io import Path;
 from std/proc import Proc;
 
-let lib_path := "t/fixtures/example_clib/libgreet.so";
+let lib_path := "stdlib/test-fixtures/example_clib/libgreet.so";
 let lib_file := new Path(lib_path);
 
 if ( lib_file.exists() ) {
@@ -21,11 +21,11 @@ else {
 			"-Wextra",
 			"-Wpedantic",
 			"-fPIC",
-			"-It/fixtures/example_clib/include",
+			"-Istdlib/test-fixtures/example_clib/include",
 			"-shared",
 			"-o",
 			lib_path,
-			"t/fixtures/example_clib/src/greet.c"
+			"stdlib/test-fixtures/example_clib/src/greet.c"
 		],
 		{
 			capture_stdout: true,
