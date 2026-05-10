@@ -1,0 +1,25 @@
+from test/more import *;
+
+requires_capability( "gui" );
+
+from std/gui/objects import Window, VBox, Button, Widget, Event, meta;
+
+ok( meta.exists("backend"), "GUI object metadata includes backend" );
+
+let button := new Button( text: "OK", id: "ok" );
+let w := new Window(
+	title: "Objects",
+	content: new VBox( children: [ button ] ),
+);
+
+ok( w instanceof Widget, "Window object is a Widget" );
+is( w.find_by_id("ok"), button, "find_by_id locates nested widgets" );
+
+let seen := [];
+button.on( "click", function ( Event e ) {
+	seen.push( e.name() );
+} );
+button.click();
+is( seen[0], "click", "Event dispatch is available" );
+
+done_testing();
