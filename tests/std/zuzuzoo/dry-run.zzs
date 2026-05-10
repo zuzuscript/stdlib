@@ -1,5 +1,6 @@
 from std/archive import Archive;
 from std/io import Path;
+from std/proc import Env;
 from std/zuzuzoo import Zuzuzoo;
 from test/more import *;
 
@@ -66,7 +67,7 @@ let result := ( new Zuzuzoo(
 	bin_dir: target{bin_dir},
 	meta_dir: target{meta_dir},
 	home: Path.tempdir().to_String(),
-	zuzu_command: Path.cwd().child("bin").child("zuzu").to_String(),
+	zuzu_command: ( new Path( path: Env.get( "ZUZU", "./bin/zuzu" ) ) ).to_String(),
 ) ).install( archive.to_String(), { dry_run: true } );
 
 ok( result{ok}, "dry run returns ok" );

@@ -76,11 +76,11 @@ function _run_fixture_file ( path ) {
 	}
 }
 
-let files := Path.glob( "t/fixtures/toon/decode/*.json" );
-let more_files := Path.glob( "t/fixtures/toon/encode/*.json" );
+let files := Path.glob( "test-fixtures/toon/decode/*.json" );
+let more_files := Path.glob( "test-fixtures/toon/encode/*.json" );
 if ( files.length() ≡ 0 and more_files.length() ≡ 0 ) {
-	files := Path.glob( "../../t/fixtures/toon/decode/*.json" );
-	more_files := Path.glob( "../../t/fixtures/toon/encode/*.json" );
+	files := Path.glob( "test-fixtures/toon/decode/*.json" );
+	more_files := Path.glob( "test-fixtures/toon/encode/*.json" );
 }
 let mf := 0;
 while ( mf < more_files.length() ) {

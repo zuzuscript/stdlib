@@ -4,13 +4,13 @@ requires_capability( "fs" );
 from std/data/kdl import KDL;
 from std/io import Path;
 
-let input_root := "t/fixtures/kdl/test_cases/input";
-let expected_root := "t/fixtures/kdl/test_cases/expected_kdl";
+let input_root := "test-fixtures/kdl/test_cases/input";
+let expected_root := "test-fixtures/kdl/test_cases/expected_kdl";
 let files := Path.glob( input_root _ "/*.kdl" );
 
 if ( files.length() = 0 ) {
-	input_root := "../../t/fixtures/kdl/test_cases/input";
-	expected_root := "../../t/fixtures/kdl/test_cases/expected_kdl";
+	input_root := "test-fixtures/kdl/test_cases/input";
+	expected_root := "test-fixtures/kdl/test_cases/expected_kdl";
 	files := Path.glob( input_root _ "/*.kdl" );
 }
 
