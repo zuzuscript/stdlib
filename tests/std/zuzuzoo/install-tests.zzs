@@ -1,6 +1,7 @@
 from std/archive import Archive;
 from std/data/json import JSON;
 from std/io import Path;
+from std/proc import Env;
 from std/zuzuzoo import Zuzuzoo;
 from test/more import *;
 
@@ -139,7 +140,7 @@ function zoo_for ( target, zuzu ) {
 }
 
 let archive := archive_path();
-let zuzu := Path.cwd().child("bin").child("zuzu").to_String();
+let zuzu := ( new Path( path: Env.get( "ZUZU", "./bin/zuzu" ) ) ).to_String();
 
 let aborted_root := root();
 let aborted := zoo_for( aborted_root, zuzu ).install(archive.to_String());

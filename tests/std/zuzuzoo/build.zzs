@@ -1,5 +1,6 @@
 from std/archive import Archive;
 from std/io import Path;
+from std/proc import Env;
 from std/zuzuzoo import load_distribution;
 from test/more import *;
 
@@ -52,7 +53,7 @@ Archive.dump(
 	"zip",
 );
 
-let zuzu := Path.cwd().child("bin").child("zuzu").to_String();
+let zuzu := ( new Path( path: Env.get( "ZUZU", "./bin/zuzu" ) ) ).to_String();
 let dist := load_distribution(
 	archive.to_String(),
 	{ zuzu_command: zuzu },

@@ -1,5 +1,6 @@
 from std/archive import Archive;
 from std/io import Path;
+from std/proc import Env;
 from std/zuzuzoo import Zuzuzoo, load_distribution;
 from test/more import *;
 
@@ -135,7 +136,7 @@ let result := ( new Zuzuzoo(
 ) ).install(
 	archive.to_String(),
 	{
-		zuzu_command: Path.cwd().child("bin").child("zuzu").to_String(),
+		zuzu_command: ( new Path( path: Env.get( "ZUZU", "./bin/zuzu" ) ) ).to_String(),
 		temp_root: temp_root.to_String(),
 	},
 );
