@@ -1,4 +1,4 @@
-#!/usr/bin/env -S zuzu -Imodules
+#!/usr/bin/env zuzu
 
 from std/getopt import Getopt;
 from std/io import Path, STDERR, STDOUT;
