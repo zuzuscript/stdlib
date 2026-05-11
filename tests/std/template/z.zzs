@@ -1,12 +1,18 @@
 from test/more import *;
-
 requires_capability( "fs" );
+requires_capability( "proc" );
 
 from std/template/z import ZTemplate;
 from std/io import Path;
+from std/proc import Env;
+
+let fixture_root := Env.get("FIXTURE_DIR");
+if ( fixture_root ≡ null or fixture_root eq "" ) {
+	skip_all( "FIXTURE_DIR is not set" );
+}
 
 ok( exception( function () {
-	new ZTemplate( string: "x", file: "t/fixtures/zpath/data1.json" );
+	new ZTemplate( string: "x", file: fixture_root _ "/zpath/data1.json" );
 } ) instanceof Exception,
 	"constructor rejects string+file together",
 );

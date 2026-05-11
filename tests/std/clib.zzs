@@ -1,12 +1,18 @@
 from test/more import *;
-
-requires_capability("clib");
+requires_capability( "proc" );
+requires_capability( "fs" );
+requires_capability( "clib" );
 
 from std/clib import CLib;
 from std/io import Path;
-from std/proc import Proc;
+from std/proc import Env, Proc;
 
-let lib_path := "stdlib/test-fixtures/example_clib/libgreet.so";
+let fixture_root := Env.get("FIXTURE_DIR");
+if ( fixture_root ≡ null or fixture_root eq "" ) {
+	skip_all( "FIXTURE_DIR is not set" );
+}
+let clib_root := fixture_root _ "/example_clib";
+let lib_path := clib_root _ "/libgreet.so";
 let lib_file := new Path(lib_path);
 
 if ( lib_file.exists() ) {
@@ -21,11 +27,11 @@ else {
 			"-Wextra",
 			"-Wpedantic",
 			"-fPIC",
-			"-Istdlib/test-fixtures/example_clib/include",
+			"-I" _ clib_root _ "/include",
 			"-shared",
 			"-o",
 			lib_path,
-			"stdlib/test-fixtures/example_clib/src/greet.c"
+			clib_root _ "/src/greet.c"
 		],
 		{
 			capture_stdout: true,

@@ -1,42 +1,13 @@
 from test/more import *;
 requires_capability( "fs" );
+requires_capability( "proc" );
 
 from std/data/toon import TOON;
 from std/data/json import JSON;
 from std/io import Path;
-from std/string import split;
+from std/proc import Env;
 
 let fixture_json := new JSON( pairlists: true );
-
-function _ztest_path_separator () {
-	let platform := "platform" in __system__
-		? lc( "" _ __system__.get("platform") )
-		: "";
-	return platform eq "mswin32" or platform eq "win32" or platform eq "windows"
-		? ";"
-		: ":";
-}
-
-function _stdlib_fixtures_root ( String module_name ) {
-	let inc := "inc" in __system__ ? "" _ __system__.get("inc") : "";
-	let module_file := module_name _ ".zzm";
-
-	for ( let root in split( inc, _ztest_path_separator() ) ) {
-		next if root eq "";
-
-		let lib := ( new Path(root) ).absolute();
-		let marker := lib.child(module_file);
-		if ( marker.exists() and marker.is_file() ) {
-			let fixtures := lib.parent().child("test-fixtures");
-			return fixtures if fixtures.exists() and fixtures.is_dir();
-		}
-	}
-
-	let fallback := ( new Path("stdlib/test-fixtures") ).absolute();
-	return fallback if fallback.exists() and fallback.is_dir();
-
-	die `Could not locate stdlib test-fixtures for ${module_name}`;
-}
 
 function _opt ( opts, String key, fallback ) {
 	if ( opts ≡ null ) {
@@ -107,7 +78,11 @@ function _run_fixture_file ( path ) {
 	}
 }
 
-let fixture_root := _stdlib_fixtures_root("std/data/toon");
+let fixture_root_env := Env.get("FIXTURE_DIR");
+if ( fixture_root_env ≡ null or fixture_root_env eq "" ) {
+	skip_all( "FIXTURE_DIR is not set" );
+}
+let fixture_root := new Path(fixture_root_env);
 let decode_root := fixture_root.child("toon").child("decode");
 let encode_root := fixture_root.child("toon").child("encode");
 let files := Path.glob( decode_root.to_String() _ "/*.json", { nocheck: false } );
