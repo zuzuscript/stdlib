@@ -1,5 +1,8 @@
-from std/zuzuzoo import Zuzuzoo;
 from test/more import *;
+
+requires_capability( "fs" );
+
+from std/zuzuzoo import Zuzuzoo;
 
 function throws_like ( f, rx, name ) {
 	let got := "";

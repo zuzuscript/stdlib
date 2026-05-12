@@ -1,8 +1,9 @@
-from std/io import Path;
-from std/zuzuzoo import Zuzuzoo, latest;
 from test/more import *;
 
 requires_capability( "fs" );
+
+from std/io import Path;
+from std/zuzuzoo import Zuzuzoo, latest;
 
 class FakeRequest {
 	let req_method := "";

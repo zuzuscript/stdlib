@@ -1,9 +1,10 @@
-from std/archive import Archive;
-from std/io import Path;
-from std/zuzuzoo import Zuzuzoo, fetch_source;
 from test/more import *;
 
 requires_capability( "fs" );
+
+from std/archive import Archive;
+from std/io import Path;
+from std/zuzuzoo import Zuzuzoo, fetch_source;
 
 class FakeRequest {
 	let target_url := null;

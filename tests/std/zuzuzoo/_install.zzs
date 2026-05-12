@@ -1,12 +1,13 @@
+from test/more import *;
+
+requires_capability( "fs" );
+requires_capability( "proc" );
+
 from std/archive import Archive;
 from std/data/json import JSON;
 from std/io import Path;
 from std/proc import Env;
 from std/zuzuzoo import Zuzuzoo, format_install_plan, install;
-from test/more import *;
-
-requires_capability( "fs" );
-requires_capability( "proc" );
 
 function ensure_dir ( path ) {
 	return true if path.exists();

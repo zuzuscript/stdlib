@@ -1,9 +1,10 @@
-from std/data/json import JSON;
-from std/io import Path;
-from std/zuzuzoo import *;
 from test/more import *;
 
 requires_capability( "fs" );
+
+from std/data/json import JSON;
+from std/io import Path;
+from std/zuzuzoo import *;
 
 let dir := Path.tempdir();
 let meta := {

@@ -1,9 +1,10 @@
-from std/data/json import JSON;
-from std/io import Path;
-from std/zuzuzoo import Zuzuzoo, format_remove_plan, plan_remove;
 from test/more import *;
 
 requires_capability( "fs" );
+
+from std/data/json import JSON;
+from std/io import Path;
+from std/zuzuzoo import Zuzuzoo, format_remove_plan, plan_remove;
 
 function ensure_dir ( path ) {
 	return true if path.exists();

@@ -1,11 +1,12 @@
-from std/archive import Archive;
-from std/io import Path;
-from std/proc import Env;
-from std/zuzuzoo import load_distribution;
 from test/more import *;
 
 requires_capability( "fs" );
 requires_capability( "proc" );
+
+from std/archive import Archive;
+from std/io import Path;
+from std/proc import Env;
+from std/zuzuzoo import load_distribution;
 
 let build_script :=
 	"from std/io import Path;\n" _
