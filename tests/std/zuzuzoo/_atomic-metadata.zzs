@@ -73,9 +73,12 @@ child.spew_utf8(
 	") ).install( \"" _ archive.to_String() _ "\", { no_test: true } );\n",
 );
 
+let argv := __system__{inc}.map( fn d -> "-I" _ d );
+argv.push( child.to_String() );
+
 let run := Proc.run(
 	( new Path( path: Env.get( "ZUZU", "./bin/zuzu" ) ) ).to_String(),
-	[ "-Imodules", child.to_String() ],
+	argv,
 	{
 		capture_stdout: true,
 		capture_stderr: true,
