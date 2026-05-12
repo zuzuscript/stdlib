@@ -152,7 +152,6 @@ License version 2.
 =cut
 
 from std/cache/lru import Cache;
-from std/io try import Path;
 from std/path/z import ZPath;
 from std/path/z/node import Node;
 from std/string import join, split, substr, trim;
@@ -251,8 +250,8 @@ function _codec_for_format ( raw_format, options? ) {
 }
 
 function _ensure_path_object ( source ) {
-	die "Could not load std.io Path" unless Path;
-	return typeof source ≡ "Path" ? source : new Path( "" _ source );
+	from std/io import Path;
+	return source instanceof Path ? source : new Path( "" _ source );
 }
 
 function _compile_path ( pathish ) {
