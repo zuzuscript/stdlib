@@ -1228,15 +1228,18 @@ function _find_dependency_in_planned ( planned, module_name, min_version ) {
 function _runtime_module_path ( module_name ) {
 	return null if not starts_with( "" _ module_name, "std/" );
 
-	let inc := "";
+	let inc := [];
 	if ( "inc" in __system__ ) {
-		inc := "" _ __system__.get("inc");
+		inc := __system__.get("inc");
 	}
-	return null if inc eq "";
+	return null if inc ≡ null;
+	if ( typeof inc ≢ "Array" ) {
+		let separator := _is_windows_platform() ? ";" : ":";
+		inc := split( "" _ inc, separator );
+	}
 
-	let separator := _is_windows_platform() ? ";" : ":";
 	let relative := module_name _ ".zzm";
-	for ( let root in split( inc, separator ) ) {
+	for ( let root in inc ) {
 		next if root eq "";
 		let path := ( new Path(root) ).child(relative);
 		return path if path.exists() and path.is_file();
@@ -1247,14 +1250,17 @@ function _runtime_module_path ( module_name ) {
 function _runtime_include_dirs () {
 	let out := [];
 	let seen := {};
-	let inc := "";
+	let inc := [];
 	if ( "inc" in __system__ ) {
-		inc := "" _ __system__.get("inc");
+		inc := __system__.get("inc");
 	}
-	return out if inc eq "";
+	return out if inc ≡ null;
+	if ( typeof inc ≢ "Array" ) {
+		let separator := _is_windows_platform() ? ";" : ":";
+		inc := split( "" _ inc, separator );
+	}
 
-	let separator := _is_windows_platform() ? ";" : ":";
-	for ( let root in split( inc, separator ) ) {
+	for ( let root in inc ) {
 		next if root eq "";
 		let path := ( new Path(root) ).absolute();
 		_push_unique_string( out, seen, path.to_String() )

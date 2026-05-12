@@ -13,6 +13,7 @@ is( STDIN can "each_line", 1, "STDIN exports each_line", );
 
 let file := Path.tempfile();
 let dir := Path.tempdir();
+is( ( new Path( path: file.to_String() ) ).to_String(), file.to_String(), "Path constructor accepts named path", );
 file.spew_utf8("one\ntwo\n");
 ok( dir.child("made").mkdir(), "mkdir creates directories", );
 ok( dir.child("made").is_dir(), "mkdir result is a directory", );
