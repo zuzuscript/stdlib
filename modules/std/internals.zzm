@@ -6,11 +6,12 @@ std/internals - Runtime internals helpers for advanced modules.
 
 =head1 SYNOPSIS
 
-  from std/internals import class_name, object_slots, ansi_esc,
+  from std/internals import class_name, classof, object_slots, ansi_esc,
     ref_id, to_String, to_Number, to_Boolean, to_Regexp,
     make_instance, setprop, getprop, load_module;
 
   let obj_class := class_name(some_object);
+  let obj_class_value := classof(some_object);
   let slots := object_slots(some_object);
   let id := ref_id(some_object);
 
@@ -31,6 +32,10 @@ named C<paths>.
 =item * C<class_name(value)>
 
 Returns the class name for object instances, else C<null>.
+
+=item * C<classof(value)>
+
+Returns the class value for object and collection values, else C<null>.
 
 =item * C<object_slots(value)>
 
@@ -122,4 +127,3 @@ B<< std/internals >> is copyright Toby Inkster.
 It is free software; you may redistribute it and/or modify it under
 the terms of either the Artistic License 1.0 or the GNU General Public
 License version 2.
-

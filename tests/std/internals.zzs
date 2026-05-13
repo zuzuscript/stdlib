@@ -1,6 +1,7 @@
 from test/more import *;
 from std/internals import
 	class_name,
+	classof,
 	object_slots,
 	ansi_esc,
 	ref_id,
@@ -15,10 +16,33 @@ class Thing {
 }
 let x := new Thing();
 is( class_name(x), "Thing", "class_name returns object class name" );
+ok( classof(x) instanceof Class, "classof returns a Class value" );
+ok( classof(x) ≡ Thing, "classof returns object class" );
 is( typeof object_slots(x), "Dict", "object_slots returns dict for objects" );
 is( object_slots(x){count}, 7, "object_slots exposes public members" );
 ok( ref_id(x) ≢ null, "ref_id returns a value for object references" );
 is( class_name(123), null, "class_name returns null for non-objects" );
+is( classof(null), null, "classof returns null for null" );
+is( classof(123), null, "classof returns null for numbers" );
+is( classof("abc"), null, "classof returns null for strings" );
+is( classof(true), null, "classof returns null for booleans" );
+ok( classof([]) ≡ Array, "classof returns Array for arrays" );
+ok( classof({}) ≡ Dict, "classof returns Dict for dicts" );
+let internals_set_class := classof(<< >>);
+ok( internals_set_class instanceof Class, "classof returns a Class for sets" );
+ok(
+	new internals_set_class() instanceof Set,
+	"classof returns constructable Set class for sets",
+);
+ok( classof(<<< >>>) ≡ Bag, "classof returns Bag for bags" );
+ok(
+	classof(new PairList()) ≡ PairList,
+	"classof returns PairList for pairlists",
+);
+ok(
+	classof(new Pair(pair: [ "key", "value" ])) ≡ Pair,
+	"classof returns Pair for pairs",
+);
 is( length ansi_esc(), 1, "ansi_esc returns one character" );
 is( getprop("path-phase"), null, "getprop returns null for missing key" );
 setprop( "path-phase", "root" );
