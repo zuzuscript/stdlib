@@ -332,8 +332,8 @@ variable is set to a true value.
 
 function author_testing () {
 	requires_capability( "proc" );
-	from std/proc import Env;
-	if ( Env.get( "AUTHOR_TESTING", false ) ) {
+	from std/proc try import Env;
+	if ( Env and Env.get( "AUTHOR_TESTING", false ) ) {
 		return true;
 	}
 	skip_all( "requires AUTHOR_TESTING=1" );
@@ -348,8 +348,8 @@ variable is set to a true value.
 
 function extended_testing () {
 	requires_capability( "proc" );
-	from std/proc import Env;
-	if ( Env.get( "EXTENDED_TESTING", false ) ) {
+	from std/proc try import Env;
+	if ( Env and Env.get( "EXTENDED_TESTING", false ) ) {
 		return true;
 	}
 	skip_all( "requires EXTENDED_TESTING=1" );
