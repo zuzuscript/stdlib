@@ -9,6 +9,158 @@ std/path/z/node - Node wrapper used by std/path/z.
 Objects of this class wrap underlying values and provide traversal and
 coercion helpers used while evaluating ZPath expressions.
 
+=head1 EXPORTS
+
+=head2 Classes
+
+=over
+
+=item C<Node>
+
+Base wrapper for values traversed by ZPath.
+
+=over
+
+=item C<< Node.from_root(obj) >>
+
+Parameters: C<obj> is any query root. Returns: C<Node>. Wraps a root
+value for traversal.
+
+=item C<< Node.wrap(obj, parent?, key?, ix?) >>
+
+Parameters: C<obj> is any value, with optional parent, key, and index
+metadata. Returns: C<Node>. Wraps a value in the appropriate node
+subclass.
+
+=item C<< node.hold_parent(owner) >>
+
+Parameters: C<owner> is a parent node. Returns: C<Node>. Retains parent
+metadata on the node.
+
+=item C<< node.raw() >>, C<< node.value() >>, C<< node.primitive_value() >>
+
+Parameters: none. Returns: value. Returns the wrapped raw, node, or
+primitive value.
+
+=item C<< node.parent() >>
+
+Parameters: none. Returns: C<Node> or C<null>. Returns the parent node.
+
+=item C<< node.key() >>, C<< node.ix() >>, C<< node.index() >>, C<< node.id() >>
+
+Parameters: none. Returns: value. Returns traversal key, index, or
+stable node id metadata.
+
+=item C<< node.type() >>, C<< node.name() >>
+
+Parameters: none. Returns: C<String> or C<null>. Returns the node type
+or name.
+
+=item C<< node.tagged() >>
+
+Parameters: none. Returns: C<String> or C<null>. Returns a KDL value
+tag when present.
+
+=item C<< node.has_tagged() >>
+
+Parameters: none. Returns: C<Boolean>. Returns true when tag metadata is
+available.
+
+=item C<< node.string_value() >>, C<< node.number_value() >>
+
+Parameters: none. Returns: C<String>, C<Number>, or C<null>. Coerces the
+node for string or numeric ZPath operations.
+
+=item C<< node.can_have_named_children() >>, C<< node.can_have_indexed_children() >>, C<< node.can_have_named_indexed_children() >>
+
+Parameters: none. Returns: C<Boolean>. Reports supported child lookup
+modes.
+
+=item C<< node.named_child(name) >>, C<< node.indexed_child(i) >>, C<< node.named_indexed_child(name, i) >>
+
+Parameters: C<name> is a child name and C<i> is an index. Returns:
+C<Node> or C<null>. Looks up child nodes.
+
+=item C<< node.next_child(child) >>, C<< node.prev_child(child) >>, C<< node.next_sibling() >>, C<< node.prev_sibling() >>
+
+Parameters: C<child> is a child node where required. Returns: C<Node> or
+C<null>. Traverses adjacent nodes.
+
+=item C<< node.named_attribute(name) >>
+
+Parameters: C<name> is an attribute name. Returns: C<Node> or C<null>.
+Looks up one attribute node.
+
+=item C<< node.children() >>, C<< node.attributes() >>
+
+Parameters: none. Returns: C<Array>. Returns child or attribute nodes.
+
+=item C<< node.dump() >>
+
+Parameters: none. Returns: C<String>. Returns a diagnostic rendering of
+the node.
+
+=item C<< node.find(zpath) >>
+
+Parameters: C<zpath> is a path string or compatible path object. Returns:
+C<Array>. Evaluates a nested path from this node.
+
+=item C<< node.do_action(action) >>, C<< node.do_action_on_child(child, action) >>
+
+Parameters: C<action> is a path action and C<child> is a child node.
+Returns: value. Applies path mutation actions.
+
+=item C<< node.ref() >>, C<< node.ref_on_child(child) >>
+
+Parameters: C<child> is a child node where required. Returns:
+C<Function>. Returns a reference-like getter/setter.
+
+=back
+
+=item C<SimpleNode>, C<StringNode>, C<NumberNode>, C<BooleanNode>, C<NullNode>
+
+Scalar node wrappers. They inherit the C<Node> API and override
+C<type>, C<string_value>, or C<number_value> where appropriate.
+
+=item C<ArrayNode>, C<SetNode>, C<BagNode>, C<DictNode>, C<PairListNode>, C<PairNode>
+
+Collection node wrappers. They inherit the C<Node> API and override
+child, attribute, assignment, and reference methods appropriate to their
+collection type.
+
+=item C<KDLDocumentNode>, C<KDLNodeNode>, C<KDLValueNode>
+
+KDL node wrappers. They inherit the C<Node> API and expose KDL children,
+attributes, names, value tags, and scalar coercions.
+
+=item C<XmlNodeNode>
+
+XML node wrapper. It inherits the C<Node> API and exposes XML names,
+children, attributes, sibling traversal, and scalar text values.
+
+=item C<TimeNode>
+
+C<std/time> wrapper. It inherits the C<Node> API and exposes time
+attributes plus string and numeric values.
+
+=item C<PathNode>
+
+C<std/io> path wrapper. It inherits the C<Node> API and exposes path
+attributes plus string values.
+
+=back
+
+=head2 Variables
+
+=over
+
+=item C<determine_class>
+
+Type: C<Function>. Chooses the concrete node wrapper class for a raw
+value.
+
+=back
+
 =head1 COPYRIGHT AND LICENCE
 
 B<< std/path/z/node >> is copyright Toby Inkster.

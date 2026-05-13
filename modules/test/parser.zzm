@@ -55,18 +55,24 @@ Outcome buckets are mutually exclusive and reported as C<passed>,
 C<failed>, C<todo>, and C<skipped>. If an assertion line has a TODO or
 SKIP directive, it is counted in that bucket rather than pass/fail.
 
-=head1 FUNCTIONS
+=head1 EXPORTS
+
+=head2 Functions
 
 =over
 
 =item C<< parse(String tap) >>
 
-Parse a TAP string and return a summary dictionary.
+Parameters: C<tap> is TAP output text. Returns: C<Dict>. Parses a TAP
+string and returns a summary dictionary.
 
 =item C<< parse_lines(Array lines) >>
 
-Parse TAP from an array of already-split lines and return the same
-summary dictionary as C<parse>.
+Parameters: C<lines> is an array of TAP lines. Returns: C<Dict>. Parses
+TAP from already-split lines and returns the same summary dictionary as
+C<parse>.
+
+=back
 
 =cut
 
@@ -187,8 +193,6 @@ function parse_lines ( Array lines ) {
 function parse ( String tap ) {
 	return parse_lines( split( tap, /\r?\n/ ) );
 }
-
-=back
 
 =head1 COPYRIGHT AND LICENCE
 

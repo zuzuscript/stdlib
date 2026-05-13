@@ -64,7 +64,9 @@ The object itself is path-aware, so this works directly:
 
   let city := cfg @ "/service/address/city";
 
-=head2 Exports
+=head1 EXPORTS
+
+=head2 Classes
 
 =over
 
@@ -76,11 +78,24 @@ Static methods:
 
 =item * C<from_data(data, options?)>
 
+Parameters: C<data> is configuration data and C<options> controls
+metadata. Returns: C<Config>. Wraps data in a config object.
+
 =item * C<parse(text, format, options?)>
+
+Parameters: C<text> is config text, C<format> is a format name, and
+C<options> configures parsing. Returns: C<Config>. Parses text into a
+config object.
 
 =item * C<load(path_or_paths, options?)>
 
+Parameters: C<path_or_paths> is one source or an array of sources.
+Returns: C<Config>. Loads and layers config files.
+
 =item * C<detect_format(path_or_name, fallback?)>
+
+Parameters: C<path_or_name> is a path-like value and C<fallback> is
+optional. Returns: C<String> or C<null>. Detects the config format.
 
 =back
 
@@ -88,39 +103,91 @@ Instance methods:
 
 =over
 
+=item * C<type()>, C<can_have_named_children()>, C<can_have_indexed_children()>, C<can_have_named_indexed_children()>, C<children()>, C<attributes()>
+
+Parameters: none. Returns: ZPath node metadata. Provides the inherited
+node API used when a C<Config> is queried as a path root.
+
+=item * C<do_action_on_child(child, action)>, C<ref_on_child(child)>
+
+Parameters: C<child> is a selected node and C<action> is a path action.
+Returns: value or C<Function>. Provides inherited mutation and reference
+support for path assignments.
+
 =item * C<to_data()>, C<clone()>
+
+Parameters: none. Returns: value or C<Config>. Returns raw data or a
+copy of the config.
 
 =item * C<source()>, C<format()>, C<layers()>
 
+Parameters: none. Returns: value. Returns config source metadata.
+
 =item * C<get(path, fallback?)>, C<get_all(path)>, C<select(path)>
+
+Parameters: C<path> is a path expression and C<fallback> is optional.
+Returns: value or C<Array>. Reads config values.
 
 =item * C<exists(path)>, C<require(path, message?)>
 
+Parameters: C<path> is a path expression and C<message> is optional.
+Returns: C<Boolean> or value. Tests for or requires a config value.
+
 =item * C<query(path)>, C<first(path, fallback?)>
+
+Parameters: C<path> is a path expression and C<fallback> is optional.
+Returns: C<Array> or value. Queries config values.
 
 =item * C<assign_first(path, value, op?)>
 
+Parameters: C<path> selects values, C<value> is assigned, and C<op> is
+optional. Returns: value. Updates the first match.
+
 =item * C<assign_all(path, value, op?)>
+
+Parameters: C<path> selects values, C<value> is assigned, and C<op> is
+optional. Returns: value. Updates every match.
 
 =item * C<assign_maybe(path, value, op?)>
 
+Parameters: C<path> selects values, C<value> is assigned, and C<op> is
+optional. Returns: C<Boolean>. Updates the first match when present.
+
 =item * C<ref_first(path)>, C<ref_all(path)>, C<ref_maybe(path)>
+
+Parameters: C<path> is a path expression. Returns: C<Function>,
+C<Array>, or C<null>. Returns reference-like accessors.
 
 =item * C<merge(data_or_config, options?)>, C<overlay(data_or_config, options?)>
 
+Parameters: C<data_or_config> is incoming data and C<options> controls
+merge behaviour. Returns: C<Config>. Merges configuration data.
+
 =item * C<merge_flat(values, options?)>, C<merge_env(values, options?)>
+
+Parameters: C<values> is flat config data and C<options> controls key
+mapping. Returns: C<Config>. Merges flat or environment-style values.
 
 =item * C<set(path, value)>, C<set_default(path, value)>
 
+Parameters: C<path> is a simple path and C<value> is any value. Returns:
+C<Config>. Sets or defaults a config value.
+
 =item * C<encode(format?, options?)>, C<save(path, options?)>
+
+Parameters: C<format>, C<path>, and C<options> control output. Returns:
+C<String> or C<Config>. Encodes or saves configuration data.
 
 =item * C<load_file(path, options?)>
 
-=back
+Parameters: C<path> is a config source and C<options> controls parsing.
+Returns: C<Config>. Loads one additional config file into the object.
 
 =back
 
-=head2 Notes
+=back
+
+=head1 NOTES
 
 =over
 

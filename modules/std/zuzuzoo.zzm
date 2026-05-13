@@ -15,6 +15,123 @@ checks, upgrade checks, and canonical pretty JSON formatting.
 
 It does not yet provide the command-line C<zuzuzoo> replacement.
 
+=head1 EXPORTS
+
+=head2 Functions
+
+=over
+
+=item C<< compare_versions(left, right) >>
+
+Parameters: C<left> and C<right> are version strings. Returns:
+C<Number>. Compares two versions, returning a negative, zero, or
+positive value.
+
+=item C<< list_installed(options?) >>, C<< query(module_name, options?) >>, C<< query_distribution(distribution_name, options?) >>
+
+Parameters: names identify installed modules or distributions and
+C<options> controls roots and output. Returns: value. Reads installed
+distribution metadata.
+
+=item C<< is_installed(module_name, min_version?, options?) >>, C<< installed_version(module_name, options?) >>
+
+Parameters: C<module_name> identifies a module, C<min_version> is
+optional, and C<options> controls roots. Returns: C<Boolean> or
+C<String>/C<null>. Checks installed module state.
+
+=item C<< pretty_json(value, options?) >>, C<< format_json(value, options?) >>
+
+Parameters: C<value> is JSON-encodable data and C<options> controls
+formatting. Returns: C<String>. Formats canonical JSON output.
+
+=item C<< fetch_source(target, options?) >>, C<< load_distribution(target, options?) >>
+
+Parameters: C<target> identifies a source archive or distribution and
+C<options> controls fetch/load behaviour. Returns: value. Fetches or
+loads distribution metadata.
+
+=item C<< dependency_roots(options?) >>, C<< find_dependency(module_name, min_version?, options?) >>
+
+Parameters: C<options> controls search roots and C<module_name> names a
+dependency. Returns: value. Locates dependency sources.
+
+=item C<< plan_install(targets, options?) >>, C<< plan_remove(targets, options?) >>
+
+Parameters: C<targets> is an array of requested modules or
+distributions. Returns: C<Dict>. Builds an install or removal plan.
+
+=item C<< verify(targets, options?) >>, C<< latest(module_name, options?) >>, C<< can_upgrade(module_name, options?) >>
+
+Parameters: C<targets> or C<module_name> identify installed or remote
+items. Returns: value. Verifies installation state or checks available
+versions.
+
+=item C<< install(targets, options?) >>, C<< remove(targets, options?) >>
+
+Parameters: C<targets> is an array of modules or distributions. Returns:
+C<Dict>. Executes installation or removal.
+
+=item C<< run_distribution_tests(install_action, options?) >>, C<< execute_removal(removal_action, options?) >>
+
+Parameters: action dictionaries come from plans and C<options> controls
+execution. Returns: C<Dict>. Runs tests or executes one removal action.
+
+=item C<< format_install_plan(plan, options?) >>, C<< format_remove_plan(plan, options?) >>
+
+Parameters: C<plan> is a plan dictionary. Returns: C<String>. Formats a
+plan for display.
+
+=back
+
+=head2 Classes
+
+=over
+
+=item C<ZuzuzooLock>
+
+Filesystem lock object.
+
+=over
+
+=item C<< lock.release() >>
+
+Parameters: none. Returns: C<null>. Releases the lock.
+
+=back
+
+=item C<Zuzuzoo>
+
+Stateful package-management helper. Its methods correspond to the
+module-level functions and take the same parameters, without the final
+C<options> argument where object configuration already supplies defaults.
+
+=over
+
+=item C<< zoo.config() >>
+
+Parameters: none. Returns: C<Dict>. Returns the effective configuration.
+
+=item C<< zoo.acquire_lock(operation, options?) >>
+
+Parameters: C<operation> names the operation and C<options> controls
+locking. Returns: C<ZuzuzooLock>. Acquires an operation lock.
+
+=item C<< zoo.find_installed_module(module_name, options?) >>
+
+Parameters: C<module_name> identifies a module and C<options> controls
+roots. Returns: C<Dict> or C<null>. Finds installed metadata for a
+module.
+
+=item C<< zoo.find_installed_distribution(distribution_name, options?) >>
+
+Parameters: C<distribution_name> identifies a distribution and
+C<options> controls roots. Returns: C<Dict> or C<null>. Finds installed
+metadata for a distribution.
+
+=back
+
+=back
+
 =head1 COPYRIGHT AND LICENCE
 
 B<< std/zuzuzoo >> is copyright Toby Inkster.

@@ -34,7 +34,9 @@ random integers, host identification, capability queries, HKDF-SHA256
 key derivation, AES-256-GCM authenticated encryption, password hashing,
 Ed25519 and ECDSA signing, and X25519 key agreement.
 
-=head2 Exported Classes
+=head1 EXPORTS
+
+=head2 Classes
 
 =over
 
@@ -145,26 +147,15 @@ Web Crypto.
 
 Capability areas and names are stable strings. C<random> currently
 supports C<bytes>, C<token>, and C<int>. C<password_hash> always
-supports C<pbkdf2-sha256>; Perl and Rust also support C<argon2id>.
-Perl, Rust, and Node also support C<scrypt>, and Perl supports legacy
-C<crypt>. C<kdf> currently supports C<hkdf-sha256>. C<cipher> supports
-C<aes-256-gcm> on every host. Perl also supports C<aes-128-gcm> and
-C<aes-192-gcm>. Perl, Rust, and Node also support C<chacha20-poly1305>.
-C<key_agreement> currently supports C<x25519>.
-C<signing> currently supports C<ed25519> on CLI hosts, and
-C<ecdsa-p256-sha256> and C<ecdsa-p384-sha384> on every host. Perl also
-supports C<ecdsa-p521-sha512>. The C<certificate> area supports
-C<parse-x509-der> and C<fingerprint-sha256> on every host. Perl also
-supports C<fingerprint-sha384> and C<fingerprint-sha512>. Perl, Rust,
-and Node also support C<parse-x509>, C<public-key>, and
-C<verify-chain>. Browser hosts intentionally only parse DER
-C<BinaryString> certificates in this phase and do not advertise
-C<verify-chain>.
-
-C<tls_identity> supports C<pem> on every host. Perl, Rust, and Node also
-support C<pkcs12>. Browser hosts do not support PKCS#12 identity input.
-The browser implementation intentionally does not bundle Argon2id,
-scrypt, Ed25519, or external X.509 parsing dependencies.
+supports C<pbkdf2-sha256>; hosts may additionally report C<argon2id>,
+C<scrypt>, or legacy C<crypt>. C<kdf> currently supports
+C<hkdf-sha256>. C<cipher> always supports C<aes-256-gcm>; hosts may add
+C<aes-128-gcm>, C<aes-192-gcm>, or C<chacha20-poly1305>.
+C<key_agreement> currently supports C<x25519>. C<signing> may include
+C<ed25519>, C<ecdsa-p256-sha256>, C<ecdsa-p384-sha384>, and
+C<ecdsa-p521-sha512>. The C<certificate> area reports X.509 parsing,
+fingerprinting, public-key extraction, and chain verification support.
+C<tls_identity> reports C<pem> and, where available, C<pkcs12>.
 
 =over
 
@@ -189,8 +180,7 @@ C<area/name> pair and the current host name in the message.
 
 Returns C<pbkdf2-sha256>. This is the portable password-hash baseline
 for every host. Hosts may report stronger additional password-hash
-algorithms through C<< Secure.capabilities(){password_hash} >>; Perl and
-Rust currently report C<argon2id>.
+algorithms through C<< Secure.capabilities(){password_hash} >>.
 
 C<scrypt> and especially C<crypt> are exposed for compatibility only and
 are not preferred for new password storage. Treat C<crypt> as a legacy,
@@ -214,8 +204,8 @@ Scrypt uses:
 
   $scrypt$ln=17,r=8,p=1,l=32$base64url_salt$base64url_hash
 
-Perl C<crypt> hashes use the host C<crypt> format and are only for
-legacy compatibility.
+Legacy C<crypt> hashes use a host-specific format and are only for
+compatibility with existing password stores.
 
 =item C<< PasswordHash.hash_async(...) >>
 
@@ -283,17 +273,17 @@ already fulfilled task.
 
 Returns a C<BinaryString> key for the requested cipher algorithm.
 C<aes-128-gcm> uses 16-byte keys, C<aes-192-gcm> uses 24-byte keys, and
-C<aes-256-gcm> and C<chacha20-poly1305> use 32-byte keys. The
-C<aes-128-gcm> and C<aes-192-gcm> algorithms are Perl-only.
+C<aes-256-gcm> and C<chacha20-poly1305> use 32-byte keys. Check
+C<Secure.capabilities()> before relying on optional cipher algorithms.
 
 =item C<< Cipher.encrypt(BinaryString plaintext, BinaryString key, Dict options = {}) >>
 
 Encrypts and authenticates C<plaintext>. C<key> must match the selected
-algorithm length. C<options.algorithm> defaults to C<aes-256-gcm>; Perl
-also accepts C<aes-128-gcm> and C<aes-192-gcm>, and Perl, Rust, and Node
-also accept C<chacha20-poly1305>. C<options.aad> may provide additional
-authenticated data as a C<BinaryString>. The runtime generates a fresh
-12-byte nonce for each call.
+algorithm length. C<options.algorithm> defaults to C<aes-256-gcm>; hosts
+may advertise additional algorithms through C<Secure.capabilities()>.
+C<options.aad> may provide additional authenticated data as a
+C<BinaryString>. The runtime generates a fresh 12-byte nonce for each
+call.
 
 The returned envelope is a C<Dict>:
 
@@ -327,19 +317,17 @@ operations. CLI hosts may return already fulfilled tasks.
 
 =head2 Signing
 
-Ed25519 signing is available on Perl, Rust, and Node hosts as the
-C<signing/ed25519> capability. ECDSA P-256 with SHA-256 and ECDSA P-384
-with SHA-384 are available as C<ecdsa-p256-sha256> and
-C<ecdsa-p384-sha384>. Perl also supports ECDSA P-521 with SHA-512 as
-C<ecdsa-p521-sha512>. Browser hosts require the async signing methods
-for ECDSA and do not support Ed25519 in this phase.
+Signing algorithms are reported through C<Secure.capabilities()>.
+ECDSA P-256 with SHA-256 and ECDSA P-384 with SHA-384 are the portable
+ECDSA names. Some hosts also support Ed25519 or ECDSA P-521 with
+SHA-512. Browser hosts may require async signing methods.
 
 =over
 
 =item C<< SigningKey.generate(String algorithm = "ed25519") >>
 
-Generates a new signing key. Supported algorithms are C<ed25519>,
-C<ecdsa-p256-sha256>, C<ecdsa-p384-sha384>, and, on Perl,
+Generates a new signing key. Common algorithms are C<ed25519>,
+C<ecdsa-p256-sha256>, C<ecdsa-p384-sha384>, and
 C<ecdsa-p521-sha512>. The default is C<ed25519>.
 C<< SigningKey.generate_async(...) >> returns a C<Task> resolving to the
 same kind of key.
@@ -349,8 +337,8 @@ same kind of key.
 Imports a private signing key. C<options.format> may be C<raw> or
 C<pem>; when it is omitted, C<BinaryString> keys default to C<raw> and
 C<String> keys default to C<pem>. Raw private keys are 32-byte Ed25519
-seeds, 32-byte P-256 scalars, 48-byte P-384 scalars, or, on Perl,
-66-byte P-521 scalars. Raw ECDSA private-key import should pass
+seeds, 32-byte P-256 scalars, 48-byte P-384 scalars, or 66-byte P-521
+scalars where supported. Raw ECDSA private-key import should pass
 C<options.algorithm> to avoid ambiguity
 with Ed25519. PEM private keys are importable as Ed25519 PKCS#8, ECDSA
 PKCS#8, or traditional EC private-key PEM where the host supports it.
@@ -384,9 +372,7 @@ signature.
 
 Exports private signing-key material. The default C<raw> format returns a
 32-byte Ed25519 seed, 32-byte P-256 scalar, or 48-byte P-384 scalar as a
-C<BinaryString>. C<format: "pem"> returns PEM text. ECDSA private PEM is
-PKCS#8 on Rust, Node, and browser hosts; Perl may return traditional
-C<EC PRIVATE KEY> PEM.
+C<BinaryString>. C<format: "pem"> returns PEM text where supported.
 
 =item C<< PublicKey.verify(BinaryString message, BinaryString signature) >>
 
@@ -460,9 +446,8 @@ resolving to the same shared secret.
 =head2 Certificates
 
 X.509 certificate parsing is available as certificate capabilities.
-Perl, Rust, and Node support PEM and DER input. Browser hosts support
-DER C<BinaryString> input only and throw a clear unsupported error for
-PEM C<String> input.
+Hosts may support PEM text, DER bytes, or both. Unsupported formats
+throw clear errors.
 
 =over
 
@@ -501,7 +486,7 @@ Return C<std/time> C<Time> objects for the certificate validity bounds.
 =item C<< Certificate.fingerprint(String algorithm = "sha256") >>
 
 Returns the certificate fingerprint as a C<BinaryString>. C<sha256> is
-available on every host. Perl also supports C<sha384> and C<sha512>.
+the portable baseline; hosts may also support C<sha384> and C<sha512>.
 
 =item C<< Certificate.to_der() >>
 
@@ -513,16 +498,14 @@ Returns canonical C<CERTIFICATE> PEM text.
 
 =item C<< Certificate.public_key() >>
 
-Returns a C<PublicKey> for Ed25519, ECDSA P-256, and ECDSA P-384
-certificate public keys on Perl, Rust, and Node. Perl also supports
-ECDSA P-521 certificate public keys. Unsupported algorithms throw
-clearly. Browser hosts do not support C<public_key()> in this phase.
+Returns a C<PublicKey> for supported certificate public-key algorithms.
+Unsupported algorithms throw clearly.
 
 =item C<< Certificate.verify_chain(Array chain, Dict options = {}) >>
 
-Verifies an X.509 chain on Perl, Rust, and Node. Browser hosts do not
-support chain verification. C<chain[0]> is the leaf certificate; later
-entries are intermediates. Trust roots are supplied through
+Verifies an X.509 chain where the host supports chain verification.
+C<chain[0]> is the leaf certificate; later entries are intermediates.
+Trust roots are supplied through
 C<options.roots>, which may be a C<Certificate>, PEM C<String>, C<Array>
 of those values, or C<null>. C<options.use_system_roots> defaults to
 C<false>; when true, CLI hosts also use the host system trust store.
@@ -558,9 +541,8 @@ but the identity is inert for signing-key extraction.
 
 =item C<< TlsIdentity.from_pkcs12(BinaryString bytes, String password = null) >>
 
-Parses PKCS#12 identity material on Perl, Rust, and Node. Browser hosts
-throw a clear unsupported error. C<password> C<null> means an empty
-passphrase.
+Parses PKCS#12 identity material where supported. C<password> C<null>
+means an empty passphrase.
 
 =item C<< TlsIdentity.certificate() >>
 
@@ -568,11 +550,8 @@ Returns the leaf certificate as a C<Certificate>.
 
 =item C<< TlsIdentity.private_key() >>
 
-Returns a C<SigningKey> for Ed25519, ECDSA P-256, and ECDSA P-384
-private keys on Perl, Rust, and Node. Unsupported key algorithms throw
-clearly. Browser hosts throw a clear unsupported error because browser
-identity private-key import is asynchronous-only and not part of this
-phase.
+Returns a C<SigningKey> for supported private-key algorithms.
+Unsupported key algorithms throw clearly.
 
 =back
 

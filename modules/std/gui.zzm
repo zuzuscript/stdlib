@@ -20,13 +20,107 @@ std/gui - User-facing GUI constructor helpers.
 =head1 DESCRIPTION
 
 This module provides thin constructor helpers over C<std/gui/objects>.
-The Perl implementation exposes the shared widget, object tree, event,
-and window lifecycle APIs, with a Prima backend for visible windows.
-It also re-exports backend-native file and directory dialogue hooks for
-C<std/gui/dialogue>.
+Host runtimes expose the shared widget, object tree, event, and window
+lifecycle APIs when GUI support is available. It also re-exports
+backend-native file and directory dialogue hooks for C<std/gui/dialogue>.
 
 The module exports C<EM>, the standard UI font height in logical
 pixels, derived from C<std/gui/objects> metadata.
+
+=head1 EXPORTS
+
+=head2 Constants
+
+=over
+
+=item C<EM>
+
+Type: C<Number>. Standard UI font height in logical pixels.
+
+=item C<GUI_XML_NS>
+
+Type: C<String>. XML namespace URI used by GUI XML serialization and
+parsing.
+
+=back
+
+=head2 Functions
+
+=over
+
+=item C<< Window(... PairList p, Array c) >>, C<< VBox(... PairList p, Array c) >>, C<< HBox(... PairList p, Array c) >>, C<< Frame(... PairList p, Array c) >>
+
+Parameters: C<p> are widget properties and C<c> contains child widgets.
+Returns: widget object. Constructs window and layout widgets.
+
+=item C<< Label(... PairList p, Array c) >>, C<< Text(... PairList p, Array c) >>, C<< RichText(... PairList p, Array c) >>, C<< Image(... PairList p, Array c) >>
+
+Parameters: C<p> are widget properties and C<c> contains child widgets.
+Returns: widget object. Constructs content widgets.
+
+=item C<< Input(... PairList p, Array c) >>, C<< DatePicker(... PairList p, Array c) >>, C<< Checkbox(... PairList p, Array c) >>, C<< Radio(... PairList p, Array c) >>, C<< RadioGroup(... PairList p, Array c) >>, C<< Select(... PairList p, Array c) >>
+
+Parameters: C<p> are widget properties and C<c> contains child widgets.
+Returns: widget object. Constructs input widgets.
+
+=item C<< Menu(... PairList p, Array c) >>, C<< MenuItem(... PairList p, Array c) >>, C<< Button(... PairList p, Array c) >>, C<< Separator(... PairList p, Array c) >>, C<< Slider(... PairList p, Array c) >>, C<< Progress(... PairList p, Array c) >>
+
+Parameters: C<p> are widget properties and C<c> contains child widgets.
+Returns: widget object. Constructs command and control widgets.
+
+=item C<< Tabs(... PairList p, Array c) >>, C<< Tab(... PairList p, Array c) >>, C<< ListView(... PairList p, Array c) >>, C<< TreeView(... PairList p, Array c) >>
+
+Parameters: C<p> are widget properties and C<c> contains child widgets.
+Returns: widget object. Constructs tabular and collection widgets.
+
+=item C<< unbind(BindingToken token) >>
+
+Parameters: C<token> is a binding token. Returns: C<null>. Removes a GUI
+binding.
+
+=item C<< gui_from_xml(String xml) >>, C<< gui_from_xml_file(path) >>
+
+Parameters: C<xml> is GUI XML text and C<path> is a file path. Returns:
+widget object. Builds a GUI object tree from XML.
+
+=item C<< gui_to_xml(Widget root) >>
+
+Parameters: C<root> is a GUI widget. Returns: C<String>. Serializes a
+GUI object tree to XML.
+
+=back
+
+=head2 Classes
+
+=over
+
+=item C<BindingToken>
+
+Represents a model/widget binding.
+
+=over
+
+=item C<< token.is_active() >>
+
+Parameters: none. Returns: C<Boolean>. Returns true while the binding is
+active.
+
+=item C<< token.set_listener(token) >>
+
+Parameters: C<token> is a listener token. Returns: C<BindingToken>.
+Stores the listener token associated with the binding.
+
+=item C<< token.sync_model_to_widget() >>, C<< token.sync_widget_to_model() >>
+
+Parameters: none. Returns: C<null>. Synchronizes the bound values.
+
+=item C<< token.unbind() >>
+
+Parameters: none. Returns: C<null>. Removes the binding.
+
+=back
+
+=back
 
 =head1 COPYRIGHT AND LICENCE
 

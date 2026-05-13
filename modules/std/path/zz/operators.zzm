@@ -1,5 +1,79 @@
 =encoding utf8
 
+=head1 NAME
+
+std/path/zz/operators - Operator definitions for ZZPath expressions.
+
+=head1 DESCRIPTION
+
+This module extends the base ZPath operator model with
+ZuzuScript-flavoured expression operators.
+
+=head1 EXPORTS
+
+=head2 Classes
+
+=over
+
+=item C<Operator>
+
+ZZPath operator class extending C<std/path/z/operators> C<Operator>.
+
+=back
+
+=head2 Functions
+
+=over
+
+=item C<< string_operand(ev, ctx, expr) >>, C<< string_operands(ev, ctx, left, right) >>
+
+Parameters: evaluator, context, and expression AST nodes. Returns:
+C<String> or C<Array>. Evaluates one or two operands as strings.
+
+=item C<< first_eval_value(values) >>, C<< primitive_eval_value(values) >>
+
+Parameters: C<values> is an evaluated node array. Returns: value.
+Extracts the first or primitive value used by ZZPath operators.
+
+=item C<< collection_operand(ev, ctx, expr) >>
+
+Parameters: evaluator, context, and expression AST node. Returns:
+collection value. Evaluates an operand for collection operators.
+
+=item C<< builtin_can(value, method_name) >>
+
+Parameters: C<value> is any value and C<method_name> is a method name.
+Returns: C<Boolean>. Tests whether built-in values support a method.
+
+=back
+
+=head2 Constants
+
+=over
+
+=item C<STANDARD_OPERATORS>
+
+Type: C<Array>. Complete ZZPath operator definition table.
+
+=item C<logical_negation>, C<logical_and>, C<logical_nand>, C<logical_xor>, C<logical_or>
+
+Type: C<Function>. Logical operator implementations.
+
+=item C<numeric_power>, C<numeric_multiplication>, C<numeric_division>, C<numeric_modulus>, C<numeric_addition>, C<numeric_subtraction>, C<numeric_equality>, C<numeric_inequality>, C<numeric_less_than>, C<numeric_greater_than>, C<numeric_less_than_or_equal>, C<numeric_greater_than_or_equal>, C<numeric_compare>
+
+Type: C<Function>. Numeric operator implementations.
+
+=item C<string_concatenation>, C<string_equality>, C<string_inequality>, C<string_greater_than>, C<string_greater_than_or_equal>, C<string_less_than>, C<string_less_than_or_equal>, C<string_compare>, C<string_equality_insensitive>, C<string_inequality_insensitive>, C<string_greater_than_insensitive>, C<string_greater_than_or_equal_insensitive>, C<string_less_than_insensitive>, C<string_less_than_or_equal_insensitive>, C<string_compare_insensitive>
+
+Type: C<Function>. String operator implementations.
+
+=item C<regexp_match>, C<bitwise_and>, C<bitwise_xor>, C<bitwise_or>, C<set_union>, C<set_intersection>, C<set_difference>, C<collection_membership>, C<collection_non_membership>, C<set_subsetof>, C<set_supersetof>, C<set_equivalentof>, C<type_aware_equality>, C<type_aware_inequality>, C<object_can>
+
+Type: C<Function>. Regular expression, bitwise, collection, type-aware,
+and object capability operator implementations.
+
+=back
+
 =head1 COPYRIGHT AND LICENCE
 
 B<< std/path/zz/operators >> is copyright Toby Inkster.

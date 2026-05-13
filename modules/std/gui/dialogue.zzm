@@ -17,6 +17,52 @@ std/gui/dialogue - Dialogue helpers.
 This module provides convenience dialogue helpers layered on top of the
 regular C<std/gui> widgets.
 
+=head1 EXPORTS
+
+=head2 Functions
+
+=over
+
+=item C<< alert(String message, ... PairList p) >>, C<< alert_window(String message, ... PairList p) >>
+
+Parameters: C<message> is display text and C<p> contains options.
+Returns: C<null> for C<alert> or C<Window> for C<alert_window>. Shows or
+builds an alert dialogue.
+
+=item C<< confirm(String message, ... PairList p) >>, C<< confirm_window(String message, ... PairList p) >>
+
+Parameters: C<message> is display text and C<p> contains options.
+Returns: C<Boolean> for C<confirm> or C<Window> for
+C<confirm_window>. Shows or builds a confirmation dialogue.
+
+=item C<< prompt(String message, ... PairList p) >>, C<< prompt_window(String message, ... PairList p) >>
+
+Parameters: C<message> is prompt text and C<p> contains options such as
+C<value>. Returns: C<String> or C<null> for C<prompt>, or C<Window> for
+C<prompt_window>. Shows or builds a text prompt.
+
+=item C<< file_open(... PairList p) >>, C<< file_save(... PairList p) >>
+
+Parameters: C<p> contains dialogue options. Returns: path value or
+C<null>. Opens a file selection dialogue.
+
+=item C<< directory_open(... PairList p) >>, C<< directory_save(... PairList p) >>
+
+Parameters: C<p> contains dialogue options. Returns: path value or
+C<null>. Opens a directory selection dialogue.
+
+=item C<< colour_picker(... PairList p) >>
+
+Parameters: C<p> contains dialogue options. Returns: C<String> or
+C<null>. Opens a colour picker and returns a normalized colour string.
+
+=item C<< file_open_window(... PairList p) >>, C<< file_save_window(... PairList p) >>, C<< directory_open_window(... PairList p) >>, C<< directory_save_window(... PairList p) >>, C<< colour_picker_window(... PairList p) >>
+
+Parameters: C<p> contains dialogue options. Returns: C<Window>. Builds
+the corresponding GUI dialogue window.
+
+=back
+
 =head1 COPYRIGHT AND LICENCE
 
 B<< std/gui/dialogue >> is copyright Toby Inkster.

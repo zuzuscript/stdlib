@@ -39,7 +39,9 @@ C<Message-ID>, derive recipients from C<To>, C<Cc>, or C<Bcc> headers,
 or add attachments. Higher-level composition modules should build the
 headers and body, then call this module.
 
-=head2 Exports
+=head1 EXPORTS
+
+=head2 Classes
 
 =over
 
@@ -47,16 +49,73 @@ headers and body, then call this module.
 
 Configured sender class.
 
+=over
+
+=item C<< Mailer.capabilities() >>
+
+Parameters: none. Returns: C<Dict>. Reports backend delivery, TLS,
+authentication, and async support.
+
+=item C<< Mailer({ transport?: String, host?: String, port?: Number, ... }) >>
+
+Constructs a sender from named options. Returns: C<Mailer>.
+
+=item C<< mailer.send(envelope_from, envelope_to, headers, body, options := {}) >>
+
+Parameters: C<envelope_from> is the sender address, C<envelope_to> is a
+string or array of recipient addresses, C<headers> is a C<PairList>,
+C<body> is a C<BinaryString>, and C<options> controls sending. Returns:
+C<MailResult>. Sends one message.
+
+=item C<< mailer.send_async(envelope_from, envelope_to, headers, body, options := {}) >>
+
+Parameters: same as C<send>. Returns: C<Task>. Asynchronously sends one
+message.
+
+=back
+
 =item C<MailResult>
 
 Result object returned by successful deliveries.
+
+=over
+
+=item C<< result.transport() >>
+
+Parameters: none. Returns: C<String>. Returns the delivery transport.
+
+=item C<< result.accepted() >>
+
+Parameters: none. Returns: C<Array>. Returns accepted envelope
+recipients.
+
+=item C<< result.rejected() >>
+
+Parameters: none. Returns: C<Array>. Returns rejected envelope
+recipients.
+
+=item C<< result.message_id() >>
+
+Parameters: none. Returns: C<String> or C<null>. Returns the supplied
+C<Message-ID> header value when present.
+
+=item C<< result.response() >>
+
+Parameters: none. Returns: C<String> or C<null>. Returns the backend
+delivery response text.
+
+=item C<< result.to_Dict() >>
+
+Parameters: none. Returns: C<Dict>. Converts the result to a dictionary.
+
+=back
 
 =back
 
 The module does not export a module-level C<capabilities()> function.
 Use C<< Mailer.capabilities() >>.
 
-=head2 Capabilities
+=head1 CAPABILITIES
 
 C<< Mailer.capabilities() >> returns a C<Dict> with stable keys:
 
@@ -73,7 +132,7 @@ Backends report C<false> or an empty array for features they cannot
 honestly provide. Browser hosts are importable but report no real
 delivery support.
 
-=head2 Mailer
+=head1 MAILER OPTIONS
 
 Create a sender with named options:
 
@@ -131,7 +190,7 @@ No shell interpolation is used.
 
 =back
 
-=head2 Sending
+=head1 SENDING
 
   mailer.send(envelope_from, envelope_to, headers, body, options := {})
   mailer.send_async(envelope_from, envelope_to, headers, body, options := {})
@@ -169,7 +228,7 @@ The body bytes exactly as supplied.
 SMTP dot-stuffing is a wire encoding detail and does not mutate caller
 bytes.
 
-=head2 MailResult
+=head1 MAIL RESULT
 
 A successful send returns a C<MailResult> with public fields:
 
@@ -191,4 +250,3 @@ B<< std/net/smtp >> is copyright Toby Inkster.
 It is free software; you may redistribute it and/or modify it under
 the terms of either the Artistic License 1.0 or the GNU General Public
 License version 2.
-

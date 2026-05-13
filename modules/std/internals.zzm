@@ -25,83 +25,82 @@ Special properties are lexical metadata, not symbol bindings.
 Calling C<setprop("paths", SomeClass)> does not create an identifier
 named C<paths>.
 
-=head1 EXPORTED FUNCTIONS
+=head1 EXPORTS
+
+=head2 Functions
 
 =over
 
 =item * C<class_name(value)>
 
-Returns the class name for object instances, else C<null>.
+Parameters: C<value> is any value. Returns: C<String> or C<null>.
+Returns the class name for object instances.
 
 =item * C<classof(value)>
 
-Returns the class value for object and collection values, else C<null>.
+Parameters: C<value> is any value. Returns: class value or C<null>.
+Returns the class value for object and collection values.
 
 =item * C<object_slots(value)>
 
-Returns a dictionary of object slots (excluding private underscore
-prefixed slots), else C<null>.
+Parameters: C<value> is any value. Returns: C<Dict> or C<null>. Returns
+a dictionary of object slots, excluding private underscore-prefixed
+slots.
 
 =item * C<ansi_esc()>
 
-Returns a one-character ANSI escape string.
+Parameters: none. Returns: C<String>. Returns a one-character ANSI
+escape string.
 
 =item * C<ref_id(value)>
 
-Returns a stable reference id for reference-like values to support
-cycle detection, else C<null>.
+Parameters: C<value> is any value. Returns: C<String> or C<null>.
+Returns a stable reference id for reference-like values to support cycle
+detection.
 
 =item * C<to_String(value)>
 
-Coerces C<value> using the same rules as string operators. Numbers are
-stringified, booleans become C<"true"> or C<"false">, C<null> becomes
-the empty string, regexps stringify to their pattern text, and objects
-must provide C<to_String>. Values that string operators reject also
-throw here.
+Parameters: C<value> is any value. Returns: C<String>. Coerces
+C<value> using the same rules as string operators.
 
 =item * C<to_Number(value)>
 
-Coerces C<value> using the same rules as numeric operators. Numeric
-strings are parsed, booleans become C<1> or C<0>, C<null> becomes C<0>,
-and objects must provide C<to_Number>. Values that numeric operators
-reject also throw here.
+Parameters: C<value> is any value. Returns: C<Number>. Coerces
+C<value> using the same rules as numeric operators.
 
 =item * C<to_Boolean(value)>
 
-Coerces C<value> using the same rules as logical operators, ternary
-conditions, C<if>, and C<while>. C<null>, C<false>, C<0>, the empty
-string, and empty collections are false. Objects with C<to_Boolean>
-use that method and then boolify the result with the same rules.
+Parameters: C<value> is any value. Returns: C<Boolean>. Coerces
+C<value> using the same rules as logical operators and conditions.
 
 =item * C<to_Regexp(value)>
 
-Returns C<value> unchanged when it is already a regexp. Otherwise,
-coerces C<value> with the string-operator rules and compiles the result
-as a regexp pattern with no implicit flags. Invalid patterns throw.
+Parameters: C<value> is a regexp or pattern-like value. Returns:
+C<Regexp>. Returns C<value> unchanged when it is a regexp, otherwise
+coerces it to a string and compiles it as a regexp.
 
 =item * C<make_instance(klass, dict := null)>
 
-Creates an instance of a user-defined class using the same field
-defaults and field type checks as C<new>, but does not call
-C<__build__>. When supplied, C<dict> provides slot values to install
-after field defaults have been evaluated.
+Parameters: C<klass> is a class value and C<dict> is an optional slot
+dictionary. Returns: object. Creates an instance without calling
+C<__build__>.
 
 =item * C<load_module(module, symbol := null)>
 
-Loads C<module> using the runtime's normal module loader. With only the
-module name, returns a dictionary of the module's exports, including
-underscore-prefixed names. With C<symbol>, returns only that exported
-symbol. Missing modules or symbols throw an exception.
+Parameters: C<module> is a module name and C<symbol> is an optional
+export name. Returns: C<Dict> or value. Loads a module and returns all
+exports, or one named export.
 
 =item * C<setprop(key, value)>
 
-Sets a lexically scoped runtime special property on the current frame.
-Keys must be strings.
+Parameters: C<key> is a string and C<value> is any value. Returns:
+C<null>. Sets a lexically scoped runtime special property on the current
+frame.
 
 =item * C<getprop(key)>
 
-Returns a lexically scoped runtime special property via outward lexical
-lookup, else C<null>. Keys must be strings.
+Parameters: C<key> is a string. Returns: value or C<null>. Returns a
+lexically scoped runtime special property via outward lexical lookup.
 
 =back
 

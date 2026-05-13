@@ -24,6 +24,25 @@ C<kdl_to_json(value, pairlists: true)> maps object-like JiK nodes to
 C<PairList> values instead of C<Dict> values, preserving key order and
 duplicate keys.
 
+=head1 EXPORTS
+
+=head2 Functions
+
+=over
+
+=item C<< kdl_to_json(value, ... PairList opts) >>
+
+Parameters: C<value> is a C<KDLDocument>, C<KDLNode>, or compatible KDL
+value and C<opts> may include C<pairlists>. Returns: value. Converts
+JSON-in-KDL structures into native JSON-like ZuzuScript data.
+
+=item C<< json_to_kdl(value) >>
+
+Parameters: C<value> is a JSON-like ZuzuScript value. Returns:
+C<KDLDocument>. Converts native JSON-like data into JSON-in-KDL nodes.
+
+=back
+
 =head1 COPYRIGHT AND LICENCE
 
 B<< std/data/kdl/json >> is copyright Toby Inkster.

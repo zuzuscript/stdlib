@@ -35,6 +35,8 @@ must not be used as an untrusted data sandbox.
 
 =head1 EXPORTS
 
+=head2 Classes
+
 =over
 
 =item C<Worker>
@@ -43,19 +45,19 @@ The worker namespace class.
 
 =item C<Worker.spawn(callable, args?, ...options)>
 
-Starts one worker job and returns a C<Task>. C<args> defaults to an
-empty array. The worker calls C<callable(...args)> in its own runtime,
-awaits a returned task if needed, marshals the result, and fulfils the
-parent task with the unmarshalled value.
+Parameters: C<callable> is the worker function, C<args> is an optional
+array of arguments, and C<options> configures the worker. Returns:
+C<Task>. Starts one worker job and resolves to the worker result.
 
 If the worker throws, cancellation is requested, or marshalling fails,
 awaiting the task throws the corresponding exception value.
 
 =item C<Worker.spawn_handle(callable, args?, ...options)>
 
-Starts a worker with an explicit bidirectional message channel and
-returns a C<WorkerHandle>. The worker calls
-C<callable(inbox, ...args)>.
+Parameters: C<callable> is the worker function, C<args> is an optional
+array of arguments, and C<options> configures the worker. Returns:
+C<WorkerHandle>. Starts a worker with an explicit bidirectional message
+channel.
 
 This method is available in implementations that support message
 passing workers. Scripts that need to be portable to an older host may
@@ -63,56 +65,52 @@ check C<< Worker can "spawn_handle" >> before using it.
 
 =item C<WorkerHandle.send(value)>
 
-Marshals and sends C<value> to the worker inbox. Returns a C<Task> that
-resolves when the local transport has accepted the message. It rejects
-with C<ChannelClosedException> if the handle is closed or cancelled.
+Parameters: C<value> is any marshalable value. Returns: C<Task>.
+Marshals and sends C<value> to the worker inbox.
 
 =item C<WorkerHandle.recv()>
 
-Returns a C<Task> for the next worker-to-parent message. C<null> is a
-valid message value, so receiving from a closed and drained worker
-handle rejects with C<ChannelClosedException>.
+Parameters: none. Returns: C<Task>. Resolves to the next
+worker-to-parent message.
 
 =item C<WorkerHandle.close()>
 
-Half-closes the parent-to-worker send direction and returns a completed
-C<Task>.
+Parameters: none. Returns: C<Task>. Half-closes the parent-to-worker
+send direction.
 
 =item C<WorkerHandle.cancel(reason?)>
 
-Requests worker cancellation, closes the message directions, rejects
-pending receives, and cancels the result task with
-C<CancelledException>. CPU-heavy Rust worker code observes cancellation
-cooperatively at runtime checkpoints.
+Parameters: C<reason> is an optional cancellation reason. Returns:
+C<Task>. Requests worker cancellation and cancels the result task.
 
 =item C<WorkerHandle.result()>
 
-Returns the worker result C<Task>. Awaiting it gives the callable's
-return value after any worker-side task has been awaited.
+Parameters: none. Returns: C<Task>. Returns the worker result task.
 
 =item C<WorkerHandle.status()>
 
-Returns the status of the result task.
+Parameters: none. Returns: C<String>. Returns the status of the result
+task.
 
 =item C<WorkerHandle.done()>
 
-Returns true when the result task has fulfilled, rejected, or been
-cancelled.
+Parameters: none. Returns: C<Boolean>. Returns true when the result task
+has fulfilled, rejected, or been cancelled.
 
 =item C<inbox.send(value)>
 
-Worker-side method for sending a message to the parent. It has the same
-marshal and close rules as C<WorkerHandle.send>.
+Parameters: C<value> is any marshalable value. Returns: C<Task>.
+Worker-side method for sending a message to the parent.
 
 =item C<inbox.recv()>
 
-Worker-side method for receiving the next parent message. Like
-C<WorkerHandle.recv>, it rejects with C<ChannelClosedException> after
-the parent send direction is closed and drained.
+Parameters: none. Returns: C<Task>. Worker-side method for receiving the
+next parent message.
 
 =item C<inbox.close()>
 
-Half-closes the worker-to-parent send direction.
+Parameters: none. Returns: C<Task>. Half-closes the worker-to-parent
+send direction.
 
 =back
 
@@ -185,10 +183,8 @@ For example:
 
 =head1 PORTABILITY NOTES
 
-Perl uses C<fork>, Rust uses OS threads, Node uses C<worker_threads>,
-and browser-capable JavaScript uses Web Workers when the host supplies a
-worker bundle or worker factory. If C<std/worker> imports successfully,
-workers are assumed to be available.
+Host runtimes use their own worker primitives. If C<std/worker> imports
+successfully, workers are assumed to be available.
 
 Live C<std/task.Channel>, C<Task>, and other runtime-backed resources
 are not transferable unless C<std/marshal> explicitly supports them.
@@ -200,4 +196,3 @@ B<< std/worker >> is copyright Toby Inkster.
 It is free software; you may redistribute it and/or modify it under
 the terms of either the Artistic License 1.0 or the GNU General Public
 License version 2.
-

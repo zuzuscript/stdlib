@@ -24,6 +24,62 @@ exception.
 It is a normal ZuzuScript class. Workers do not require C<Result>; any value
 supported by C<std/marshal> may be returned.
 
+=head1 EXPORTS
+
+=head2 Classes
+
+=over
+
+=item C<Result>
+
+Container for either an ok value or an error value.
+
+=over
+
+=item C<< Result.ok(value) >>
+
+Parameters: C<value> is any success value. Returns: C<Result>. Creates an
+ok result wrapping C<value>.
+
+=item C<< Result.err(error) >>
+
+Parameters: C<error> is any error value. Returns: C<Result>. Creates an
+error result wrapping C<error>.
+
+=item C<< result.is_ok() >>
+
+Parameters: none. Returns: C<Boolean>. Returns true when the result is an
+ok value.
+
+=item C<< result.is_err() >>
+
+Parameters: none. Returns: C<Boolean>. Returns true when the result is an
+error value.
+
+=item C<< result.value() >>
+
+Parameters: none. Returns: value. Returns the stored ok value, or
+C<null> for an error result.
+
+=item C<< result.error() >>
+
+Parameters: none. Returns: value. Returns the stored error value, or
+C<null> for an ok result.
+
+=item C<< result.unwrap() >>
+
+Parameters: none. Returns: value. Returns the ok value, or throws if the
+result is an error.
+
+=item C<< result.unwrap_err() >>
+
+Parameters: none. Returns: value. Returns the error value, or throws if
+the result is ok.
+
+=back
+
+=back
+
 =head1 COPYRIGHT AND LICENCE
 
 B<< std/result >> is copyright Toby Inkster.

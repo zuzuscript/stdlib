@@ -23,7 +23,9 @@ This module provides lightweight structured logging with level
 filtering, optional timestamps, and stderr routing for warnings and
 errors.
 
-=head2 Exports
+=head1 EXPORTS
+
+=head2 Classes
 
 =over
 
@@ -35,20 +37,23 @@ Static methods:
 
 =item * C<configure(options)>
 
-Supported options: C<level>, C<timestamps>,
-C<stderr_for_errors>.
+Parameters: C<options> is a dictionary with optional C<level>,
+C<timestamps>, and C<stderr_for_errors> fields. Returns: C<null>.
+Configures global logging behaviour.
 
 =item * C<level()>
 
-Returns the current level name.
+Parameters: none. Returns: C<String>. Returns the current level name.
 
 =item * C<debug(...)>, C<info(...)>, C<warn(...)>, C<error(...)>
 
-Writes one log line when the message level is enabled.
+Parameters: C<parts> are values to concatenate into the message.
+Returns: C<null>. Writes one log line when the message level is enabled.
 
 =item * C<log(level, ...)>
 
-Dynamic level logger.
+Parameters: C<level> is a level name and C<parts> are message values.
+Returns: C<null>. Writes one log line at the requested dynamic level.
 
 =back
 

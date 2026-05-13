@@ -35,11 +35,11 @@ ZuzuScript. If a return descriptor includes C<free>, that symbol is
 called after the copy so libraries can return owned memory safely.
 
 On Unix-like systems, dynamic libraries usually use C<.so> on Linux and
-C<.dylib> on macOS. Windows libraries usually use C<.dll>. The exact
-runtime support depends on the host implementation: the Perl runtime
-uses C<FFI::Platypus>, and the Rust runtime uses C<dlopen> plus
-C<libffi>. The JavaScript runtime supports this module in Node through
-C<koffi>; browser runtimes reject it as unsupported.
+C<.dylib> on macOS. Windows libraries usually use C<.dll>. Exact
+availability depends on the host runtime. Browser runtimes reject this
+module as unsupported.
+
+=head1 EXPORTS
 
 =head2 Classes
 
@@ -53,7 +53,8 @@ Static methods:
 
 =item C<< CLib.open(String path) >>
 
-Loads a dynamic library and returns a C<CLibrary> object.
+Parameters: C<path> is a dynamic library path. Returns: C<CLibrary>.
+Loads a dynamic library.
 
 =back
 
@@ -65,18 +66,20 @@ Methods:
 
 =item C<< func(String name, Array params, return_type, options?) >>
 
-Looks up a symbol and returns a callable C<CFunction>. Parameters and
-return values are described with strings or dict descriptors such as
-C<"bool">, C<< { type: "int", bits: 64 } >>, or
-C<< { type: "binary", terminated_by: "nul", free: "free_symbol" } >>.
+Parameters: C<name> is a symbol name, C<params> describes parameter
+types, C<return_type> describes the return type, and C<options> is
+optional. Returns: C<CFunction>. Looks up a symbol and returns a
+callable C function wrapper.
 
 =item C<< has_symbol(String name) >>
 
-Returns whether the loaded library exports the named symbol.
+Parameters: C<name> is a symbol name. Returns: C<Boolean>. Returns
+whether the loaded library exports the named symbol.
 
 =item C<close()>
 
-Invalidates the library and functions created from it.
+Parameters: none. Returns: C<null>. Invalidates the library and
+functions created from it.
 
 =back
 
@@ -88,7 +91,8 @@ Methods:
 
 =item C<call(...)>
 
-Calls the C function using the declared signature.
+Parameters: arguments must match the declared C signature. Returns:
+value. Calls the C function using the declared signature.
 
 =back
 
@@ -101,4 +105,3 @@ B<< std/clib >> is copyright Toby Inkster.
 It is free software; you may redistribute it and/or modify it under
 the terms of either the Artistic License 1.0 or the GNU General Public
 License version 2.
-

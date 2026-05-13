@@ -6,8 +6,47 @@ std/path/z/parser - Pure Zuzu parser for ZPath expressions.
 
 =head1 DESCRIPTION
 
-This module ports the C<Data::ZPath::_Parser> Perl class to pure
-ZuzuScript with a near line-by-line translation and matching public API.
+This module provides the pure-Zuzu parser used by ZPath.
+
+=head1 EXPORTS
+
+=head2 Classes
+
+=over
+
+=item C<< Parser({ lexer_class?, allowed_operators }) >>
+
+Constructs a ZPath parser. Returns: C<Parser>.
+
+=over
+
+=item C<< parser.parse_top_level_terms(src) >>
+
+Parameters: C<src> is a ZPath expression string. Returns: C<Array>.
+Parses comma-separated top-level expression terms.
+
+=item C<< parser.parse_expression(lx) >>
+
+Parameters: C<lx> is a C<Lexer>. Returns: C<Dict>. Parses an expression.
+
+=item C<< parser.parse_ternary(lx) >>
+
+Parameters: C<lx> is a C<Lexer>. Returns: C<Dict>. Parses ternary and
+Elvis expressions.
+
+=item C<< parser.parse_subexpression(lx, min_prec) >>
+
+Parameters: C<lx> is a C<Lexer> and C<min_prec> is a precedence floor.
+Returns: C<Dict>. Parses a precedence-climbing subexpression.
+
+=item C<< parser.parse_primary(lx) >>
+
+Parameters: C<lx> is a C<Lexer>. Returns: C<Dict>. Parses a primary
+expression.
+
+=back
+
+=back
 
 =head1 COPYRIGHT AND LICENCE
 

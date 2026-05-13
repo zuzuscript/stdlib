@@ -63,6 +63,79 @@ in a lexical scope:
   from std/path/simple import SimplePath;
   SimplePath.use();
 
+=head1 EXPORTS
+
+=head2 Classes
+
+=over
+
+=item C<< SimplePath({ path: String }) >>
+
+Constructs a simple path selector. Returns: C<SimplePath>.
+
+=over
+
+=item C<< SimplePath.use() >>
+
+Parameters: none. Returns: C<null>. Makes this path class the lexical
+implementation for C<@>, C<@@>, and C<@?>.
+
+=item C<< path.expression() >>
+
+Parameters: none. Returns: C<String>. Returns the original path
+expression.
+
+=item C<< path.get(value) >>, C<< path.select(value) >>, C<< path.query(value) >>
+
+Parameters: C<value> is the query root. Returns: C<Array>. Evaluates the
+path and returns selected values.
+
+=item C<< path.first(value, fallback) >>
+
+Parameters: C<value> is the query root and C<fallback> is returned when
+there is no match. Returns: value. Returns the first selected value.
+
+=item C<< path.exists(value) >>
+
+Parameters: C<value> is the query root. Returns: C<Boolean>. Returns
+true when the path selects at least one value.
+
+=item C<< path.assign_first(target, value, op := ":=", weak := false) >>
+
+Parameters: C<target> is the query root, C<value> is the assignment
+value, C<op> is an assignment operator, and C<weak> is accepted for path
+API compatibility. Returns: value. Updates the first selected location.
+
+=item C<< path.assign_all(target, value, op := ":=", weak := false) >>
+
+Parameters: same as C<assign_first>. Returns: value. Updates every
+selected location.
+
+=item C<< path.assign_maybe(target, value, op := ":=", weak := false) >>
+
+Parameters: same as C<assign_first>. Returns: C<Boolean>. Updates the
+first selected location when one exists.
+
+=item C<< path.ref_first(target) >>
+
+Parameters: C<target> is the query root. Returns: C<Function>. Returns a
+reference-like getter/setter for the first selected location.
+
+=item C<< path.ref_all(target) >>
+
+Parameters: C<target> is the query root. Returns: C<Array>. Returns
+reference-like getter/setters for all selected locations.
+
+=item C<< path.ref_maybe(target) >>
+
+Parameters: C<target> is the query root. Returns: C<Function> or
+C<null>. Returns a reference-like getter/setter for the first selected
+location when one exists.
+
+=back
+
+=back
+
 =cut
 
 from std/string import substr;

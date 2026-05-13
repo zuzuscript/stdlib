@@ -23,31 +23,37 @@ std/data/ini - INI encoding and decoding for ZuzuScript.
 This module provides a pure-Zuzu implementation of INI parsing and
 serialization, with a user-facing API modelled on C<std/data/json>.
 
+=head1 EXPORTS
+
 =head2 Classes
 
 =over
 
 =item C<< INI({ utf8?: Bool, pretty?: Bool, canonical?: Bool }) >>
 
-Construct an INI codec.
+Constructs an INI codec. Returns: C<INI>.
 
-=item C<< INI->encode(Dict value) >>
+=item C<< codec.encode(value) >>
 
-Encode a dictionary to INI text.
+Parameters: C<value> is a C<Dict> or compatible mapping. Returns:
+C<String> or C<BinaryString>. Encodes C<value> as INI text, or bytes
+when C<utf8> is true.
 
-=item C<< INI->decode(String text) >>
+=item C<< codec.decode(String text) >>
 
-Decode INI text into a dictionary.
+Parameters: C<text> is INI text. Returns: C<Dict>. Decodes INI text
+into a dictionary.
 
-=item C<< INI->load(Path path) >>
+=item C<< codec.load(Path path) >>
 
-Read INI from a C<std/io> C<Path> and decode it.
-Throws an exception if passed a plain string.
+Parameters: C<path> is a C<std/io> C<Path>. Returns: C<Dict>. Reads INI
+text from C<path> and decodes it.
 
-=item C<< INI->dump(Path path, Dict value) >>
+=item C<< codec.dump(Path path, value) >>
 
-Encode and write INI to a C<std/io> C<Path>.
-Throws an exception if passed a plain string.
+Parameters: C<path> is a C<std/io> C<Path> and C<value> is a C<Dict> or
+compatible mapping. Returns: C<null>. Encodes C<value> and writes INI
+text to C<path>.
 
 =back
 

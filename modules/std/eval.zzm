@@ -36,6 +36,20 @@ Syntax and runtime errors thrown while evaluating code are catchable as
 normal Zuzu exceptions. Compile exceptions expose eval source metadata,
 including C<message>, C<file>, C<line>, and C<code>.
 
+=head1 EXPORTS
+
+=head2 Functions
+
+=over
+
+=item C<< eval(String source, ... PairList denials) >>
+
+Parameters: C<source> is ZuzuScript source text and C<denials> are
+optional named capability-denial flags. Returns: value. Parses and
+evaluates C<source> in a nested caller scope.
+
+=back
+
 =head1 COPYRIGHT AND LICENCE
 
 B<< std/eval >> is copyright Toby Inkster.
@@ -43,4 +57,3 @@ B<< std/eval >> is copyright Toby Inkster.
 It is free software; you may redistribute it and/or modify it under
 the terms of either the Artistic License 1.0 or the GNU General Public
 License version 2.
-

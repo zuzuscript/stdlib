@@ -31,10 +31,10 @@ std/web - Request, response, and routing helpers for ZuzuScript web apps.
 =head1 DESCRIPTION
 
 This pure ZuzuScript module provides a small web framework layer over the
-raw C<__request__(env)> protocol used by C<zuzu-rust-server> and
-C<zuzu-plackup>. C<Request> and C<Response> are modelled on
-C<Plack::Request> and C<Plack::Response>. C<Routes> is modelled on
-C<Mojolicious::Routes>.
+raw C<__request__(env)> protocol used by ZuzuScript web hosts. It
+provides request, response, route match, route, and router objects.
+
+=head1 EXPORTS
 
 =head2 C<Request>
 

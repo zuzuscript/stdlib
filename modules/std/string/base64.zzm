@@ -24,26 +24,32 @@ The URL-safe variant uses C<-> and C<_> instead of C<+>
 and C</>. It also omits trailing C<=> padding so encoded
 text can be placed into URLs more easily.
 
-=head1 EXPORTED FUNCTIONS
+=head1 EXPORTS
+
+=head2 Functions
 
 =over
 
 =item * C<encode(BinaryString value)>
 
-Encode C<value> as standard Base64.
+Parameters: C<value> is binary input data. Returns: C<String>. Encodes
+C<value> as standard Base64 text.
 
 =item * C<decode(String value)>
 
-Decode standard Base64 text into C<BinaryString>.
+Parameters: C<value> is standard Base64 text. Returns:
+C<BinaryString>. Decodes Base64 text into bytes.
 
 =item * C<encode_urlsafe(BinaryString value)>
 
-Encode C<value> as URL-safe Base64.
+Parameters: C<value> is binary input data. Returns: C<String>. Encodes
+C<value> as URL-safe Base64 text without trailing padding.
 
 =item * C<decode_urlsafe(String value)>
 
-Decode URL-safe Base64 text into C<BinaryString>.
-Missing trailing padding is added automatically.
+Parameters: C<value> is URL-safe Base64 text. Returns:
+C<BinaryString>. Decodes URL-safe Base64 text, adding missing trailing
+padding automatically.
 
 =back
 
@@ -54,4 +60,3 @@ B<< std/string/base64 >> is copyright Toby Inkster.
 It is free software; you may redistribute it and/or modify it under
 the terms of either the Artistic License 1.0 or the GNU General Public
 License version 2.
-

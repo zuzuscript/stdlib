@@ -18,13 +18,16 @@ std/math/roman - Roman numeral formatter for ZuzuScript.
 This module exports a single pure-Zuzu helper, C<roman>, which
 formats numbers using Roman numerals with twelfth fractions.
 
-=head1 EXPORTED FUNCTIONS
+=head1 EXPORTS
+
+=head2 Functions
 
 =over
 
 =item * C<< roman(Number n) >>
 
-Returns C<N> for zero.
+Parameters: C<n> is the number to render. Returns: C<String>. Formats
+C<n> as a Roman numeral, returning C<N> for zero.
 
 Whole numbers from 1 to 3999 are formatted with standard Roman
 numeral subtractive notation.

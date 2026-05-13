@@ -35,6 +35,56 @@ C<JSResult.value()> returns the converted Zuzu value for safe results.
 
 C<JSResult.toJSON()> serializes the wrapped JavaScript value as JSON.
 
+=head1 EXPORTS
+
+=head2 Classes
+
+=over
+
+=item C<JS>
+
+Runtime-supported JavaScript bridge class.
+
+=over
+
+=item C<< JS.eval(String code) >>
+
+Parameters: C<code> is JavaScript source text. Returns: C<JSResult>.
+Evaluates C<code> in the host JavaScript runtime.
+
+=back
+
+=item C<JSResult>
+
+Wrapper for a JavaScript value returned by C<JS.eval()> or
+C<JSResult.eval()>.
+
+=over
+
+=item C<< result.eval(String code) >>
+
+Parameters: C<code> is JavaScript source text. Returns: C<JSResult>.
+Evaluates C<code> with the wrapped JavaScript value bound to C<this>.
+
+=item C<< result.isSafe() >>
+
+Parameters: none. Returns: C<Boolean>. Returns true when C<value()> can
+convert the wrapped JavaScript value into a native ZuzuScript value.
+
+=item C<< result.value() >>
+
+Parameters: none. Returns: value. Converts and returns the wrapped
+JavaScript value when C<isSafe()> is true.
+
+=item C<< result.toJSON() >>
+
+Parameters: none. Returns: C<String>. Serializes the wrapped JavaScript
+value as JSON text.
+
+=back
+
+=back
+
 =head1 COPYRIGHT AND LICENCE
 
 B<< javascript >> is copyright Toby Inkster.
@@ -42,4 +92,3 @@ B<< javascript >> is copyright Toby Inkster.
 It is free software; you may redistribute it and/or modify it under
 the terms of either the Artistic License 1.0 or the GNU General Public
 License version 2.
-

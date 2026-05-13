@@ -21,13 +21,16 @@ Only runs of three or more consecutive integers are collapsed into a
 range token like C<9-12>. Single values and two-item runs are emitted
 as individual tokens.
 
-=head1 EXPORTED FUNCTIONS
+=head1 EXPORTS
+
+=head2 Functions
 
 =over
 
 =item * C<< abbreviate(Array values) >>
 
-Return an array of compact string labels for the provided numbers.
+Parameters: C<values> is an array of numbers. Returns: C<Array>. Returns
+compact string labels for the provided numbers.
 
 The input may be unsorted and may contain duplicates; values are
 normalized before abbreviation.

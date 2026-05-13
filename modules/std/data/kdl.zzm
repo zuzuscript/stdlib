@@ -19,7 +19,7 @@ std/data/kdl - KDL parsing and serialization for ZuzuScript.
 This module provides a pure-Zuzu implementation of the KDL document
 model and parser, with a user-facing API modelled on C<std/data/json>.
 
-=head1 DATA MODEL
+=head1 EXPORTS
 
 The parser returns explicit KDL model objects rather than generic Dict
 and Array structures.
@@ -44,12 +44,13 @@ Methods:
 
 =item C<nodes()>
 
-Returns the Array of top-level C<KDLNode> objects.
+Parameters: none. Returns: C<Array>. Returns the Array of top-level
+C<KDLNode> objects.
 
 =item C<to_Iterator()>
 
-Returns an iterator over the document's top-level nodes, so a document
-can be used directly in a C<for> loop.
+Parameters: none. Returns: C<Function>. Returns an iterator over the
+document's top-level nodes.
 
 =back
 
@@ -91,28 +92,32 @@ Methods:
 
 =item C<name()>
 
-Returns the node name.
+Parameters: none. Returns: C<String>. Returns the node name.
 
 =item C<type_annotation()>
 
-Returns the node type annotation, or C<null>.
+Parameters: none. Returns: C<String> or C<null>. Returns the node type
+annotation.
 
 =item C<args()>
 
-Returns the Array of unnamed argument C<KDLValue> objects.
+Parameters: none. Returns: C<Array>. Returns the unnamed argument
+C<KDLValue> objects.
 
 =item C<props()>
 
-Returns the C<PairList> of named property C<KDLValue> objects.
+Parameters: none. Returns: C<PairList>. Returns the named property
+C<KDLValue> objects.
 
 =item C<children()>
 
-Returns the Array of child C<KDLNode> objects.
+Parameters: none. Returns: C<Array>. Returns the child C<KDLNode>
+objects.
 
 =item C<to_Iterator()>
 
-Returns an iterator over the node's arguments followed by its child
-nodes, so a node can be used directly in a C<for> loop.
+Parameters: none. Returns: C<Function>. Returns an iterator over the
+node's arguments followed by its child nodes.
 
 =back
 
@@ -157,49 +162,82 @@ Methods:
 
 =item C<type()>
 
-Returns the value type.
+Parameters: none. Returns: C<String>. Returns the value type.
 
 =item C<kind()>
 
-Returns the numeric kind, or C<null> for non-number values.
+Parameters: none. Returns: C<String> or C<null>. Returns the numeric
+kind for number values.
 
 =item C<value()>
 
-Returns the raw native value.
+Parameters: none. Returns: value. Returns the raw native value.
 
 =item C<type_annotation()>
 
-Returns the value type annotation, or C<null>.
+Parameters: none. Returns: C<String> or C<null>. Returns the value type
+annotation.
 
 =item C<canonical_number()>
 
-Returns the canonical numeric spelling, or C<null>.
+Parameters: none. Returns: C<String> or C<null>. Returns the canonical
+numeric spelling.
 
 =item C<is_null()>, C<is_boolean()>, C<is_number()>, C<is_string()>
 
-Predicate methods for the four KDL primitive value types.
+Parameters: none. Returns: C<Boolean>. Predicate methods for the four
+KDL primitive value types.
 
 =item C<is_true()>, C<is_false()>
 
-Predicate methods for boolean C<#true> and C<#false> values.
+Parameters: none. Returns: C<Boolean>. Predicate methods for boolean
+C<#true> and C<#false> values.
 
 =item C<to_Number()>
 
-Returns the native number. Throws if the value is not a number, or if
-the number is a KDL keyword such as C<#inf>.
+Parameters: none. Returns: C<Number>. Returns the native number, or
+throws when the value is not a finite native number.
 
 =item C<to_String()>
 
-Returns the value coerced to a String. C<null> values become the empty
-String.
+Parameters: none. Returns: C<String>. Coerces the value to a string.
 
 =item C<to_Boolean()>
 
-Returns the value coerced to a Boolean.
+Parameters: none. Returns: C<Boolean>. Coerces the value to a boolean.
 
 =item C<native_value()>
 
-Returns the raw native value, with KDL C<#null> represented as C<null>.
+Parameters: none. Returns: value. Returns the raw native value, with KDL
+C<#null> represented as C<null>.
+
+=back
+
+=head2 C<KDL>
+
+C<KDL> is the codec class for KDL text.
+
+=over
+
+=item C<< codec.decode(String text) >>
+
+Parameters: C<text> is KDL text. Returns: C<KDLDocument>. Parses KDL
+text.
+
+=item C<< codec.encode(value) >>
+
+Parameters: C<value> is a C<KDLDocument>, C<KDLNode>, or compatible
+value. Returns: C<String>. Serializes KDL data to text.
+
+=item C<< codec.load(path) >>
+
+Parameters: C<path> is a C<std/io> C<Path>. Returns: C<KDLDocument>.
+Reads and parses a KDL file.
+
+=item C<< codec.dump(path, value) >>
+
+Parameters: C<path> is a C<std/io> C<Path> and C<value> is KDL data.
+Returns: C<null>. Serializes and writes a KDL file.
 
 =back
 

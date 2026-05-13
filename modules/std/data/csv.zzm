@@ -32,7 +32,9 @@ This module provides CSV-style parsing and writing backed by the runtime.
 Its options are designed so the same API can also handle TSV and other
 character-delimited formats.
 
-=head2 Exports
+=head1 EXPORTS
+
+=head2 Classes
 
 =over
 
@@ -52,65 +54,79 @@ Instance methods:
 
 =over
 
-=item * C<decode(text)>
+=item C<< csv.decode(text) >>
 
-Parse a whole string into an Array of rows. With C<headers: true>, rows
-are returned as Dicts.
+Parameters: C<text> is delimited text. Returns: C<Array>. Parses a whole
+string into rows, returning C<Dict> rows when headers are enabled.
 
-=item * C<decode_report(text)>
+=item C<< csv.decode_report(text) >>
 
-Decode while collecting parse errors instead of throwing immediately.
-Returns a Dict with C<rows> and C<errors>.
+Parameters: C<text> is delimited text. Returns: C<Dict>. Decodes while
+collecting parse errors in C<rows> and C<errors>.
 
-=item * C<encode(rows)>
+=item C<< csv.encode(rows) >>
 
-Encode rows into a delimited text string.
+Parameters: C<rows> is an array of row values. Returns: C<String>.
+Encodes rows into a delimited text string.
 
-=item * C<encode_row(row)>
+=item C<< csv.encode_row(row) >>
 
-Encode a single row as delimited text.
+Parameters: C<row> is an array, dictionary, or row-like value. Returns:
+C<String>. Encodes a single row as delimited text.
 
-=item * C<load(path)>
+=item C<< csv.load(path) >>
 
-Read and parse a full file from a C<std/io> C<Path>.
+Parameters: C<path> is a C<std/io> C<Path>. Returns: C<Array>. Reads and
+parses a full delimited file.
 
-=item * C<load_report(path)>
+=item C<< csv.load_report(path) >>
 
-Load while collecting parse errors instead of throwing immediately.
+Parameters: C<path> is a C<std/io> C<Path>. Returns: C<Dict>. Loads a
+file while collecting parse errors in C<rows> and C<errors>.
 
-=item * C<dump(path, rows)>
+=item C<< csv.dump(path, rows) >>
 
-Write rows to a C<std/io> C<Path>.
+Parameters: C<path> is a C<std/io> C<Path> and C<rows> is an array of
+row values. Returns: C<null>. Writes rows to a delimited file.
 
-=item * C<open(path)>
+=item C<< csv.open(path) >>
 
-Open a streaming reader and return a C<CSVReader>.
+Parameters: C<path> is a C<std/io> C<Path>. Returns: C<CSVReader>.
+Opens a streaming reader.
 
-=item * C<open_writer(path, options?)>
+=item C<< csv.open_writer(path, options?) >>
 
-Open a streaming writer and return a C<CSVWriter>.
+Parameters: C<path> is a C<std/io> C<Path> and C<options> overrides
+writer settings. Returns: C<CSVWriter>. Opens a streaming writer.
 
-=item * C<sniff(text_or_path)>
+=item C<< csv.sniff(text_or_path) >>
 
-Guess delimiter and likely header presence.
+Parameters: C<text_or_path> is delimited text or a C<Path>. Returns:
+C<Dict>. Guesses delimiter and likely header presence.
 
-=item * C<transpose(rows)>
+=item C<< csv.transpose(rows) >>
 
-Transpose a table represented as nested Arrays.
+Parameters: C<rows> is an array of arrays. Returns: C<Array>.
+Transposes a table represented as nested arrays.
 
 =item * C<< dump_table(path, dbh, table, options?) >>
 
-Export a database table through C<std/db> to a delimited file.
+Parameters: C<path> is output path, C<dbh> is a database handle,
+C<table> is a table name, and C<options> controls export. Returns:
+C<null>. Exports a database table to a delimited file.
 
 =item * C<< dump_query(path, dbh, sql, bind?, options?) >>
 
-Export the results of an arbitrary SQL query through C<std/db>.
+Parameters: C<path> is output path, C<dbh> is a database handle,
+C<sql> is SQL text, C<bind> contains bind values, and C<options>
+controls export. Returns: C<null>. Exports query results to a delimited
+file.
 
 =item * C<< load_table(path, dbh, table, options?) >>
 
-Import a delimited file into a database table. Supports creating the
-table first when requested, plus batched transactional inserts and
-column mapping.
+Parameters: C<path> is input path, C<dbh> is a database handle,
+C<table> is a table name, and C<options> controls import. Returns:
+C<Dict>. Imports a delimited file into a database table.
 
 =back
 
@@ -122,31 +138,68 @@ Methods:
 
 =over
 
-=item * C<next_array()>
+=item C<< reader.next_array() >>
 
-=item * C<next_dict()>
+Parameters: none. Returns: C<Array> or C<null>. Reads the next row as an
+array.
 
-=item * C<next()>
+=item C<< reader.next_dict() >>
 
-=item * C<all_array()>, C<all_dict()>
+Parameters: none. Returns: C<Dict> or C<null>. Reads the next row as a
+dictionary using configured columns.
 
-=item * C<headers()>
+=item C<< reader.next() >>
 
-=item * C<columns()>, C<set_columns(columns)>
+Parameters: none. Returns: C<Array>, C<Dict>, or C<null>. Reads the next
+row using the reader's configured row shape.
 
-=item * C<row_number()>
+=item C<< reader.all_array() >>
 
-=item * C<skip_lines(count)>
+Parameters: none. Returns: C<Array>. Reads all remaining rows as arrays.
 
-=item * C<errors()>
+=item C<< reader.all_dict() >>
 
-=item * C<close()>
+Parameters: none. Returns: C<Array>. Reads all remaining rows as
+dictionaries.
 
-=item * C<to_Iterator()>
+=item C<< reader.headers() >>
 
-Returns an iterator function suitable for C<for> loops. It yields Dict
-rows when headers/columns are configured; otherwise it yields Array
-rows.
+Parameters: none. Returns: C<Array> or C<null>. Returns the detected or
+configured header row.
+
+=item C<< reader.columns() >>
+
+Parameters: none. Returns: C<Array> or C<null>. Returns the current
+column names.
+
+=item C<< reader.set_columns(columns) >>
+
+Parameters: C<columns> is an array of column names. Returns:
+C<CSVReader>. Replaces the reader's column names.
+
+=item C<< reader.row_number() >>
+
+Parameters: none. Returns: C<Number>. Returns the number of rows read
+from the stream.
+
+=item C<< reader.skip_lines(count) >>
+
+Parameters: C<count> is a number of input lines. Returns: C<CSVReader>.
+Skips raw input lines before further parsing.
+
+=item C<< reader.errors() >>
+
+Parameters: none. Returns: C<Array>. Returns parse errors collected by
+the reader.
+
+=item C<< reader.close() >>
+
+Parameters: none. Returns: C<null>. Closes the reader.
+
+=item C<< reader.to_Iterator() >>
+
+Parameters: none. Returns: C<Function>. Returns an iterator suitable for
+C<for> loops.
 
 =back
 
@@ -158,17 +211,33 @@ Methods:
 
 =over
 
-=item * C<write_header(columns?)>
+=item C<< writer.write_header(columns?) >>
 
-=item * C<write_row(row)>
+Parameters: C<columns> is an optional array of column names. Returns:
+C<CSVWriter>. Writes a header row.
 
-=item * C<print_row(row)>
+=item C<< writer.write_row(row) >>
 
-=item * C<columns()>
+Parameters: C<row> is an array, dictionary, or row-like value. Returns:
+C<CSVWriter>. Writes one row.
 
-=item * C<row_number()>
+=item C<< writer.print_row(row) >>
 
-=item * C<close()>
+Parameters: C<row> is an array, dictionary, or row-like value. Returns:
+C<CSVWriter>. Alias for writing one row.
+
+=item C<< writer.columns() >>
+
+Parameters: none. Returns: C<Array> or C<null>. Returns the configured
+writer columns.
+
+=item C<< writer.row_number() >>
+
+Parameters: none. Returns: C<Number>. Returns the number of rows written.
+
+=item C<< writer.close() >>
+
+Parameters: none. Returns: C<null>. Closes the writer.
 
 =back
 
@@ -181,4 +250,3 @@ B<< std/data/csv >> is copyright Toby Inkster.
 It is free software; you may redistribute it and/or modify it under
 the terms of either the Artistic License 1.0 or the GNU General Public
 License version 2.
-

@@ -19,6 +19,46 @@ machinery while routing expression operators through
 C<std/path/zz/operators> and expression functions through
 C<std/path/zz/functions>.
 
+=head1 EXPORTS
+
+=head2 Classes
+
+=over
+
+=item C<ZZEvaluator>
+
+Evaluator class that supplies ZZPath operators and functions.
+
+=over
+
+=item C<< evaluator.operator_definitions() >>
+
+Parameters: none. Returns: C<Array>. Returns ZZPath operator
+definitions.
+
+=item C<< evaluator.function_definitions() >>
+
+Parameters: none. Returns: C<Array>. Returns ZZPath function
+definitions.
+
+=back
+
+=item C<< ZZPath({ path: String }) >>
+
+Constructs a ZZPath query object. Returns: C<ZZPath>. Inherits the
+public query, assignment, and reference methods from C<ZPath>.
+
+=over
+
+=item C<< path.get_evaluator() >>
+
+Parameters: none. Returns: C<ZZEvaluator>. Returns the evaluator used
+for this path.
+
+=back
+
+=back
+
 =head1 COPYRIGHT AND LICENCE
 
 B<< std/path/zz >> is copyright Toby Inkster.

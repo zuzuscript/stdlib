@@ -21,6 +21,28 @@ Zuzu values into code-like text.
 If a value cannot be realistically dumped (for example a function),
 C<Dumper> emits a warning and inserts C<null> in that location.
 
+=head1 EXPORTS
+
+=head2 Classes
+
+=over
+
+=item C<Dumper>
+
+Pure-Zuzu structured value dumper.
+
+=over
+
+=item C<< Dumper.dump(value, options?) >>
+
+Parameters: C<value> is any ZuzuScript value and C<options> is an
+optional dictionary. Returns: C<String>. Serializes C<value> into
+code-like text.
+
+=back
+
+=back
+
 =head1 COPYRIGHT AND LICENCE
 
 B<< std/dump >> is copyright Toby Inkster.

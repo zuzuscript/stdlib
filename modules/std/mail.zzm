@@ -27,6 +27,203 @@ generated boundary. C<Serializer.serialize_body()> returns only body bytes,
 so callers using it with a generated boundary must provide the matching
 C<Content-Type> header separately.
 
+=head1 EXPORTS
+
+=head2 Functions
+
+=over
+
+=item C<< parse_datetime(String text) >>
+
+Parameters: C<text> is a mail date string. Returns: C<Time>. Parses a
+mail header date into a C<std/time> object.
+
+=item C<< format_datetime(Time time) >>
+
+Parameters: C<time> is a C<std/time> object. Returns: C<String>. Formats
+a time for use in mail headers.
+
+=back
+
+=head2 Classes
+
+=over
+
+=item C<Address>
+
+Mail address object.
+
+=over
+
+=item C<< Address.parse(String text) >>, C<< Address.parse_list(String text) >>
+
+Parameters: C<text> is address header text. Returns: C<Address> or
+C<Array>. Parses one address or a comma-separated address list.
+
+=item C<< address.local() >>, C<< address.domain() >>, C<< address.display_name() >>, C<< address.address() >>
+
+Parameters: none. Returns: C<String> or C<null>. Returns address
+components.
+
+=item C<< address.to_header() >>, C<< address.to_String() >>
+
+Parameters: none. Returns: C<String>. Formats the address.
+
+=item C<< address.to_Dict() >>
+
+Parameters: none. Returns: C<Dict>. Converts the address to a
+dictionary.
+
+=back
+
+=item C<Head>
+
+Ordered mail header collection.
+
+=over
+
+=item C<< head.fields() >>, C<< head.to_PairList() >>, C<< head.to_Iterator() >>
+
+Parameters: none. Returns: C<PairList> or C<Function>. Returns header
+fields or an iterator.
+
+=item C<< head.raw(String name, fallback := null) >>, C<< head.raw_all(String name) >>, C<< head.decoded(String name, fallback := null) >>, C<< head.decoded_all(String name) >>, C<< head.get(String name, fallback := null) >>, C<< head.get_all(String name) >>
+
+Parameters: C<name> is a header name and C<fallback> is optional.
+Returns: C<String>, C<Array>, or fallback. Reads header values.
+
+=item C<< head.set(String name, String value) >>, C<< head.add(String name, String value) >>, C<< head.remove(String name) >>
+
+Parameters: C<name> is a header name and C<value> is header text.
+Returns: C<Head>. Mutates header fields.
+
+=item C<< head.has(String name) >>
+
+Parameters: C<name> is a header name. Returns: C<Boolean>. Tests whether
+a header exists.
+
+=item C<< head.content_type() >>, C<< head.content_transfer_encoding() >>, C<< head.charset() >>, C<< head.boundary() >>, C<< head.message_id() >>, C<< head.date() >>, C<< head.from() >>, C<< head.to() >>, C<< head.cc() >>, C<< head.bcc() >>, C<< head.subject() >>
+
+Parameters: none. Returns: header-specific value. Reads common headers.
+
+=back
+
+=item C<Body>
+
+Mail body value.
+
+=over
+
+=item C<< Body.bytes(BinaryString raw, ... PairList options) >>
+
+Parameters: C<raw> is body bytes and C<options> describe content type,
+encoding, and parts. Returns: C<Body>. Creates a leaf or multipart body.
+
+=item C<< Body.nested(message, ... PairList options) >>
+
+Parameters: C<message> is a C<Message>. Returns: C<Body>. Creates a
+nested message body.
+
+=item C<< body.is_multipart() >>, C<< body.is_nested() >>
+
+Parameters: none. Returns: C<Boolean>. Reports body shape.
+
+=item C<< body.bytes() >>, C<< body.decoded() >>, C<< body.encoded() >>
+
+Parameters: none. Returns: C<BinaryString>. Returns raw, decoded, or
+encoded body bytes.
+
+=item C<< body.parts() >>, C<< body.part(Number index) >>, C<< body.count() >>
+
+Parameters: C<index> selects a body part. Returns: C<Array>, C<Body>, or
+C<Number>. Reads multipart body parts.
+
+=item C<< body.nested() >>, C<< body.content_type() >>, C<< body.transfer_encoding() >>, C<< body.to_Dict() >>
+
+Parameters: none. Returns: value. Reads body metadata or converts the
+body to a dictionary.
+
+=back
+
+=item C<Message>
+
+Mail message object with C<head> and C<body>.
+
+=over
+
+=item C<< message.head() >>, C<< message.body() >>
+
+Parameters: none. Returns: C<Head> or C<Body>. Returns message parts.
+
+=item C<< message.header(String name, fallback := null) >>, C<< message.headers(String name) >>
+
+Parameters: C<name> is a header name and C<fallback> is optional.
+Returns: C<String>, C<Array>, or fallback. Reads message headers.
+
+=item C<< message.set_header(String name, String value) >>, C<< message.add_header(String name, String value) >>, C<< message.remove_header(String name) >>
+
+Parameters: C<name> is a header name and C<value> is header text.
+Returns: C<Message>. Mutates message headers.
+
+=item C<< message.subject() >>, C<< message.from() >>, C<< message.to() >>, C<< message.cc() >>, C<< message.bcc() >>, C<< message.date() >>, C<< message.message_id() >>
+
+Parameters: none. Returns: header-specific value. Reads common message
+headers.
+
+=item C<< message.is_part() >>, C<< message.container() >>, C<< message.toplevel() >>
+
+Parameters: none. Returns: C<Boolean> or C<Message>. Reads containment
+state.
+
+=item C<< message.send(mailer, ... PairList options) >>
+
+Parameters: C<mailer> is a compatible low-level mailer. Returns: value.
+Sends the message.
+
+=item C<< message.to_Dict() >>
+
+Parameters: none. Returns: C<Dict>. Converts the message to a
+dictionary.
+
+=back
+
+=item C<Parser>
+
+Conservative mail parser.
+
+=over
+
+=item C<< parser.warnings() >>
+
+Parameters: none. Returns: C<Array>. Returns non-fatal parse warnings.
+
+=item C<< parser.parse(BinaryString bytes) >>
+
+Parameters: C<bytes> is raw message bytes. Returns: C<Message>. Parses a
+mail message.
+
+=back
+
+=item C<Serializer>
+
+Mail serializer.
+
+=over
+
+=item C<< serializer.serialize_body(Message message, ... PairList options) >>
+
+Parameters: C<message> is a mail message and C<options> control output.
+Returns: C<BinaryString>. Serializes only the message body.
+
+=item C<< serializer.serialize(Message message, ... PairList options) >>
+
+Parameters: C<message> is a mail message and C<options> control output.
+Returns: C<BinaryString>. Serializes a complete message.
+
+=back
+
+=back
+
 =head1 COPYRIGHT AND LICENCE
 
 B<< std/mail >> is copyright Toby Inkster.

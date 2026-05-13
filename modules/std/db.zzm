@@ -38,9 +38,11 @@ std/db - DBI-powered SQL database access.
 
 =head1 DESCRIPTION
 
-This module provides a lightweight SQL interface backed by DBI.
+This module provides a lightweight SQL interface.
 
-=head2 Exports
+=head1 EXPORTS
+
+=head2 Classes
 
 =over
 
@@ -52,15 +54,20 @@ Static methods:
 
 =item * C<< connect(String dsn, Dict settings?) >>
 
-Connect using a DBI DSN string.
+Parameters: C<dsn> is a database connection string and C<settings>
+contains optional connection settings. Returns: C<DatabaseHandle>.
+Opens a database connection.
 
 =item * C<< temp(Dict settings?) >>
 
-Connect to an in-memory SQLite database.
+Parameters: C<settings> contains optional connection settings. Returns:
+C<DatabaseHandle>. Opens an in-memory SQLite database.
 
 =item * C<< open(path, Dict settings?) >>
 
-Shortcut for SQLite files. Accepts a string path or C<Path> object.
+Parameters: C<path> is a string or C<std/io> C<Path> and C<settings>
+contains optional connection settings. Returns: C<DatabaseHandle>.
+Opens a SQLite database file.
 Optional settings keys: C<auto_commit>, C<raise_error>,
 C<print_error>, C<sqlite_unicode>, and C<isolation_level>.
 For SQLite, C<isolation_level> may be C<deferred>,
@@ -74,15 +81,24 @@ Methods:
 
 =over
 
-=item * C<< prepare(String sql) >> returning C<StatementHandle>
+=item * C<< prepare(String sql) >>
+
+Parameters: C<sql> is SQL text. Returns: C<StatementHandle>. Prepares a
+statement.
 
 =item * C<< quote(String value) >>
 
+Parameters: C<value> is text. Returns: C<String>. Quotes a string for
+SQL where supported.
+
 =item * C<begin()>, C<commit()>, C<rollback()>
+
+Parameters: none. Returns: C<null>. Controls a transaction.
 
 =item * C<< execute_batch(String sql, Array rows) >>
 
-Prepare once, then execute with multiple bind rows.
+Parameters: C<sql> is SQL text and C<rows> is an array of bind rows.
+Returns: C<null>. Prepares once, then executes with multiple bind rows.
 
 =back
 
@@ -94,23 +110,41 @@ Methods:
 
 =item * C<execute(...)>
 
+Parameters: bind values match the prepared statement. Returns:
+C<StatementHandle>. Executes the statement.
+
 =item * C<< execute_batch(Array rows) >>
+
+Parameters: C<rows> is an array of bind rows. Returns:
+C<StatementHandle>. Executes the statement for multiple bind rows.
 
 =item * C<column_names()>, C<column_types()>
 
+Parameters: none. Returns: C<Array>. Returns statement column metadata.
+
 =item * C<next_array()>, C<next_dict()>
+
+Parameters: none. Returns: C<Array>, C<Dict>, or C<null>. Fetches the
+next row.
 
 =item * C<all_array()>, C<all_dict()>
 
+Parameters: none. Returns: C<Array>. Fetches all remaining rows.
+
 =item * C<next_typed_array()>, C<next_typed_dict()>
+
+Parameters: none. Returns: C<Array>, C<Dict>, or C<null>. Fetches the
+next row with type coercions.
 
 =item * C<all_typed_array()>, C<all_typed_dict()>
 
+Parameters: none. Returns: C<Array>. Fetches all remaining rows with
+type coercions.
+
 =item * C<to_Iterator()>
 
-Returns an iterator function suitable for C<for> loops.
-Each yielded row is a typed C<Dict> (equivalent to
-C<next_typed_dict()>).
+Parameters: none. Returns: C<Function>. Returns an iterator function
+suitable for C<for> loops.
 
 =back
 
@@ -132,4 +166,3 @@ B<< std/db >> is copyright Toby Inkster.
 It is free software; you may redistribute it and/or modify it under
 the terms of either the Artistic License 1.0 or the GNU General Public
 License version 2.
-

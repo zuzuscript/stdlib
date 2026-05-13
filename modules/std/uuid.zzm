@@ -16,18 +16,22 @@ std/uuid - Pure ZuzuScript UUID v1 generator.
 This module implements UUID version 1 generation using only
 ZuzuScript code.
 
-It exports:
+=head1 EXPORTS
+
+=head2 Functions
 
 =over
 
 =item * C<create_uuid_binary()>
 
-Returns a single UUID as a C<BinaryString> of 16 bytes.
+Parameters: none. Returns: C<BinaryString>. Returns a single UUID as 16
+raw bytes.
 
 =item * C<create_uuid()>
 
-Returns a single UUID as lower-case hexadecimal with hyphens,
-in the usual C<8-4-4-4-12> layout.
+Parameters: none. Returns: C<String>. Returns a single UUID as
+lowercase hexadecimal text with hyphens in the usual C<8-4-4-4-12>
+layout.
 
 =back
 

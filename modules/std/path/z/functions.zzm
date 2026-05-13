@@ -1,5 +1,80 @@
 =encoding utf8
 
+=head1 NAME
+
+std/path/z/functions - Function definitions for ZPath.
+
+=head1 DESCRIPTION
+
+This module defines the function objects and standard function table used
+by C<std/path/z>.
+
+=head1 EXPORTS
+
+=head2 Classes
+
+=over
+
+=item C<< Func({ spelling: String, f: Function }) >>
+
+Constructs a ZPath function definition. Returns: C<Func>.
+
+=over
+
+=item C<< func.has_name(n) >>
+
+Parameters: C<n> is a function name. Returns: C<Boolean>. Returns true
+when C<n> matches the function spelling.
+
+=back
+
+=back
+
+=head2 Functions
+
+=over
+
+=item C<< replace(haystack, needle, replacement) >>
+
+Parameters: C<haystack> is source text, C<needle> is a pattern, and
+C<replacement> is replacement text. Returns: C<String>. Performs ZPath
+replacement with capture substitutions.
+
+=item C<< mk_single_number_function(String name, Function impl) >>
+
+Parameters: C<name> is a ZPath function name and C<impl> maps one
+number. Returns: C<Function>. Builds a function wrapper for per-node
+numeric functions.
+
+=item C<< mk_aggregate_number_function(String name, Function impl) >>
+
+Parameters: C<name> is a ZPath function name and C<impl> maps an array
+of numbers. Returns: C<Function>. Builds a function wrapper for
+aggregate numeric functions.
+
+=item C<< mk_single_string_function(String name, Function impl) >>
+
+Parameters: C<name> is a ZPath function name and C<impl> maps one
+string. Returns: C<Function>. Builds a function wrapper for per-node
+string functions.
+
+=item C<< mk_match_function() >>
+
+Parameters: none. Returns: C<Function>. Builds the standard ZPath
+C<match> function implementation.
+
+=back
+
+=head2 Constants
+
+=over
+
+=item C<STANDARD_FUNCTIONS>
+
+Type: C<Array>. Standard ZPath function definitions.
+
+=back
+
 =head1 COPYRIGHT AND LICENCE
 
 B<< std/path/z/functions >> is copyright Toby Inkster.

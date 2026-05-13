@@ -28,17 +28,23 @@ In the default non-binary mode, CRLF, CR, and LF bytes are normalized to
 the configured C<newline> string. In binary mode, CR and LF bytes are
 encoded as C<=0D> and C<=0A>.
 
-=head1 EXPORTED FUNCTIONS
+=head1 EXPORTS
+
+=head2 Functions
 
 =over
 
 =item * C<encode(BinaryString bytes, ... PairList options)>
 
-Encode C<bytes> as quoted-printable ASCII text.
+Parameters: C<bytes> is binary input data and C<options> controls
+encoding. Returns: C<String>. Encodes C<bytes> as quoted-printable ASCII
+text.
 
 =item * C<decode(String text, ... PairList options)>
 
-Decode quoted-printable text into a C<BinaryString>.
+Parameters: C<text> is quoted-printable text and C<options> controls
+strictness. Returns: C<BinaryString>. Decodes quoted-printable text into
+bytes.
 
 =back
 
