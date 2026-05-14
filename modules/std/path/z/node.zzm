@@ -148,6 +148,12 @@ attributes plus string and numeric values.
 C<std/io> path wrapper. It inherits the C<Node> API and exposes path
 attributes plus string values.
 
+=item C<WidgetNode>
+
+C<std/gui/objects> widget wrapper. It inherits the C<Node> API and
+exposes widget children by widget class name and index, plus public
+widget properties as assignable attributes.
+
 =back
 
 =head2 Variables
@@ -171,11 +177,194 @@ License version 2.
 
 =cut
 
-from std/internals import ref_id;
+from std/internals import class_name, load_module, ref_id;
 from std/math import Math;
 from std/string import index, substr;
 
 let determine_class;
+let _widget_class_loaded := false;
+let _widget_class := null;
+
+const _WIDGET_ATTRS := [
+	{ name: "id", getter: "id", setter: "set_id" },
+	{ name: "enabled", getter: "enabled", setter: "set_enabled" },
+	{ name: "visible", getter: "visible", setter: "set_visible" },
+	{ name: "width", getter: "width", accessor: true },
+	{ name: "height", getter: "height", accessor: true },
+	{ name: "minwidth", getter: "minwidth", accessor: true },
+	{ name: "minheight", getter: "minheight", accessor: true },
+	{ name: "maxwidth", getter: "maxwidth", accessor: true },
+	{ name: "maxheight", getter: "maxheight", accessor: true },
+	{ name: "classes", getter: "classes" },
+	{ name: "title", getter: "title", setter: "set_title", accessor: true },
+	{ name: "text", getter: "text", setter: "set_text", accessor: true },
+	{ name: "value", getter: "value", setter: "set_value", accessor: true },
+	{ name: "placeholder", getter: "placeholder", setter: "set_placeholder", accessor: true },
+	{ name: "for", getter: "for_id", setter: "set_for_id", accessor: true },
+	{ name: "align", getter: "align", accessor: true },
+	{ name: "gap", getter: "gap", accessor: true },
+	{ name: "padding", getter: "padding", accessor: true },
+	{ name: "label", getter: "label", accessor: true },
+	{ name: "collapsible", getter: "collapsible", accessor: true },
+	{ name: "collapsed", getter: "collapsed", accessor: true },
+	{ name: "wrap", getter: "wrap", accessor: true },
+	{ name: "readonly", getter: "readonly", accessor: true },
+	{ name: "multiline", getter: "multiline", accessor: true },
+	{ name: "password", getter: "password", accessor: true },
+	{ name: "required", getter: "required", accessor: true },
+	{ name: "src", getter: "src", accessor: true },
+	{ name: "alt", getter: "alt", accessor: true },
+	{ name: "fit", getter: "fit", accessor: true },
+	{ name: "checked", getter: "checked", accessor: true },
+	{ name: "indeterminate", getter: "indeterminate", accessor: true },
+	{ name: "name", getter: "name", accessor: true },
+	{ name: "disabled", getter: "disabled", accessor: true },
+	{ name: "group", getter: "group", accessor: true },
+	{ name: "multiple", getter: "multiple", accessor: true },
+	{ name: "min", getter: "min", accessor: true },
+	{ name: "max", getter: "max", accessor: true },
+	{ name: "first_day_of_week", getter: "first_day_of_week", accessor: true },
+	{ name: "orientation", getter: "orientation", accessor: true },
+	{ name: "step", getter: "step", accessor: true },
+	{ name: "show_text", getter: "show_text", accessor: true },
+	{ name: "selected", getter: "selected", accessor: true },
+	{ name: "placement", getter: "placement", accessor: true },
+	{ name: "icon", getter: "icon", setter: "set_icon", accessor: true },
+	{ name: "closable", getter: "closable", accessor: true },
+	{ name: "selected_index", getter: "selected_index", accessor: true },
+	{ name: "selected_path", getter: "selected_path", accessor: true },
+	{ name: "variant", getter: "variant", accessor: true },
+];
+
+function _zpath_widget_class () {
+	if ( not _widget_class_loaded ) {
+		_widget_class_loaded := true;
+		try {
+			_widget_class := load_module( "std/gui/objects", "Widget" );
+		}
+		catch {
+			_widget_class := null;
+		}
+	}
+	return _widget_class;
+}
+
+function _zpath_is_widget ( obj ) {
+	let Widget := _zpath_widget_class();
+	return Widget ≢ null and obj instanceof Widget;
+}
+
+function _zpath_widget_attr_name ( name ) {
+	return ( name ~ /^@/ ) ? substr( name, 1 ) : name;
+}
+
+function _zpath_widget_attr_spec ( name ) {
+	let attr := _zpath_widget_attr_name(name);
+	return _WIDGET_ATTRS.first( fn spec → spec{name} ≡ attr );
+}
+
+function _zpath_widget_attr_applies ( widget, spec ) {
+	let attr := spec{name};
+	if ( attr in [
+		"id",
+		"enabled",
+		"visible",
+		"width",
+		"height",
+		"minwidth",
+		"minheight",
+		"maxwidth",
+		"maxheight",
+		"classes",
+	] ) {
+		return true;
+	}
+
+	switch ( class_name(widget) : eq ) {
+		case "Window":
+			return attr in [ "title" ];
+		case "VBox", "HBox":
+			return attr in [ "align", "gap", "padding" ];
+		case "Frame":
+			return attr in [ "label", "collapsible", "collapsed" ];
+		case "Label":
+			return attr in [ "text", "for" ];
+		case "Text":
+			return attr in [ "value", "multiline", "readonly", "wrap" ];
+		case "RichText":
+			return attr in [ "value", "multiline", "readonly" ];
+		case "Image":
+			return attr in [ "src", "alt", "fit" ];
+		case "Input":
+			return attr in [
+				"value",
+				"placeholder",
+				"multiline",
+				"readonly",
+				"password",
+				"required",
+			];
+		case "DatePicker":
+			return attr in [ "value", "min", "max", "first_day_of_week" ];
+		case "Checkbox":
+			return attr in [ "label", "checked", "indeterminate" ];
+		case "Radio":
+			return attr in [ "label", "value", "group", "checked" ];
+		case "RadioGroup":
+			return attr in [ "name", "value" ];
+		case "Select":
+			return attr in [ "value", "multiple" ];
+		case "Menu":
+			return attr in [ "text" ];
+		case "MenuItem":
+			return attr in [ "text", "disabled" ];
+		case "Button":
+			return attr in [ "text", "variant" ];
+		case "Separator":
+			return attr in [ "orientation" ];
+		case "Slider":
+			return attr in [ "value", "min", "max", "step", "orientation", "readonly" ];
+		case "Progress":
+			return attr in [ "value", "min", "max", "indeterminate", "show_text" ];
+		case "Tabs":
+			return attr in [ "selected", "placement" ];
+		case "Tab":
+			return attr in [ "title", "value", "icon", "selected", "closable" ];
+		case "ListView":
+			return attr in [ "selected_index", "multiple" ];
+		case "TreeView":
+			return attr in [ "selected_path", "multiple" ];
+	}
+
+	return false;
+}
+
+function _zpath_widget_get_attr ( widget, spec ) {
+	let getter := spec{getter};
+	return widget.(getter)();
+}
+
+function _zpath_widget_set_attr ( widget, spec, value ) {
+	let setter := spec.get( "setter", null );
+	if ( setter ≢ null ) {
+		try {
+			return widget.(setter)(value);
+		}
+		catch {
+		}
+	}
+
+	let getter := spec{getter};
+	if ( spec.get( "accessor", false ) ) {
+		try {
+			return widget.(getter)(value);
+		}
+		catch {
+		}
+	}
+
+	die `Widget attribute @${spec{name}} is not assignable`;
+}
 
 class Node {
 	let raw with set := null;
@@ -986,6 +1175,100 @@ class PathNode extends Node {
 	}
 }
 
+class WidgetNode extends Node {
+
+	method _use_ref_as_id () {
+		return true;
+	}
+
+	method type () {
+		return "widget";
+	}
+
+	method name () {
+		return class_name( self.raw() ) ?: "Widget";
+	}
+
+	method can_have_named_children () {
+		return true;
+	}
+
+	method can_have_indexed_children () {
+		return true;
+	}
+
+	method can_have_named_indexed_children () {
+		return true;
+	}
+
+	method children () {
+		let out := [];
+		let i := 0;
+		for ( let child in self.raw().children() ) {
+			let nm := class_name(child) ?: "Widget";
+			out.push( Node.wrap( child, self, nm, i ) );
+			i++;
+		}
+		return out;
+	}
+
+	method indexed_child ( i ) {
+		return self.children().get( i, null );
+	}
+
+	method named_indexed_child ( name, i ) {
+		let n := 0;
+		for ( let child in self.children() ) {
+			if ( child.key() ≡ name ) {
+				return child if n ≡ i;
+				n++;
+			}
+		}
+		return null;
+	}
+
+	method attributes () {
+		let raw := self.raw();
+		let out := [];
+		let i := 0;
+		for ( let spec in _WIDGET_ATTRS ) {
+			next unless _zpath_widget_attr_applies( raw, spec );
+			try {
+				let value := _zpath_widget_get_attr( raw, spec );
+				out.push( Node.wrap( value, self, "@" _ spec{name}, i ) );
+				i++;
+			}
+			catch {
+			}
+		}
+		return out;
+	}
+
+	method do_action_on_child ( child, action ) {
+		return super( child, action ) if action{op} ne ":=";
+
+		let spec := _zpath_widget_attr_spec( child.key() );
+		return super( child, action ) if spec ≡ null;
+
+		_zpath_widget_set_attr( self.raw(), spec, action{value} );
+		return action{value};
+	}
+
+	method ref_on_child ( child ) {
+		let spec := _zpath_widget_attr_spec( child.key() );
+		return super(child) if spec ≡ null;
+
+		let widget := self.raw();
+		return function ( ... args ) {
+			if ( args.length() = 0 ) {
+				return _zpath_widget_get_attr( widget, spec );
+			}
+			_zpath_widget_set_attr( widget, spec, args[0] );
+			return args[0];
+		};
+	}
+}
+
 // Need to define the body of this function late so it can refer back to
 // classes that have been declared.
 
@@ -1038,6 +1321,10 @@ determine_class := function ( obj ) {
 					Klass = real_obj.__zpath_node_class__;
 				}
 			}
+	}
+
+	if ( Klass ≡ null and _zpath_is_widget(real_obj) ) {
+		Klass := WidgetNode;
 	}
 
 	if ( Klass ≡ null ) {
