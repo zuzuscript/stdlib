@@ -69,6 +69,8 @@ License version 2.
 
 =cut
 
+from std/string import join;
+
 let _LEVEL_NUM := {
 	debug: 10,
 	info: 20,
@@ -108,7 +110,7 @@ function _emit ( level, parts ) {
 	if ( _USE_TIMESTAMPS ) {
 		prefix := `TIME ${prefix}`;
 	}
-	let line := prefix _ " " _ parts.join("");
+	let line := prefix _ " " _ join( "", parts );
 	if ( _ERROR_TO_STDERR and numeric >= _LEVEL_NUM{warn} ) {
 		warn(line);
 	}
