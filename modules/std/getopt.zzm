@@ -90,7 +90,7 @@ License version 2.
 
 =cut
 
-from std/string import split, substr, starts_with, ends_with;
+from std/string import split, substr, starts_with, ends_with, join;
 
 function _spec_kind_from_suffix ( suffix ) {
 	if ( suffix ≡ "i" ) {
@@ -233,14 +233,14 @@ function _parse_from_specs ( argv, specs ) {
 			last;
 		}
 
-		if ( starts_with(arg, "--") and arg.length() > 2 ) {
+		if ( starts_with(arg, "--") and length arg > 2 ) {
 			let raw := substr(arg, 2);
 			let name := raw;
 			let inline_value := null;
 			if ( raw ~ /=/ ) {
 				let parts := split(raw, "=");
 				name := parts[0];
-				inline_value := parts.slice(1).join("=");
+				inline_value := join( "=", parts.slice(1) );
 			}
 			if ( not( name in long_lookup ) ) {
 				parse_error := `Unknown option --${name}`;
@@ -248,7 +248,7 @@ function _parse_from_specs ( argv, specs ) {
 			}
 				let spec := long_lookup{( name )};
 			if ( spec{kind} ≡ "flag" ) {
-				options{spec{name}} := 1;
+				options{( spec{name} )} := 1;
 				i++;
 				next;
 			}
@@ -266,18 +266,18 @@ function _parse_from_specs ( argv, specs ) {
 			let coerced := _coerce_value( spec{kind}, value_text );
 			if ( spec{multiple} ) {
 				if ( not( spec{name} in options ) ) {
-					options{spec{name}} := [];
+					options{( spec{name} )} := [];
 				}
-				options{spec{name}}.push(coerced);
+				options{( spec{name} )}.push(coerced);
 			}
 			else {
-				options{spec{name}} := coerced;
+				options{( spec{name} )} := coerced;
 			}
 			i++;
 			next;
 		}
 
-		if ( starts_with(arg, "-") and arg.length() > 1 ) {
+		if ( starts_with(arg, "-") and length arg > 1 ) {
 			let short_name := substr(arg, 1);
 			if ( not( short_name in short_lookup ) ) {
 				parse_error := `Unknown option -${short_name}`;
@@ -285,7 +285,7 @@ function _parse_from_specs ( argv, specs ) {
 			}
 				let spec := short_lookup{( short_name )};
 			if ( spec{kind} ≡ "flag" ) {
-				options{spec{name}} := 1;
+				options{( spec{name} )} := 1;
 				i++;
 				next;
 			}
@@ -296,12 +296,12 @@ function _parse_from_specs ( argv, specs ) {
 			let coerced := _coerce_value( spec{kind}, "" _ argv[i + 1] );
 			if ( spec{multiple} ) {
 				if ( not( spec{name} in options ) ) {
-					options{spec{name}} := [];
+					options{( spec{name} )} := [];
 				}
-				options{spec{name}}.push(coerced);
+				options{( spec{name} )}.push(coerced);
 			}
 			else {
-				options{spec{name}} := coerced;
+				options{( spec{name} )} := coerced;
 			}
 			i += 2;
 			next;
@@ -406,9 +406,9 @@ class Getopt {
 			ok: ok,
 			options: result{options},
 			argv: result{argv},
-			error: errors.length() > 0 ? errors.join("\n"): null,
+			error: errors.length() > 0 ? join( "\n", errors ): null,
 			errors: errors,
-			usage: usage_lines.join("\n"),
+			usage: join( "\n", usage_lines ),
 			specs: specs,
 		};
 	}
