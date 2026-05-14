@@ -8,14 +8,14 @@ std/path/z - Pure Zuzu implementation of ZPath selectors.
 
   from std/path/z import ZPath;
   from std/time import Time;
-  
+
   let data := {
     users: [
       { name: "Ada", age: 32, updated: new Time() },
       { name: "Bob", age: 27 },
     ],
   };
-  
+
   let names := query( data, "/users/*/name" );
   let zp := new ZPath( path: "/users/#0/name" );
   say( zp.first( data, "n/a" ) );
@@ -27,13 +27,92 @@ std/path/z - Pure Zuzu implementation of ZPath selectors.
 
 Native (pure-Zuzu) path traversal for structured values.
 
-=head2 Use with path operators
+=head1 EXPORTS
+
+=head2 Classes
+
+=over
+
+=item C<< ZPath({ path: String, ast? }) >>
+
+Constructs a compiled ZPath selector. Returns: C<ZPath>.
+
+=over
+
+=item C<< ZPath.use() >>
+
+Parameters: none. Returns: C<null>. Makes this path class the lexical
+implementation for C<@>, C<@@>, and C<@?>.
+
+=item C<< path.get_evaluator() >>
+
+Parameters: none. Returns: C<Evaluator>. Returns the evaluator used for
+this path.
+
+=item C<< path.evaluate(raw, meta := {}) >>
+
+Parameters: C<raw> is the query root and C<meta> is optional evaluation
+metadata. Returns: C<Array>. Evaluates the path and returns selected
+nodes.
+
+=item C<< path.get(raw) >>, C<< path.select(raw) >>, C<< path.query(raw) >>
+
+Parameters: C<raw> is the query root. Returns: C<Array>. Evaluates the
+path and returns selected primitive values.
+
+=item C<< path.first(raw, fallback?) >>
+
+Parameters: C<raw> is the query root and C<fallback> is optional.
+Returns: value. Returns the first selected value or C<fallback>/C<null>.
+
+=item C<< path.exists(raw) >>
+
+Parameters: C<raw> is the query root. Returns: C<Boolean>. Returns true
+when the path selects at least one value.
+
+=item C<< path.assign_first(raw, value, op := ":=", weak := false) >>
+
+Parameters: C<raw> is the query root, C<value> is the assignment value,
+C<op> is an assignment operator, and C<weak> requests weak assignment.
+Returns: value. Updates the first selected node or throws if none match.
+
+=item C<< path.assign_all(raw, value, op := ":=", weak := false) >>
+
+Parameters: same as C<assign_first>. Returns: value. Updates every
+selected node.
+
+=item C<< path.assign_maybe(raw, value, op := ":=", weak := false) >>
+
+Parameters: same as C<assign_first>. Returns: C<Boolean>. Updates the
+first selected node when one exists.
+
+=item C<< path.ref_first(raw) >>
+
+Parameters: C<raw> is the query root. Returns: C<Function>. Returns a
+reference-like getter/setter for the first selected node.
+
+=item C<< path.ref_all(raw) >>
+
+Parameters: C<raw> is the query root. Returns: C<Array>. Returns
+reference-like getter/setters for all selected nodes.
+
+=item C<< path.ref_maybe(raw) >>
+
+Parameters: C<raw> is the query root. Returns: C<Function> or C<null>.
+Returns a reference-like getter/setter for the first selected node when
+one exists.
+
+=back
+
+=back
+
+=head1 USE WITH PATH OPERATORS
 
 The path operators C<@>, C<@@>, and C<@?> can be set to use this module
 in a lexical scope.
 
   from std/path/z import ZPath;
-  
+
   function find_usernames (data) {
     ZPath.use();
     return data @@ "/users/*/name";
@@ -49,55 +128,7 @@ path once and use many times:
     return data @@ _usernames_zpath;
   }
 
-=head2 Methods
-
-A compiled C<ZPath> object provides the following methods:
-
-=over
-
-=item * C<query(haystack)>
-
-Returns an Array with all results searching the haystack.
-
-=item * C<first(haystack)>
-
-Returns just the first result, or null if none were found.
-
-=item * C<exists(haystack)>
-
-Returns a boolean indicating if any results were found.
-
-=item * C<assign_first(haystack, value, op := ":=")>
-
-Updates the first selected node. Throws if no matches are found.
-
-=item * C<assign_all(haystack, value, op := ":=")>
-
-Updates all selected nodes. If no matches are found, returns C<value>
-without mutation.
-
-=item * C<assign_maybe(haystack, value, op := ":=")>
-
-Updates the first selected node when one exists. Returns C<true> on
-match and C<false> on no match.
-
-=item * C<ref_first(haystack)>
-
-Returns a reference-like getter/setter closure for the first selected
-node. Throws if no matches are found.
-
-=item * C<ref_all(haystack)>
-
-Returns an Array of reference-like getter/setter closures.
-
-=item * C<ref_maybe(haystack)>
-
-Returns one reference-like getter/setter closure when a match exists,
-otherwise C<null>.
-
-=back
-
-=head2 Supported types
+=head1 SUPPORTED TYPES
 
 =over
 
@@ -173,7 +204,7 @@ See C<< std/data/xml >>.
 
 Specification: L<https://zpath.me>.
 
-Perl implementation: L<Data::ZPath>.
+ZPath specification: L<https://zpath.me>.
 
 =head1 COPYRIGHT AND LICENCE
 

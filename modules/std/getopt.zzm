@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-std/getopt - Parse command line arguments with Getopt::Long.
+std/getopt - Parse command line arguments.
 
 =head1 SYNOPSIS
 
@@ -33,14 +33,16 @@ std/getopt - Parse command line arguments with Getopt::Long.
 
 =head1 DESCRIPTION
 
-This module wraps C<Getopt::Long> for ZuzuScript.
+This module parses command-line option arrays for ZuzuScript programs.
 
 Use C<Getopt.parse(argv, specs, config?)> and pass the C<argv> array
 that your C<__main__> function receives.
 
-It intentionally does not read Perl's C<@ARGV>.
+It intentionally does not read a host process argument global.
 
 =head1 EXPORTS
+
+=head2 Classes
 
 =over
 
@@ -52,7 +54,17 @@ Static methods:
 
 =item * C<parse(Array argv, Array specs, Array config?)>
 
+Parameters: C<argv> is the command-line argument array, C<specs> is an
+option-spec array, and C<config> is optional parser configuration.
+Returns: C<Dict>. Parses arguments into options and remaining
+positional arguments.
+
 =item * C<schema(Array argv, Array schema, Array config?)>
+
+Parameters: C<argv> is the command-line argument array, C<schema> is an
+array of option schema dictionaries, and C<config> is optional parser
+configuration. Returns: C<Dict>. Parses arguments using structured
+option metadata and produces errors and usage text.
 
 Schema entries use fields such as C<name>, C<short>,
 C<type> (for example C<Number>, C<String>, C<Boolean>),

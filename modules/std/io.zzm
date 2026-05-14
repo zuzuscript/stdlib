@@ -21,7 +21,9 @@ This module provides path objects built on path semantics, an
 iterator for directory traversal, and objects for standard I/O
 streams.
 
-=head2 Exports
+=head1 EXPORTS
+
+=head2 Classes
 
 =over
 
@@ -148,4 +150,3 @@ B<< std/io >> is copyright Toby Inkster.
 It is free software; you may redistribute it and/or modify it under
 the terms of either the Artistic License 1.0 or the GNU General Public
 License version 2.
-

@@ -6,8 +6,52 @@ std/path/z/context - Evaluation context used by std/path/z.
 
 =head1 DESCRIPTION
 
-This module ports the C<Data::ZPath::_Ctx> Perl class to pure
-ZuzuScript with a near line-by-line translation and matching public API.
+This module provides the pure-Zuzu evaluation context used by ZPath.
+
+=head1 EXPORTS
+
+=head2 Classes
+
+=over
+
+=item C<< Ctx({ root, nodeset?, parentset?, meta? }) >>
+
+Constructs a ZPath evaluation context. Returns: C<Ctx>. Wraps C<root>
+as a C<std/path/z/node> C<Node> and stores the active node sets.
+
+=over
+
+=item C<< ctx.with_nodeset(ns, ps) >>
+
+Parameters: C<ns> is the next node set and C<ps> is the parent set.
+Returns: C<Ctx>. Returns a copy of the context with different node
+sets.
+
+=item C<< ctx.nested(extras?) >>
+
+Parameters: C<extras> is optional metadata. Returns: C<Ctx>. Returns a
+nested context with incremented metadata level.
+
+=item C<< ctx.root() >>
+
+Parameters: none. Returns: C<Node>. Returns the root node.
+
+=item C<< ctx.nodeset() >>
+
+Parameters: none. Returns: C<Array>. Returns the current node set.
+
+=item C<< ctx.parentset() >>
+
+Parameters: none. Returns: C<Array> or C<null>. Returns the parent node
+set.
+
+=item C<< ctx.meta() >>
+
+Parameters: none. Returns: C<Dict>. Returns context metadata.
+
+=back
+
+=back
 
 =head1 COPYRIGHT AND LICENCE
 

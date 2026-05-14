@@ -25,6 +25,8 @@ cache written in pure ZuzuScript.
 Keys are stored in an internal C<Dict>, and are assumed to be
 strings. Values may be any ZuzuScript value.
 
+=head1 EXPORTS
+
 =head2 Classes
 
 =over
@@ -32,38 +34,43 @@ strings. Values may be any ZuzuScript value.
 =item C<< Cache({ capacity?: Number }) >>
 
 Construct a cache with a maximum number of entries.
-Defaults to C<128>.
+Returns: C<Cache>. Defaults to C<128>.
 
 =item C<< cache.get(String item_key, Function producer) >>
 
-Returns the cached value for C<item_key>.
-On a miss, calls C<producer(item_key)>, stores the return value,
-and returns it.
+Parameters: C<item_key> is a string key and C<producer> is a function
+called on cache miss. Returns: value. Returns the cached value or stores
+and returns C<producer(item_key)>.
 
 =item C<< cache.peek(String item_key, fallback?) >>
 
-Returns the cached value for C<item_key>.
-On a miss, returns the fallback. Or null if no fallback provided.
+Parameters: C<item_key> is a string key and C<fallback> is optional.
+Returns: value. Returns the cached value without changing recency, or
+C<fallback>/C<null> on a miss.
 
 =item C<< cache.set(String item_key, value) >>
 
-Store a value for C<item_key> and mark it as recently used.
+Parameters: C<item_key> is a string key and C<value> is any value.
+Returns: value. Stores C<value> and marks it as recently used.
 
 =item C<< cache.has(String item_key) >>
 
-True if the cache currently contains C<item_key>.
+Parameters: C<item_key> is a string key. Returns: C<Boolean>. Returns
+true if the cache currently contains C<item_key>.
 
 =item C<< cache.size() >>
 
-Current number of cached entries.
+Parameters: none. Returns: C<Number>. Returns the current number of
+cached entries.
 
 =item C<< cache.capacity() >>
 
-Configured maximum number of entries.
+Parameters: none. Returns: C<Number>. Returns the configured maximum
+number of entries.
 
 =item C<< cache.empty() >>
 
-Remove all entries from the cache.
+Parameters: none. Returns: C<null>. Removes all entries from the cache.
 
 =back
 

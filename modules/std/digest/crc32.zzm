@@ -17,24 +17,28 @@ std/digest/crc32 - CRC32 digests for BinaryString values.
 =head1 DESCRIPTION
 
 This module provides CRC32 digest helpers implemented in pure
-ZuzuScript, with no Perl backend dependency.
+ZuzuScript.
 
-=head1 EXPORTED FUNCTIONS
+=head1 EXPORTS
+
+=head2 Functions
 
 =over
 
 =item * C<crc32(BinaryString value)>
 
-Returns the raw 4-byte CRC32 digest as C<BinaryString>.
+Parameters: C<value> is binary input data. Returns: C<BinaryString>.
+Returns the raw 4-byte CRC32 digest.
 
 =item * C<crc32_hex(BinaryString value)>
 
-Returns the digest as lowercase hexadecimal text.
+Parameters: C<value> is binary input data. Returns: C<String>. Returns
+the digest as lowercase hexadecimal text.
 
 =item * C<crc32_b64(BinaryString value)>
 
-Returns the digest as Base64 text without trailing C=>
-padding.
+Parameters: C<value> is binary input data. Returns: C<String>. Returns
+the digest as Base64 text without trailing C<=> padding.
 
 =back
 

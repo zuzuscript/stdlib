@@ -21,11 +21,32 @@ std/template/z - Pure ZuzuScript template engine.
 
 =head1 DESCRIPTION
 
-C<std/template/z> is a pure ZuzuScript port of Perl
-C<Text::ZTemplate>.
+C<std/template/z> is a pure ZuzuScript template renderer.
 
 The module compiles template text into a cached parse tree and renders
 it against data using C<std/path/z> expressions.
+
+=head1 EXPORTS
+
+=head2 Classes
+
+=over
+
+=item C<< ZTemplate({ string?: String, file?, escape?: String, includes?: Boolean }) >>
+
+Constructs a template from inline text or a file path. Returns:
+C<ZTemplate>.
+
+=over
+
+=item C<< template.process(data) >>
+
+Parameters: C<data> is the model used for path lookups. Returns:
+C<String>. Renders the template.
+
+=back
+
+=back
 
 =head1 TAG FORMS
 
@@ -74,10 +95,9 @@ quotes.
 
 =head1 KNOWN DIFFERENCES
 
-This module intentionally tracks Perl behavior where practical, but is
-implemented on top of C<std/path/z>. Any parser/rendering deltas are
-covered in ztests and should be treated as implementation bugs unless
-explicitly documented.
+This module is implemented on top of C<std/path/z>. Parser/rendering
+deltas across runtimes are covered in ztests and should be treated as
+implementation bugs unless explicitly documented.
 
 =head1 COPYRIGHT AND LICENCE
 

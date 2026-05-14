@@ -19,6 +19,8 @@ std/time - Time objects, formatting, and parsing.
 This module provides C<Time> for working with timestamps and
 C<TimeParser> for parsing strings using a strptime format.
 
+=head1 EXPORTS
+
 =head2 Classes
 
 =over
@@ -26,43 +28,80 @@ C<TimeParser> for parsing strings using a strptime format.
 =item C<< Time(Number epoch?) >>
 
 Construct a time from an epoch value in seconds, or use the current
-local time when omitted.
+local time when omitted. Returns: C<Time>.
 
 Common instance methods include:
 
 =over
 
-=item * Components
+=item C<< time.sec() >>, C<< time.min() >>, C<< time.hour() >>
 
-C<sec>, C<min>, C<hour>, C<day_of_month>, C<mon>, C<month>,
-C<year>, C<yy>, C<day_of_week>, C<day>, C<day_of_year>,
-C<month_last_day>, C<epoch>.
+Parameters: none. Returns: C<Number>. Returns the seconds, minutes, or
+hours component.
 
-=item * Formatting
+=item C<< time.day_of_month() >>, C<< time.mon() >>, C<< time.month() >>, C<< time.year() >>, C<< time.yy() >>
 
-C<hms>, C<ymd>, C<mdy>, C<dmy>, C<date>, C<time>,
-C<datetime>, C<cdate>, C<strftime>, C<to_String>.
+Parameters: none. Returns: C<Number>. Returns the local calendar date
+component.
 
-=item * Calendar helpers
+=item C<< time.day_of_week() >>, C<< time.day() >>, C<< time.day_of_year() >>, C<< time.month_last_day() >>
 
-C<tzoffset>, C<is_leap_year>, C<week>, C<week_year>,
-C<julian_day>.
+Parameters: none. Returns: C<Number>. Returns derived local calendar
+component values.
 
-=item * Arithmetic
+=item C<< time.epoch() >>
 
-C<add_seconds>, C<add_minutes>, C<add_hours>, C<add_days>,
-C<add_weeks>, and on supported builds C<add_months> and
-C<add_years>.
+Parameters: none. Returns: C<Number>. Returns epoch seconds.
+
+=item C<< time.hms(separator?) >>, C<< time.ymd(separator?) >>, C<< time.mdy(separator?) >>, C<< time.dmy(separator?) >>
+
+Parameters: C<separator> is an optional separator string. Returns:
+C<String>. Formats a time or date component string.
+
+=item C<< time.date() >>, C<< time.time() >>, C<< time.datetime() >>, C<< time.cdate() >>, C<< time.to_String() >>
+
+Parameters: none. Returns: C<String>. Formats the time using common date
+and time layouts.
+
+=item C<< time.strftime(String format) >>
+
+Parameters: C<format> is a strftime format string. Returns: C<String>.
+Formats the time with C<format>.
+
+=item C<< time.tzoffset() >>
+
+Parameters: none. Returns: C<Number>. Returns the local timezone offset.
+
+=item C<< time.is_leap_year() >>
+
+Parameters: none. Returns: C<Boolean>. Returns true when the local year
+is a leap year.
+
+=item C<< time.week() >>, C<< time.week_year() >>, C<< time.julian_day() >>
+
+Parameters: none. Returns: C<Number>. Returns week-numbering and Julian
+day values.
+
+=item C<< time.add_seconds(Number n) >>, C<< time.add_minutes(Number n) >>, C<< time.add_hours(Number n) >>, C<< time.add_days(Number n) >>, C<< time.add_weeks(Number n) >>
+
+Parameters: C<n> is the amount to add. Returns: C<Time>. Returns a new
+time offset by the requested duration.
+
+=item C<< time.add_months(Number n) >>, C<< time.add_years(Number n) >>
+
+Parameters: C<n> is the amount to add. Returns: C<Time>. Returns a new
+time offset by calendar months or years on supported builds.
 
 =back
 
 =item C<< TimeParser(String format = "%Y-%m-%d") >>
 
-Create a parser for the given format string.
+Creates a parser for the given format string. Returns: C<TimeParser>.
 
 =item C<< TimeParser->parse(String text) >>
 
-Parse text and return a C<Time> object.
+Parameters: C<text> is text matching the parser format. Returns:
+C<Time>. Parses text into a time object.
 
 =back
 
@@ -73,4 +112,3 @@ B<< std/time >> is copyright Toby Inkster.
 It is free software; you may redistribute it and/or modify it under
 the terms of either the Artistic License 1.0 or the GNU General Public
 License version 2.
-

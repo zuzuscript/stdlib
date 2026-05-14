@@ -43,6 +43,89 @@ in a lexical scope:
   KDLQuery.use();
   let dependencies := doc @@ "package >> dependencies";
 
+=head1 EXPORTS
+
+=head2 Classes
+
+=over
+
+=item C<< KDLQuery({ path: String }) >>
+
+Constructs a KDL Query Language selector. Returns: C<KDLQuery>.
+
+=over
+
+=item C<< KDLQuery.use() >>
+
+Parameters: none. Returns: C<null>. Makes this path class the lexical
+implementation for C<@>, C<@@>, and C<@?>.
+
+=item C<< query.expression() >>
+
+Parameters: none. Returns: C<String>. Returns the original query
+expression.
+
+=item C<< query.get(raw) >>, C<< query.select(raw) >>, C<< query.query(raw) >>
+
+Parameters: C<raw> is a KDL root or JSON-like value. Returns: C<Array>.
+Evaluates the query and returns selected nodes.
+
+=item C<< query.first(raw, fallback?) >>
+
+Parameters: C<raw> is the query root and C<fallback> is optional.
+Returns: value. Returns the first selected node or fallback.
+
+=item C<< query.exists(raw) >>
+
+Parameters: C<raw> is the query root. Returns: C<Boolean>. Returns true
+when the query selects at least one node.
+
+=item C<< query.values(raw) >>
+
+Parameters: C<raw> is the query root. Returns: C<Array>. Returns
+selected node argument values.
+
+=item C<< query.props(raw) >>
+
+Parameters: C<raw> is the query root. Returns: C<Array>. Returns
+selected node property data.
+
+=item C<< query.assign_first(target, value, op := ":=", weak := false) >>
+
+Parameters: C<target> is the query root, C<value> is the assignment
+value, C<op> is an assignment operator, and C<weak> is accepted for path
+API compatibility. Returns: value. Updates the first selected node.
+
+=item C<< query.assign_all(target, value, op := ":=", weak := false) >>
+
+Parameters: same as C<assign_first>. Returns: value. Updates every
+selected node.
+
+=item C<< query.assign_maybe(target, value, op := ":=", weak := false) >>
+
+Parameters: same as C<assign_first>. Returns: C<Boolean>. Updates the
+first selected node when one exists.
+
+=item C<< query.ref_first(target) >>
+
+Parameters: C<target> is the query root. Returns: C<Function>. Returns a
+reference-like getter/setter for the first selected node.
+
+=item C<< query.ref_all(target) >>
+
+Parameters: C<target> is the query root. Returns: C<Array>. Returns
+reference-like getter/setters for all selected nodes.
+
+=item C<< query.ref_maybe(target) >>
+
+Parameters: C<target> is the query root. Returns: C<Function> or
+C<null>. Returns a reference-like getter/setter for the first selected
+node when one exists.
+
+=back
+
+=back
+
 =head1 COPYRIGHT AND LICENCE
 
 B<< std/path/kdl >> is copyright Toby Inkster.

@@ -1,5 +1,97 @@
 =encoding utf8
 
+=head1 NAME
+
+std/path/zz/functions - Function definitions for ZZPath expressions.
+
+=head1 DESCRIPTION
+
+This module extends the base ZPath function table with
+ZuzuScript-flavoured path expression helpers.
+
+=head1 EXPORTS
+
+=head2 Constants
+
+=over
+
+=item C<STANDARD_FUNCTION_NAMES>
+
+Type: C<Array>. Names of inherited ZPath functions available to ZZPath.
+
+=item C<STANDARD_FUNCTIONS>
+
+Type: C<Array>. Complete ZZPath function definition table.
+
+=back
+
+=head2 Functions
+
+=over
+
+=item C<< first_arg_node(name, ev, ctx, args) >>
+
+Parameters: function name, evaluator, context, and argument AST nodes.
+Returns: C<Node> or C<null>. Resolves the first argument or current
+context node.
+
+=item C<< first_number_arg(name, ev, ctx, args) >>, C<< nth_number_arg(name, ev, ctx, args, i) >>
+
+Parameters: function name, evaluator, context, arguments, and optional
+index. Returns: C<Number>. Resolves an argument as a number.
+
+=item C<< first_string_arg(name, ev, ctx, args) >>, C<< nth_string_arg(name, ev, ctx, args, i) >>
+
+Parameters: function name, evaluator, context, arguments, and optional
+index. Returns: C<String>. Resolves an argument as a string.
+
+=item C<< nth_value_arg(name, ev, ctx, args, i) >>
+
+Parameters: function name, evaluator, context, arguments, and index.
+Returns: value. Resolves an argument as a primitive value.
+
+=item C<< nth_array_arg(name, ev, ctx, args, i) >>
+
+Parameters: function name, evaluator, context, arguments, and index.
+Returns: C<Array>. Resolves an argument as an array value.
+
+=item C<< number_args(ev, ctx, args) >>
+
+Parameters: evaluator, context, and argument AST nodes. Returns:
+C<Array>. Resolves all arguments as numbers.
+
+=item C<< first_arg_value(name, ev, ctx, args) >>
+
+Parameters: function name, evaluator, context, and arguments. Returns:
+value. Resolves the first argument as a primitive value.
+
+=item C<< z_function(spelling) >>
+
+Parameters: C<spelling> is a base ZPath function name. Returns:
+C<Function>. Returns the inherited function implementation.
+
+=item C<< string_index_of(funk, ev, ast, ctx, args) >>
+
+Parameters: standard ZPath function callback arguments. Returns:
+C<Array>. Implements string C<index-of>.
+
+=item C<< string_rindex(funk, ev, ast, ctx, args) >>
+
+Parameters: standard ZPath function callback arguments. Returns:
+C<Array>. Implements string reverse-index lookup.
+
+=item C<< defined_function(funk, ev, ast, ctx, args) >>
+
+Parameters: standard ZPath function callback arguments. Returns:
+C<Array>. Implements defined-value testing.
+
+=item C<< empty_function(funk, ev, ast, ctx, args) >>
+
+Parameters: standard ZPath function callback arguments. Returns:
+C<Array>. Implements empty-value testing.
+
+=back
+
 =head1 COPYRIGHT AND LICENCE
 
 B<< std/path/zz/functions >> is copyright Toby Inkster.

@@ -20,17 +20,46 @@ std/data/cbor - CBOR encoding and decoding for ZuzuScript.
 
 Pure-Zuzu implementation of CBOR (RFC 8949).
 
-=head1 CLASSES
+=head1 EXPORTS
+
+=head2 Classes
 
 =over
 
-=item * C<TaggedValue>
+=item C<< TaggedValue({ tag: Number, value: value }) >>
 
-Represents a tagged CBOR value with C<tag> and C<value> fields.
+Constructs a tagged CBOR value. Returns: C<TaggedValue>. Stores the CBOR
+tag number and associated value.
 
-=item * C<CBOR>
+=item C<< CBOR({ pairlists?: Boolean }) >>
 
-Methods C<encode>, C<decode>, C<load>, and C<dump>.
+Constructs a CBOR codec. Returns: C<CBOR>. The C<pairlists> option makes
+decoded maps return as C<PairList> values instead of C<Dict> values.
+
+=over
+
+=item C<< codec.encode(value) >>
+
+Parameters: C<value> is any CBOR-encodable ZuzuScript value. Returns:
+C<BinaryString>. Encodes C<value> as CBOR bytes.
+
+=item C<< codec.decode(BinaryString raw) >>
+
+Parameters: C<raw> is CBOR data. Returns: value. Decodes CBOR bytes into
+the equivalent ZuzuScript value.
+
+=item C<< codec.load(Path path) >>
+
+Parameters: C<path> is a C<std/io> C<Path>. Returns: value. Reads CBOR
+bytes from C<path> and decodes them.
+
+=item C<< codec.dump(Path path, value) >>
+
+Parameters: C<path> is a C<std/io> C<Path> and C<value> is any
+CBOR-encodable value. Returns: C<null>. Encodes C<value> and writes CBOR
+bytes to C<path>.
+
+=back
 
 =back
 

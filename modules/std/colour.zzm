@@ -17,6 +17,20 @@ C<parse_colour> accepts three- and six-digit hexadecimal colours and the
 CSS3 extended colour keywords. It returns a lowercase six-digit
 hexadecimal colour string.
 
+=head1 EXPORTS
+
+=head2 Functions
+
+=over
+
+=item C<< parse_colour(String x) >>
+
+Parameters: C<x> is a CSS colour keyword or a three- or six-digit
+hexadecimal colour string. Returns: C<String>. Returns the normalized
+lowercase C<#rrggbb> colour string, or throws if C<x> is not recognised.
+
+=back
+
 =head1 COPYRIGHT AND LICENCE
 
 B<< std/colour >> is copyright Toby Inkster.

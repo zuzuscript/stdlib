@@ -36,6 +36,61 @@ C<toJSON()> attempts to encode the wrapped value as JSON text.
 C<eval(String code)> evaluates more Perl with the wrapped value in
 C<$_>, again returning C<PerlResult>.
 
+=head1 EXPORTS
+
+=head2 Classes
+
+=over
+
+=item C<Perl>
+
+Runtime-supported Perl bridge class.
+
+=over
+
+=item C<< Perl.version() >>
+
+Parameters: none. Returns: C<String>. Returns the host Perl interpreter
+version.
+
+=item C<< Perl.eval(String code) >>
+
+Parameters: C<code> is Perl source text. Returns: C<PerlResult>.
+Evaluates C<code> in scalar context in the host Perl interpreter.
+
+=back
+
+=item C<PerlResult>
+
+Wrapper for a Perl value returned by C<Perl.eval()> or
+C<PerlResult.eval()>.
+
+=over
+
+=item C<< result.eval(String code) >>
+
+Parameters: C<code> is Perl source text. Returns: C<PerlResult>.
+Evaluates C<code> with the wrapped Perl value available in C<$_>.
+
+=item C<< result.isSafe() >>
+
+Parameters: none. Returns: C<Boolean>. Returns true when C<value()> can
+convert the wrapped Perl value into a native ZuzuScript value.
+
+=item C<< result.value() >>
+
+Parameters: none. Returns: value. Converts and returns the wrapped Perl
+value when C<isSafe()> is true.
+
+=item C<< result.toJSON() >>
+
+Parameters: none. Returns: C<String>. Serializes the wrapped Perl value
+as JSON text.
+
+=back
+
+=back
+
 =head1 COPYRIGHT AND LICENCE
 
 B<< perl >> is copyright Toby Inkster.
@@ -43,4 +98,3 @@ B<< perl >> is copyright Toby Inkster.
 It is free software; you may redistribute it and/or modify it under
 the terms of either the Artistic License 1.0 or the GNU General Public
 License version 2.
-

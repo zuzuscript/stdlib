@@ -6,8 +6,58 @@ std/path/z/lexer - Pure Zuzu lexer for ZPath expressions.
 
 =head1 DESCRIPTION
 
-This module ports the C<Data::ZPath::_Lexer> Perl class to pure ZuzuScript
-with a near line-by-line translation and matching public API.
+This module provides the pure-Zuzu lexer used by ZPath.
+
+=head1 EXPORTS
+
+=head2 Classes
+
+=over
+
+=item C<< Lexer({ src: String, allowed_operators: Array }) >>
+
+Constructs a ZPath lexer. Returns: C<Lexer>. Tokenizes C<src> using the
+allowed operator table.
+
+=over
+
+=item C<< lexer.peek() >>
+
+Parameters: none. Returns: C<Dict>. Returns the current token without
+advancing.
+
+=item C<< lexer.peek_n(n) >>
+
+Parameters: C<n> is a zero-based lookahead offset. Returns: C<Dict>.
+Returns a token ahead of the current position.
+
+=item C<< lexer.peek_kind() >>
+
+Parameters: none. Returns: C<String>. Returns the current token kind.
+
+=item C<< lexer.peek_kind_n(n) >>
+
+Parameters: C<n> is a zero-based lookahead offset. Returns: C<String>.
+Returns a token kind ahead of the current position.
+
+=item C<< lexer.next_tok() >>
+
+Parameters: none. Returns: C<Dict>. Consumes and returns the current
+token.
+
+=item C<< lexer.expect(k) >>
+
+Parameters: C<k> is the expected token kind. Returns: C<Dict>. Consumes
+and returns the current token, throwing when it has a different kind.
+
+=item C<< lexer.known_operators() >>
+
+Parameters: none. Returns: C<Array>. Returns the allowed operator
+definitions.
+
+=back
+
+=back
 
 =head1 COPYRIGHT AND LICENCE
 

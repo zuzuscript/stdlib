@@ -1,5 +1,94 @@
 =encoding utf8
 
+=head1 NAME
+
+std/path/z/operators - Operator definitions for ZPath.
+
+=head1 DESCRIPTION
+
+This module defines the base ZPath operator model and the standard
+operator table used by C<std/path/z>.
+
+=head1 EXPORTS
+
+=head2 Traits
+
+=over
+
+=item C<EvalHelpers>
+
+Shared helpers for operator and function definitions.
+
+=over
+
+=item C<< helper.wrap(value) >>
+
+Parameters: C<value> is any value. Returns: C<Array>. Wraps C<value> as
+a one-item ZPath node array.
+
+=item C<< helper.wrap_for_array(value) >>
+
+Parameters: C<value> is any value. Returns: C<Node>. Wraps C<value> as a
+ZPath node for array results.
+
+=back
+
+=back
+
+=head2 Classes
+
+=over
+
+=item C<< Operator({ spelling: String, kind: String, precedence: Number, ... }) >>
+
+Constructs an operator definition. Returns: C<Operator>.
+
+=over
+
+=item C<< operator.is_unary() >>, C<< operator.is_binary() >>
+
+Parameters: none. Returns: C<Boolean>. Reports whether the operator is
+unary or binary.
+
+=item C<< operator.requires_whitespace() >>
+
+Parameters: none. Returns: C<Boolean>. Reports whether the lexer
+requires whitespace around the operator.
+
+=item C<< operator.lexer_should_ignore() >>
+
+Parameters: none. Returns: C<Boolean>. Reports whether the lexer should
+ignore this operator definition.
+
+=item C<< operator.is_right_associative() >>
+
+Parameters: none. Returns: C<Boolean>. Reports whether the operator is
+right associative.
+
+=item C<< operator.char_length() >>
+
+Parameters: none. Returns: C<Number>. Returns the operator spelling
+length.
+
+=item C<< operator.precedence_is(lvl) >>
+
+Parameters: C<lvl> is a precedence level. Returns: C<Boolean>. Returns
+true when the operator has that precedence.
+
+=back
+
+=back
+
+=head2 Constants
+
+=over
+
+=item C<STANDARD_OPERATORS>
+
+Type: C<Array>. Standard ZPath operator definitions.
+
+=back
+
 =head1 COPYRIGHT AND LICENCE
 
 B<< std/path/z/operators >> is copyright Toby Inkster.

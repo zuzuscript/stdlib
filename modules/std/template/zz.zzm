@@ -22,6 +22,20 @@ using C<std/path/zz> instead of C<std/path/z>.
 The parser, escaping, include handling, and rendering machinery are
 inherited from C<ZTemplate>.
 
+=head1 EXPORTS
+
+=head2 Classes
+
+=over
+
+=item C<< ZZTemplate({ string?: String, file?, escape?: String, includes?: Boolean }) >>
+
+Constructs a template that evaluates expressions with C<std/path/zz>.
+Returns: C<ZZTemplate>. It inherits C<process(data)> from C<ZTemplate>,
+which takes a model value and returns rendered C<String> output.
+
+=back
+
 =head1 COPYRIGHT AND LICENCE
 
 B<< std/template/zz >> is copyright Toby Inkster.

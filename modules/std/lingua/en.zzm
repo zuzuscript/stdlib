@@ -23,22 +23,29 @@ This module provides pure-Zuzu helpers for presenting English text,
 using British English conventions (including the serial comma and
 "and" in hundreds).
 
-=head1 EXPORTED FUNCTIONS
+=head1 EXPORTS
+
+=head2 Functions
 
 =over
 
 =item * C<< english_list(Collection c, String j := "and") >>
 
-Format a list of values into English prose.
+Parameters: C<c> is an ordered collection and C<j> is the conjunction
+before the final item. Returns: C<String> or C<null>. Formats a list of
+values into English prose.
 
 =item * C<< english_number(Number n, Number cutoff?) >>
 
-Render numbers in English words. If C<cutoff> is provided and
-C<abs(n) > cutoff>, the numeric string is returned instead.
+Parameters: C<n> is the number to render and C<cutoff> is an optional
+numeric rendering limit. Returns: C<String>. Renders a number in English
+words, falling back to digits when C<abs(n)> exceeds C<cutoff>.
 
 =item * C<< english_ordinal(Number n, Number cutoff?) >>
 
-Render ordinal forms such as C<first>, C<second>, and C<third>.
+Parameters: C<n> is the number to render and C<cutoff> is an optional
+numeric rendering limit. Returns: C<String>. Renders an ordinal form such
+as C<first>, C<second>, or C<third>.
 
 =back
 

@@ -4,6 +4,14 @@
 
 std/data/toon - Pure-Zuzu TOON codec.
 
+=head1 SYNOPSIS
+
+  from std/data/toon import TOON;
+
+  let codec := new TOON( indent: 2 );
+  let text := codec.encode({ answer: 42 });
+  let data := codec.decode(text);
+
 =head1 DESCRIPTION
 
 A pure ZuzuScript TOON codec with C<encode>, C<decode>, C<load>, and
@@ -25,7 +33,44 @@ The implementation supports:
 
 Object decoding defaults to PairLists so key order is kept.
 
-=head2 Constructor options
+=head1 EXPORTS
+
+=head2 Classes
+
+=over
+
+=item C<< TOON({ indent?: Number, strict?: Boolean, delimiter?: String, pairlists?: Boolean, expandPaths?, keyFolding?, flattenDepth? }) >>
+
+Constructs a TOON codec. Returns: C<TOON>.
+
+=over
+
+=item C<< codec.decode(String text) >>
+
+Parameters: C<text> is TOON text. Returns: value. Decodes TOON text into
+ZuzuScript data.
+
+=item C<< codec.encode(value) >>
+
+Parameters: C<value> is a TOON-encodable value. Returns: C<String>.
+Encodes C<value> as TOON text.
+
+=item C<< codec.load(Path path) >>
+
+Parameters: C<path> is a C<std/io> C<Path>. Returns: value. Reads TOON
+text from C<path> and decodes it.
+
+=item C<< codec.dump(Path path, value) >>
+
+Parameters: C<path> is a C<std/io> C<Path> and C<value> is a
+TOON-encodable value. Returns: C<null>. Encodes C<value> and writes TOON
+text to C<path>.
+
+=back
+
+=back
+
+=head1 OPTIONS
 
 =over
 

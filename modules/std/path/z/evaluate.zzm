@@ -6,8 +6,93 @@ std/path/z/evaluate - Pure Zuzu evaluator for ZPath expressions.
 
 =head1 DESCRIPTION
 
-This module ports C<Data::ZPath::_Evaluate> to pure ZuzuScript with a
-near line-by-line translation and object-oriented public API.
+This module provides the pure-Zuzu evaluator used by ZPath.
+
+=head1 EXPORTS
+
+=head2 Classes
+
+=over
+
+=item C<Evaluator>
+
+Pure-Zuzu evaluator for parsed ZPath AST values.
+
+=over
+
+=item C<< evaluator.operator_definitions() >>
+
+Parameters: none. Returns: C<Array>. Returns the active operator
+definition table.
+
+=item C<< evaluator.function_definitions() >>
+
+Parameters: none. Returns: C<Array>. Returns the active function
+definition table.
+
+=item C<< evaluator.eval_expr_wrap(ast, ctx) >>
+
+Parameters: C<ast> is an AST node and C<ctx> is a C<Ctx>. Returns:
+C<Array>. Evaluates with optional debug dumping.
+
+=item C<< evaluator.eval_expr(ast, ctx) >>
+
+Parameters: C<ast> is an AST node and C<ctx> is a C<Ctx>. Returns:
+C<Array>. Evaluates an expression to a node set.
+
+=item C<< evaluator.nested_ctx(ctx, ... PairList extras) >>
+
+Parameters: C<ctx> is a C<Ctx> or C<null> and C<extras> are metadata.
+Returns: C<Ctx> or C<null>. Creates a nested evaluation context.
+
+=item C<< evaluator.eval_binop(ast, ctx) >>, C<< evaluator.eval_unop(ast, ctx) >>
+
+Parameters: C<ast> is an operator AST node and C<ctx> is a C<Ctx>.
+Returns: C<Array>. Evaluates a binary or unary operator.
+
+=item C<< evaluator.eval_path(path_ast, ctx) >>
+
+Parameters: C<path_ast> is a path AST node and C<ctx> is a C<Ctx>.
+Returns: C<Array>. Evaluates a path expression to selected nodes.
+
+=item C<< evaluator.maybe_apply_action(node, ctx) >>
+
+Parameters: C<node> is a C<Node> and C<ctx> is a C<Ctx>. Returns:
+C<Node>. Applies any pending path action.
+
+=item C<< evaluator.eval_fn(fn_ast, ctx) >>
+
+Parameters: C<fn_ast> is a function-call AST node and C<ctx> is a
+C<Ctx>. Returns: C<Array>. Evaluates a ZPath function call.
+
+=item C<< evaluator.string_replace(string, pattern, replacement) >>
+
+Parameters: all arguments are strings or regex-like values. Returns:
+C<String>. Applies ZPath string replacement.
+
+=item C<< evaluator.dedup_nodes(nodes) >>
+
+Parameters: C<nodes> is an array of nodes. Returns: C<Array>. Removes
+duplicate nodes while preserving order.
+
+=item C<< evaluator.truthy(n) >>
+
+Parameters: C<n> is a node or value. Returns: C<Boolean>. Applies ZPath
+truthiness.
+
+=item C<< evaluator.to_number(n) >>, C<< evaluator.to_string(n) >>
+
+Parameters: C<n> is a node or value. Returns: C<Number> or C<String>.
+Coerces a ZPath value.
+
+=item C<< evaluator.equals(a, b) >>
+
+Parameters: C<a> and C<b> are nodes or values. Returns: C<Boolean>.
+Compares two ZPath values.
+
+=back
+
+=back
 
 =head1 COPYRIGHT AND LICENCE
 

@@ -26,11 +26,13 @@ std/proc - Process execution, environment, and signals.
 
 =head1 DESCRIPTION
 
-This module provides OS process helpers backed by C<IPC::Run3>,
-environment variable helpers, signal send/receive primitives,
-process-identification helpers, and process exit.
+This module provides OS process helpers, environment variable helpers,
+signal send/receive primitives, process-identification helpers, and
+process exit.
 
-=head2 Exports
+=head1 EXPORTS
+
+=head2 Classes
 
 =over
 
@@ -42,43 +44,58 @@ Static methods:
 
 =item * C<pid()>
 
-Returns the current process id.
+Parameters: none. Returns: C<Number>. Returns the current process id.
 
 =item * C<< exit(code?) >>
 
-Exits the current process.
+Parameters: C<code> is an optional numeric exit status. Returns:
+C<null>. Exits the current process.
 
 =item * C<< run(command, argv?, options?) >>
+
+Parameters: C<command> is an executable, C<argv> is an optional array of
+arguments, and C<options> controls execution. Returns: C<Dict>. Runs one
+process and returns its result.
 
 Options include C<stdin>, C<capture_stdout>, C<capture_stderr>,
 and C<merge_stderr>. Also supports C<env> injection, C<cwd>, and
 C<timeout>.
 
-Returns a result (dict).
-
 =item * C<< run_async(command, argv?, options?) >>
 
-Awaitable version of C<run>. Returns a C<Task> resolving to the same
-result dict.
+Parameters: same as C<run>. Returns: C<Task>. Awaitable version of
+C<run> resolving to the same result dictionary.
 
 =item * C<< pipeline(commands, options?) >>
 
-Runs commands in sequence, piping captured stdout from each step
-to the next step's stdin. Options include C<stdin>, C<capture_stderr>,
-C<merge_stderr>, C<env>, C<cwd>, and C<timeout>.
+Parameters: C<commands> is an array of command specs and C<options>
+controls execution. Returns: C<Dict>. Runs commands in sequence, piping
+captured stdout from each step to the next step's stdin.
 
 =item * C<< pipeline_async(commands, options?) >>
 
-Awaitable version of C<pipeline>. Returns a C<Task> resolving to the
-same result dict.
+Parameters: same as C<pipeline>. Returns: C<Task>. Awaitable version of
+C<pipeline> resolving to the same result dictionary.
 
 =item * C<is_success(result)>
 
+Parameters: C<result> is a process result dictionary. Returns:
+C<Boolean>. Returns true when the command exited successfully.
+
 =item * C<status_text(result)>
+
+Parameters: C<result> is a process result dictionary. Returns:
+C<String>. Formats the process status for display.
 
 =item * C<kill(String signal, Number pid?)>
 
+Parameters: C<signal> is a signal name and C<pid> is an optional process
+id. Returns: C<null>. Sends a signal to a process.
+
 =item * C<onsignal(String signal, Function callback)>
+
+Parameters: C<signal> is a signal name and C<callback> is a handler.
+Returns: C<null>. Registers a process signal callback.
 
 =back
 
@@ -90,28 +107,37 @@ Static methods:
 
 =item * C<get(String name, Any default?)>
 
+Parameters: C<name> is an environment variable name and C<default> is an
+optional fallback. Returns: C<String> or value. Returns an environment
+variable value or the fallback.
+
 =item * C<set(String name, String value)>
+
+Parameters: C<name> is an environment variable name and C<value> is its
+new value. Returns: C<null>. Sets an environment variable.
 
 =item * C<remove(String name)>
 
+Parameters: C<name> is an environment variable name. Returns: C<null>.
+Removes an environment variable.
+
 =back
 
-=item C<sleep>
+=back
 
-Function:
+=head2 Functions
 
 =over
 
 =item * C<< sleep(seconds) >>
 
-Sleeps for the given number of seconds. Fractional seconds are allowed.
+Parameters: C<seconds> is the delay in seconds. Returns: C<null>.
+Sleeps for the requested time; fractional seconds are allowed.
 
 =item * C<< sleep_async(seconds) >>
 
-Returns an awaitable C<Task> that completes after the requested delay
-without blocking the async scheduler.
-
-=back
+Parameters: C<seconds> is the delay in seconds. Returns: C<Task>.
+Returns an awaitable task that completes after the requested delay.
 
 =back
 
@@ -122,4 +148,3 @@ B<< std/proc >> is copyright Toby Inkster.
 It is free software; you may redistribute it and/or modify it under
 the terms of either the Artistic License 1.0 or the GNU General Public
 License version 2.
-

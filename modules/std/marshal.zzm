@@ -36,29 +36,26 @@ untrusted code. For untrusted data interchange, prefer a data-only
 format such as C<std/data/json>, C<std/data/cbor>, or C<std/data/yaml>
 with your own validation.
 
-The public API is:
+=head1 EXPORTS
+
+=head2 Functions
 
 =over
 
-=item C<< dump(Any value) -> BinaryString >>
+=item C<< dump(value) >>
 
-Serializes C<value> and returns a Zuzu Marshal CBOR v1 C<BinaryString>.
-If the value cannot be represented, C<dump> throws
-C<MarshallingException> with a message describing the unsupported part
-of the graph.
+Parameters: C<value> is any value. Returns: C<BinaryString>. Serializes
+C<value> to a Zuzu Marshal CBOR v1 blob.
 
-=item C<< load(BinaryString blob) -> Any >>
+=item C<< load(BinaryString blob) >>
 
-Loads a Zuzu Marshal CBOR v1 blob and returns the reconstructed value.
-If the blob is corrupt, incomplete, malformed, or unsupported by this
-runtime, C<load> throws C<UnmarshallingException>.
+Parameters: C<blob> is a Zuzu Marshal CBOR v1 blob. Returns: value.
+Loads and reconstructs the marshalled value.
 
-=item C<< safe_to_dump(Any value) -> Boolean >>
+=item C<< safe_to_dump(value) >>
 
-Runs the same traversal as C<dump> and returns C<true> if the value is
-currently marshalable. It returns C<false> for ordinary marshalling
-failures. Because it uses the same traversal, it also calls
-C<__on_dump__> hooks and can observe their side effects.
+Parameters: C<value> is any value. Returns: C<Boolean>. Returns true
+when C<value> can currently be marshalled.
 
 =back
 

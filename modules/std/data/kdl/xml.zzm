@@ -23,6 +23,25 @@ objects. C<kdl_to_xml> accepts a C<KDLDocument> or C<KDLNode> and
 returns an C<XMLDocument>. C<xml_to_kdl> accepts an C<XMLDocument> or
 C<XMLNode> and returns a C<KDLDocument>.
 
+=head1 EXPORTS
+
+=head2 Functions
+
+=over
+
+=item C<< kdl_to_xml(value) >>
+
+Parameters: C<value> is a C<KDLDocument>, C<KDLNode>, or compatible KDL
+value. Returns: C<XMLDocument>. Converts XML-in-KDL structures into an
+XML document.
+
+=item C<< xml_to_kdl(value) >>
+
+Parameters: C<value> is an C<XMLDocument>, C<XMLNode>, or compatible XML
+value. Returns: C<KDLDocument>. Converts XML data into XML-in-KDL nodes.
+
+=back
+
 =head1 COPYRIGHT AND LICENCE
 
 B<< std/data/kdl/xml >> is copyright Toby Inkster.

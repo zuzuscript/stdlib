@@ -24,59 +24,104 @@ When possible, method names mirror other stream APIs:
 C<read>, C<write>, C<print>, C<say>, C<next_line>,
 C<each_line>, and C<close>.
 
-=head1 FUNCTIONS
+=head1 EXPORTS
+
+=head2 Functions
 
 =over
 
 =item C<< listen_tcp(String host?, Number port?, Number backlog?) >>
 
-Create a TCP listening socket and return C<TCPServer>.
+Parameters: C<host>, C<port>, and C<backlog> are optional bind
+settings. Returns: C<TCPServer>. Creates a TCP listening socket.
 
 =item C<< connect_tcp(String host, Number port, Bool raw?) >>
 
-Connect to a TCP server and return C<TCPSocket>.
+Parameters: C<host> and C<port> identify the server, and C<raw> controls
+line decoding. Returns: C<TCPSocket>. Connects to a TCP server.
 
 =item C<< bind_udp(String host?, Number port?, Bool raw?) >>
 
-Bind a UDP socket and return C<UDPSocket>.
+Parameters: C<host>, C<port>, and C<raw> are optional bind settings.
+Returns: C<UDPSocket>. Binds a UDP socket.
 
 =item C<< connect_udp(String host, Number port, Bool raw?) >>
 
-Create a connected UDP socket and return C<UDPSocket>.
+Parameters: C<host> and C<port> identify the peer, and C<raw> controls
+byte handling. Returns: C<UDPSocket>. Creates a connected UDP socket.
 
 =item C<< listen_unix(String path, Number backlog?) >>
 
-Create a Unix domain stream server and return C<UnixServer>.
+Parameters: C<path> is the socket path and C<backlog> is optional.
+Returns: C<UnixServer>. Creates a Unix domain stream server.
 
 =item C<< connect_unix(String path, Bool raw?) >>
 
-Connect to a Unix domain stream server and return C<UnixSocket>.
+Parameters: C<path> is the socket path and C<raw> controls line
+decoding. Returns: C<UnixSocket>. Connects to a Unix domain stream
+server.
 
 =back
 
-=head1 CLASSES
+=head2 Classes
 
-=head2 Socket methods
+=head3 Socket methods
 
-Common methods include C<read>, C<write>, C<print>, C<say>,
-C<next_line>, C<each_line>, C<close>, and C<is_open>.
+=over
 
-=head2 TCPSocket
+=item C<< socket.read(Number length?) >>
 
-Adds C<peer_host> and C<peer_port>.
+Parameters: C<length> is an optional byte count. Returns:
+C<BinaryString> or C<String>. Reads data from the socket.
 
-=head2 TCPServer
+=item C<< socket.write(value) >>, C<< socket.print(value) >>, C<< socket.say(value) >>
 
-Provides C<accept>, C<port>, C<host>, and C<close>.
+Parameters: C<value> is data to send. Returns: C<null>. Writes data to
+the socket, with C<say> adding a newline.
 
-=head2 UDPSocket
+=item C<< socket.next_line() >>
 
-Provides C<send>, C<recv>, C<port>, C<host>, and C<close>.
+Parameters: none. Returns: C<String>, C<BinaryString>, or C<null>.
+Reads the next line.
 
-=head2 UnixSocket / UnixServer
+=item C<< socket.each_line(callback) >>
+
+Parameters: C<callback> is called for each line. Returns: C<null>.
+Iterates over incoming lines.
+
+=item C<< socket.close() >>
+
+Parameters: none. Returns: C<null>. Closes the socket.
+
+=item C<< socket.is_open() >>
+
+Parameters: none. Returns: C<Boolean>. Returns true when the socket is
+open.
+
+=back
+
+=head3 TCPSocket
+
+C<peer_host()> and C<peer_port()> take no parameters and return the
+remote host C<String> and port C<Number>.
+
+=head3 TCPServer
+
+C<accept()> returns C<TCPSocket>, C<port()> returns C<Number>,
+C<host()> returns C<String>, and C<close()> closes the server and
+returns C<null>.
+
+=head3 UDPSocket
+
+C<send(value, host?, port?)> returns C<null>; C<recv()> returns a
+received datagram value; C<port()> and C<host()> return the bound port
+and host; C<close()> closes the socket.
+
+=head3 UnixSocket / UnixServer
 
 Unix sockets support stream methods, and C<UnixServer> offers
-C<accept>, C<path>, and C<close>.
+C<accept()> returning C<UnixSocket>, C<path()> returning C<String>, and
+C<close()> returning C<null>.
 
 =head1 COPYRIGHT AND LICENCE
 
