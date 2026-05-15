@@ -184,7 +184,7 @@ License version 2.
 from std/data/cbor import TaggedValue;
 from std/data/kdl import KDLDocument, KDLNode, KDLValue;
 from std/internals import class_name, load_module, ref_id;
-from std/io import Path;
+from std/io try import Path;
 from std/math import Math;
 from std/string import index, substr;
 from std/time import Time;
@@ -1361,7 +1361,7 @@ determine_class := function ( obj ) {
 	else if ( real_obj instanceof Time ) {
 		Klass := TimeNode;
 	}
-	else if ( real_obj instanceof Path ) {
+	else if ( Path and ( real_obj instanceof Path ) ) {
 		Klass := PathNode;
 	}
 	else if ( real_obj instanceof Object ) {
