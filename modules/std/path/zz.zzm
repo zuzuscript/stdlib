@@ -11,6 +11,10 @@ std/path/zz - ZuzuScript-flavoured path selectors.
   let data := { users: [ { name: "Ada" } ] };
   say( ( new ZZPath( path: "/users/#0/name" ) ).first(data) );
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 This module provides the public C<ZZPath> class. It currently reuses the

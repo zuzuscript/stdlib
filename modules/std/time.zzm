@@ -14,6 +14,10 @@ std/time - Time objects, formatting, and parsing.
   let parser := new TimeParser("%Y-%m-%d");
   let d := parser.parse("2026-03-20");
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 This module provides C<Time> for working with timestamps and

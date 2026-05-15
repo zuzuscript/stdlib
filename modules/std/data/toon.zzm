@@ -12,6 +12,14 @@ std/data/toon - Pure-Zuzu TOON codec.
   let text := codec.encode({ answer: 42 });
   let data := codec.decode(text);
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by zuzu.pl, zuzu-rust, and zuzu-js on Node and
+Electron. It is partially supported by zuzu-js in the browser: in-memory
+TOON parsing and serialization coverage passes, but fixture and load/dump
+coverage is unsupported because browser filesystem capability is
+unavailable.
+
 =head1 DESCRIPTION
 
 A pure ZuzuScript TOON codec with C<encode>, C<decode>, C<load>, and
@@ -102,6 +110,7 @@ License version 2.
 =cut
 
 from std/string import substr, index, replace;
+
 
 function _trim ( String s ) {
 	let a := 0;
@@ -313,7 +322,7 @@ function _encode_scalar ( v, String delim, Boolean is_key ) {
 	if ( v ≡ null ) { return "null"; }
 	if ( v ≡ true ) { return "true"; }
 	if ( v ≡ false ) { return "false"; }
-	if ( typeof v ≡ "Number" ) {
+	if ( v instanceof Number ) {
 		return _canonical_number(v);
 	}
 	let s := "" _ v;
@@ -347,14 +356,14 @@ function _obj_put ( obj, String k, v, Boolean pairlists ) {
 }
 
 function _obj_get ( obj, String key, fallback ) {
-	if ( typeof obj ≡ "PairList" ) { return obj.has(key) ? obj.get(key) : fallback; }
-	if ( typeof obj ≡ "Dict" ) { return obj.exists(key) ? obj.get(key) : fallback; }
+	if ( obj instanceof PairList ) { return obj.has(key) ? obj.get(key) : fallback; }
+	if ( obj instanceof Dict ) { return obj.exists(key) ? obj.get(key) : fallback; }
 	return fallback;
 }
 
 function _obj_has ( obj, String key ) {
-	if ( typeof obj ≡ "PairList" ) { return obj.has(key); }
-	if ( typeof obj ≡ "Dict" ) { return obj.exists(key); }
+	if ( obj instanceof PairList ) { return obj.has(key); }
+	if ( obj instanceof Dict ) { return obj.exists(key); }
 	return false;
 }
 
@@ -398,7 +407,7 @@ function _parse_header ( String line, Boolean strict ) {
 }
 
 function _expand_path_add ( root, String key, value, Boolean pairlists, Boolean strict, String mode, Boolean quoted_key ) {
-	function is_map ( v ) { return typeof v ≡ "PairList" or typeof v ≡ "Dict"; }
+	function is_map ( v ) { return v instanceof PairList or v instanceof Dict; }
 	function is_conflict ( oldv, newv ) {
 		return ( is_map(oldv) and not is_map(newv) ) or ( not is_map(oldv) and is_map(newv) );
 	}
@@ -421,7 +430,7 @@ function _expand_path_add ( root, String key, value, Boolean pairlists, Boolean 
 					nxt := _mk_obj(pairlists);
 					_obj_put( cur, seg, nxt, pairlists );
 				}
-				else if ( typeof nxt ≢ "PairList" and typeof nxt ≢ "Dict" ) {
+				else if ( not( nxt instanceof PairList ) and not( nxt instanceof Dict ) ) {
 					die "Path expansion conflict" if strict;
 					nxt := _mk_obj(pairlists);
 					_obj_put( cur, seg, nxt, pairlists );
@@ -733,7 +742,7 @@ function _decode_text ( String text, Boolean pairlists, Number indent, Boolean s
 
 function _pairs ( obj ) {
 	let out := [];
-	if ( typeof obj ≡ "PairList" ) {
+	if ( obj instanceof PairList ) {
 		for ( let p in obj.to_Array() ) { out.push( p{pair} ); }
 		return out;
 	}
@@ -742,7 +751,7 @@ function _pairs ( obj ) {
 }
 
 function _is_obj ( v ) {
-	return typeof v ≡ "PairList" or typeof v ≡ "Dict";
+	return v instanceof PairList or v instanceof Dict;
 }
 
 function _join ( Array items, String sep ) {
@@ -762,7 +771,7 @@ function _array_uniform_obj ( Array arr ) {
 	if ( not _is_obj(first) ) { return false; }
 	let cols := [];
 	for ( let p in _pairs(first) ) {
-		if ( _is_obj( p[1] ) or typeof p[1] ≡ "Array" ) { return false; }
+		if ( _is_obj( p[1] ) or p[1] instanceof Array ) { return false; }
 		cols.push( p[0] );
 	}
 	let i := 1;
@@ -774,7 +783,7 @@ function _array_uniform_obj ( Array arr ) {
 		while ( j < cols.length() ) {
 			if ( not _obj_has( arr[i], cols[j] ) ) { return false; }
 			let vv := _obj_get( arr[i], cols[j], null );
-			if ( _is_obj(vv) or typeof vv ≡ "Array" ) { return false; }
+			if ( _is_obj(vv) or vv instanceof Array ) { return false; }
 			j++;
 		}
 		i++;
@@ -820,7 +829,7 @@ function _encode_array ( key, Array arr, Number depth, Number indent, String del
 	let dtag := delim ≡ "," ? "" : delim;
 	let all_prim := true;
 	for ( let v in arr ) {
-		if ( _is_obj(v) or typeof v ≡ "Array" ) { all_prim := false; last; }
+		if ( _is_obj(v) or v instanceof Array ) { all_prim := false; last; }
 	}
 	if ( all_prim ) {
 		let vals := [];
@@ -848,7 +857,7 @@ function _encode_array ( key, Array arr, Number depth, Number indent, String del
 	let i2 := 0;
 	while ( i2 < indent ) { pad _= " "; i2++; }
 	for ( let v in arr ) {
-		if ( typeof v ≡ "Array" ) {
+		if ( v instanceof Array ) {
 			let lnidx := 0;
 			for ( let ln in _encode_array( null, v, depth + 1, indent, delim ) ) {
 				out.push( pad _ ( lnidx ≡ 0 ? "- " : "" ) _ ln );
@@ -869,7 +878,7 @@ function _encode_array ( key, Array arr, Number depth, Number indent, String del
 						out.push( pad _ "  " _ _encode_scalar( p2[0], delim, true ) _ ": " _ _encode_scalar( p2[1], delim, false ) );
 					}
 				}
-			else if ( typeof first[1] ≡ "Array" ) {
+			else if ( first[1] instanceof Array ) {
 				let lnidx2 := 0;
 				for ( let ln in _encode_array( first[0], first[1], depth + 1, indent, delim ) ) {
 					out.push( pad _ ( lnidx2 ≡ 0 ? "- " : "  " ) _ ln );
@@ -886,7 +895,7 @@ function _encode_array ( key, Array arr, Number depth, Number indent, String del
 							out.push( pad _ "    " _ _encode_scalar( p3[0], delim, true ) _ ": " _ _encode_scalar( p3[1], delim, false ) );
 						}
 					}
-				else if ( typeof rr[1] ≡ "Array" ) {
+				else if ( rr[1] instanceof Array ) {
 					for ( let ln2 in _encode_array( rr[0], rr[1], depth + 2, indent, delim ) ) { out.push( pad _ "  " _ ln2 ); }
 				}
 				else {
@@ -927,7 +936,7 @@ function _encode_obj ( obj, Number depth, Number indent, String delim, String ke
 			}
 			next;
 		}
-		if ( typeof v ≡ "Array" ) {
+		if ( v instanceof Array ) {
 			for ( let l in _encode_array( k, v, depth, indent, delim ) ) { lines.push( pad _ l ); }
 			next;
 		}
@@ -950,7 +959,7 @@ class TOON {
 	}
 
 	method encode ( value ) {
-		if ( typeof value ≡ "Array" ) {
+		if ( value instanceof Array ) {
 			return _join( _encode_array( null, value, 0, indent, delimiter ), "\n" );
 		}
 		if ( _is_obj(value) ) {

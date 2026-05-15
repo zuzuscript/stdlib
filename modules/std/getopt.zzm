@@ -31,6 +31,10 @@ std/getopt - Parse command line arguments.
     return 0;
   }
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 This module parses command-line option arrays for ZuzuScript programs.
@@ -104,6 +108,7 @@ License version 2.
 
 from std/string import split, substr, starts_with, ends_with, join;
 
+
 function _spec_kind_from_suffix ( suffix ) {
 	if ( suffix ≡ "i" ) {
 		return "integer";
@@ -121,7 +126,7 @@ function _normalize_schema_type ( raw_type ) {
 	if ( raw_type ≡ null ) {
 		return "Boolean";
 	}
-	if ( typeof raw_type ≡ "Function" ) {
+	if ( raw_type instanceof Function ) {
 		let function_name := null;
 		try {
 			function_name := raw_type.name;

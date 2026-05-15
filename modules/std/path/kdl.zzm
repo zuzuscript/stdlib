@@ -20,6 +20,10 @@ std/path/kdl - KDL Query Language selectors for KDL documents.
 
   let names := doc @@ new KDLQuery( path: "package >> name" );
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 C<KDLQuery> implements the KDL Query Language described in
@@ -136,7 +140,7 @@ License version 2.
 
 =cut
 
-from std/data/kdl import _KDLParser;
+from std/data/kdl import KDLDocument, KDLNode, _KDLParser;
 from std/data/kdl import _kdl_is_line_space, _kdl_is_newline, _kdl_is_ws;
 from std/data/kdl import _kdl_starts_with;
 from std/data/kdl/json import json_to_kdl;
@@ -498,10 +502,10 @@ class KDLQuery {
 
 	method _root_nodes ( raw ) {
 		let root := raw;
-		if ( typeof root ≢ "KDLDocument" and typeof root ≢ "KDLNode" ) {
+		if ( not( root instanceof KDLDocument ) and not( root instanceof KDLNode ) ) {
 			root := json_to_kdl(root);
 		}
-		if ( typeof root ≡ "KDLDocument" ) {
+		if ( root instanceof KDLDocument ) {
 			let roots := root.nodes();
 			let parent := {
 				document: true,
@@ -520,7 +524,7 @@ class KDLQuery {
 			}
 			return out;
 		}
-		if ( typeof root ≡ "KDLNode" ) {
+		if ( root instanceof KDLNode ) {
 			return [ { node: root, parent: null, index: 0 } ];
 		}
 		die "KDLQuery root could not be converted to KDL";
@@ -993,7 +997,7 @@ class KDLQuery {
 		die `Unsupported KDLQuery assignment operator '${op}'`
 			if op ≢ ":=";
 		die "KDLQuery assignment value must be a KDLNode"
-			if typeof value ≢ "KDLNode";
+			if not( value instanceof KDLNode );
 		return ref(value);
 	}
 }

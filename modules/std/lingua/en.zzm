@@ -17,6 +17,10 @@ std/lingua/en - English text helpers for ZuzuScript.
   say( english_ordinal(42) );
   # forty-second
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 This module provides pure-Zuzu helpers for presenting English text,

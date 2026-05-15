@@ -19,6 +19,11 @@ perl - Evaluate Perl code from ZuzuScript.
   let n;
   n := r2.value() if r2.isSafe();
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by zuzu.pl. It is not supported by zuzu-rust or
+zuzu-js.
+
 =head1 DESCRIPTION
 
 This builtin module bridges to the host Perl interpreter.

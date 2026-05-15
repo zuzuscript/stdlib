@@ -4,6 +4,11 @@
 
 std/zuzuzoo - Plan and install Zuzu distributions.
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by zuzu.pl, zuzu-rust, and zuzu-js on Node and
+Electron. It is not supported by zuzu-js in the browser.
+
 =head1 DESCRIPTION
 
 This phase of C<std/zuzuzoo> provides installed distribution metadata
@@ -152,8 +157,9 @@ from std/string import contains, ends_with, join, split, starts_with, substr;
 from std/time import Time;
 from test/parser import parse as parse_tap;
 
+
 function _opt ( options, key, fallback := null ) {
-	if ( typeof options eq "Dict" and options.exists(key) ) {
+	if ( options instanceof Dict and options.exists(key) ) {
 		return options.get(key);
 	}
 	return fallback;
@@ -180,7 +186,7 @@ function _response_status_text ( response ) {
 function _archive_url_from_latest ( latest_info ) {
 	let metadata := latest_info{remote_metadata};
 	if (
-		( typeof metadata eq "Dict" or typeof metadata eq "PairList" ) and
+		( metadata instanceof Dict or metadata instanceof PairList ) and
 		metadata.exists("archive_url")
 	) {
 		return metadata{archive_url};
@@ -208,7 +214,7 @@ function _push_unique_string ( items, seen, value ) {
 
 function _copy_options_with ( options, key, value ) {
 	let out := {};
-	if ( typeof options eq "Dict" ) {
+	if ( options instanceof Dict ) {
 		for ( let existing_key in options.keys() ) {
 			out.set( existing_key, options.get(existing_key) );
 		}
@@ -231,57 +237,57 @@ function _join_dir ( String base, String child, Boolean windows ) {
 }
 
 function _require_text ( obj, String key, String where ) {
-	if ( typeof obj ne "Dict" or not obj.exists(key) ) {
+	if ( not( obj instanceof Dict ) or not obj.exists(key) ) {
 		die `Invalid installed metadata ${where}: missing ${key}`;
 	}
 	let value := obj.get(key);
-	if ( typeof value ne "String" or value eq "" ) {
+	if ( not( value instanceof String ) or value eq "" ) {
 		die `Invalid metadata ${where}: ${key} must be a string`;
 	}
 	return value;
 }
 
 function _require_object ( obj, String key, String where ) {
-	if ( typeof obj ne "Dict" or not obj.exists(key) ) {
+	if ( not( obj instanceof Dict ) or not obj.exists(key) ) {
 		die `Invalid installed metadata ${where}: missing ${key}`;
 	}
 	let value := obj.get(key);
-	if ( typeof value ne "Dict" ) {
+	if ( not( value instanceof Dict ) ) {
 		die `Invalid metadata ${where}: ${key} must be an object`;
 	}
 	return value;
 }
 
 function _require_array ( obj, String key, String where ) {
-	if ( typeof obj ne "Dict" or not obj.exists(key) ) {
+	if ( not( obj instanceof Dict ) or not obj.exists(key) ) {
 		die `Invalid installed metadata ${where}: missing ${key}`;
 	}
 	let value := obj.get(key);
-	if ( typeof value ne "Array" ) {
+	if ( not( value instanceof Array ) ) {
 		die `Invalid metadata ${where}: ${key} must be an array`;
 	}
 	return value;
 }
 
 function _source_require_text ( obj, String key, String where ) {
-	if ( typeof obj ne "Dict" and typeof obj ne "PairList" ) {
+	if ( not( obj instanceof Dict ) and not( obj instanceof PairList ) ) {
 		die `Invalid source metadata ${where}: root must be an object`;
 	}
 	if ( not obj.exists(key) ) {
 		die `Invalid source metadata ${where}: missing ${key}`;
 	}
 	let value := obj.get(key);
-	if ( typeof value ne "String" or value eq "" ) {
+	if ( not( value instanceof String ) or value eq "" ) {
 		die `Invalid source metadata ${where}: ${key} must be a string`;
 	}
 	return value;
 }
 
 function _validate_dependency_pair ( key, value, String where ) {
-	if ( typeof key ne "String" or key eq "" ) {
+	if ( not( key instanceof String ) or key eq "" ) {
 		die `Invalid source metadata ${where}: bad dependency name`;
 	}
-	if ( typeof value ne "String" or value eq "" ) {
+	if ( not( value instanceof String ) or value eq "" ) {
 		die `Invalid source metadata ${where}: bad dependency version`;
 	}
 	return true;
@@ -292,15 +298,15 @@ function _validate_dependencies ( meta, String where ) {
 		return true;
 	}
 	let deps := meta.get("dependencies");
-	if ( typeof deps ne "Dict" ) {
+	if ( not( deps instanceof Dict ) ) {
 		die `Invalid metadata ${where}: dependencies must be an object`;
 	}
 	for ( let key in deps.keys() ) {
-		if ( typeof key ne "String" or key eq "" ) {
+		if ( not( key instanceof String ) or key eq "" ) {
 			die `Invalid metadata ${where}: bad dependency name`;
 		}
 		let value := deps.get(key);
-		if ( typeof value ne "String" or value eq "" ) {
+		if ( not( value instanceof String ) or value eq "" ) {
 			die `Invalid metadata ${where}: bad dependency version`;
 		}
 	}
@@ -312,13 +318,13 @@ function _validate_source_dependencies ( meta, String where ) {
 		return true;
 	}
 	let deps := meta.get("dependencies");
-	if ( typeof deps eq "Dict" ) {
+	if ( deps instanceof Dict ) {
 		for ( let key in deps.keys() ) {
 			_validate_dependency_pair( key, deps.get(key), where );
 		}
 		return true;
 	}
-	if ( typeof deps eq "PairList" ) {
+	if ( deps instanceof PairList ) {
 		let keys := deps.keys();
 		let values := deps.values();
 		let i := 0;
@@ -332,7 +338,7 @@ function _validate_source_dependencies ( meta, String where ) {
 }
 
 function _validate_source_metadata ( meta, String metadata_file ) {
-	if ( typeof meta ne "Dict" and typeof meta ne "PairList" ) {
+	if ( not( meta instanceof Dict ) and not( meta instanceof PairList ) ) {
 		die `Invalid source metadata ${metadata_file}: root must be an object`;
 	}
 	if ( meta.exists("installed") ) {
@@ -358,7 +364,7 @@ function _validate_source_metadata ( meta, String metadata_file ) {
 	}
 	_validate_source_dependencies( meta, metadata_file );
 
-	if ( typeof meta eq "Dict" ) {
+	if ( meta instanceof Dict ) {
 		meta.set( "metadata_file", metadata_file );
 	}
 	else {
@@ -368,7 +374,7 @@ function _validate_source_metadata ( meta, String metadata_file ) {
 }
 
 function _validate_entry ( entry, String kind, String where ) {
-	if ( typeof entry ne "Dict" ) {
+	if ( not( entry instanceof Dict ) ) {
 		die `Invalid metadata ${where}: bad ${kind} entry`;
 	}
 	_require_text( entry, "source", where );
@@ -376,11 +382,11 @@ function _validate_entry ( entry, String kind, String where ) {
 	_require_text( entry, "sha256", where );
 	if ( kind eq "script" and entry.exists("wrappers") ) {
 		let wrappers := entry.get("wrappers");
-		if ( typeof wrappers ne "Array" ) {
+		if ( not( wrappers instanceof Array ) ) {
 			die `Invalid metadata ${where}: bad script wrappers`;
 		}
 		for ( let wrapper in wrappers ) {
-			if ( typeof wrapper ne "String" or wrapper eq "" ) {
+			if ( not( wrapper instanceof String ) or wrapper eq "" ) {
 				die `Invalid metadata ${where}: bad wrapper`;
 			}
 		}
@@ -389,7 +395,7 @@ function _validate_entry ( entry, String kind, String where ) {
 }
 
 function _validate_installed_metadata ( meta, String metadata_file ) {
-	if ( typeof meta ne "Dict" ) {
+	if ( not( meta instanceof Dict ) ) {
 		die `Invalid metadata ${metadata_file}: root must be an object`;
 	}
 	if ( meta.exists("modules") or meta.exists("scripts") ) {
@@ -513,14 +519,14 @@ function _trim_right_slash ( String text ) {
 }
 
 function _safe_archive_root ( archive, String where ) {
-	if ( typeof archive ne "Dict" or typeof archive.get("entries") ne "Array" ) {
+	if ( not( archive instanceof Dict ) or not( archive.get("entries") instanceof Array ) ) {
 		die `Invalid archive ${where}: entries must be an array`;
 	}
 
 	let seen := {};
 	let root := null;
 	for ( let entry in archive{entries} ) {
-		if ( typeof entry ne "Dict" or typeof entry.get("path") ne "String" ) {
+		if ( not( entry instanceof Dict ) or not( entry.get("path") instanceof String ) ) {
 			die `Invalid archive ${where}: bad entry path`;
 		}
 		let path := entry{path};
@@ -544,7 +550,7 @@ function _safe_archive_root ( archive, String where ) {
 				die `Invalid archive ${where}: unsafe path ${path}`;
 			}
 		}
-		if ( typeof root eq "Null" ) {
+		if ( root instanceof Null ) {
 			root := parts[0];
 		}
 		else if ( root ne parts[0] ) {
@@ -552,7 +558,7 @@ function _safe_archive_root ( archive, String where ) {
 		}
 	}
 
-	die `Invalid archive ${where}: no entries` if typeof root eq "Null";
+	die `Invalid archive ${where}: no entries` if root instanceof Null;
 	return root;
 }
 
@@ -622,7 +628,7 @@ function _script_install_name ( String source ) {
 }
 
 function _target_list ( targets ) {
-	return typeof targets eq "Array" ? targets : [ targets ];
+	return targets instanceof Array ? targets : [ targets ];
 }
 
 function _root_key ( root ) {
@@ -646,11 +652,11 @@ function _root_from_config ( String name, String kind, cfg ) {
 }
 
 function _require_root_text ( root, String key, String where ) {
-	if ( typeof root ne "Dict" or not root.exists(key) ) {
+	if ( not( root instanceof Dict ) or not root.exists(key) ) {
 		die `Invalid dependency root ${where}: missing ${key}`;
 	}
 	let value := root.get(key);
-	if ( typeof value ne "String" or value eq "" ) {
+	if ( not( value instanceof String ) or value eq "" ) {
 		die `Invalid dependency root ${where}: ${key} must be a string`;
 	}
 	return value;
@@ -723,7 +729,7 @@ function _now_epoch () {
 
 function _temp_parent ( options? ) {
 	let temp_root := _opt( options, "temp_root", null );
-	if ( typeof temp_root eq "Null" ) {
+	if ( temp_root instanceof Null ) {
 		return null;
 	}
 	let root := new Path(temp_root);
@@ -743,7 +749,7 @@ function _unique_temp_path ( parent, String prefix, String suffix ) {
 
 function _new_temp_dir ( options?, String prefix := "zuzuzoo-" ) {
 	let parent := _temp_parent(options);
-	if ( typeof parent eq "Null" ) {
+	if ( parent instanceof Null ) {
 		return Path.tempdir();
 	}
 
@@ -764,7 +770,7 @@ function _new_temp_dir ( options?, String prefix := "zuzuzoo-" ) {
 }
 
 function _cleanup_path ( path ) {
-	return false if typeof path eq "Null";
+	return false if path instanceof Null;
 	try {
 		if ( path.exists() ) {
 			if ( path.is_dir() ) {
@@ -783,7 +789,7 @@ function _cleanup_path ( path ) {
 }
 
 function _cleanup_source ( source, options? ) {
-	return false if typeof source eq "Null";
+	return false if source instanceof Null;
 	return false if _opt( options, "keep_work_dirs", false );
 	if ( source.exists("temp_dir") ) {
 		return _cleanup_path(source{temp_dir});
@@ -801,7 +807,7 @@ function _cleanup_install_action ( install_action, options? ) {
 }
 
 function _cleanup_plan_work_dirs ( plan, options? ) {
-	return false if typeof plan eq "Null";
+	return false if plan instanceof Null;
 	return false if _opt( options, "keep_work_dirs", false );
 	for ( let install_action in plan.get( "installs", [] ) ) {
 		_cleanup_install_action( install_action, options );
@@ -847,7 +853,7 @@ function _copy_file_atomic ( source, destination, chmod_mode? ) {
 	try {
 		source.copy(temp);
 		let temp_sha := sha256_hex(temp.slurp());
-		temp.chmod(chmod_mode) if typeof chmod_mode ne "Null";
+		temp.chmod(chmod_mode) if not( chmod_mode instanceof Null );
 		temp.move(destination);
 		let final_bytes := destination.slurp();
 		let final_sha := sha256_hex(final_bytes);
@@ -984,7 +990,7 @@ function _write_cache_entry ( paths, source, temp_path ) {
 }
 
 function _check_expected_source_sha ( source, expected_sha256 ) {
-	return true if typeof expected_sha256 eq "Null";
+	return true if expected_sha256 instanceof Null;
 	let actual := sha256_hex( ( new Path(source{path}) ).slurp() );
 	if ( actual ne expected_sha256 ) {
 		die(
@@ -1000,7 +1006,7 @@ function _dependency_chain ( stack, dependency_of, module_name ) {
 	for ( let item in stack ) {
 		chain.push(item);
 	}
-	if ( typeof dependency_of ne "Null" ) {
+	if ( not( dependency_of instanceof Null ) ) {
 		chain.push(dependency_of{metadata}{name});
 	}
 	chain.push(module_name);
@@ -1014,10 +1020,10 @@ function _dependency_conflict_message (
 	planned_action,
 	conflicting_dist
 ) {
-	let requested_by := typeof dependency_of eq "Null"
+	let requested_by := dependency_of instanceof Null
 		? "<requested target>"
 		: dependency_of{metadata}{name};
-	let planned_text := typeof planned_action eq "Null"
+	let planned_text := planned_action instanceof Null
 		? "none"
 		: planned_action{metadata}{name} _ " " _
 			planned_action{metadata}{version};
@@ -1062,7 +1068,7 @@ function _copy_dependencies ( metadata ) {
 	let out := {};
 	return out if not metadata.exists("dependencies");
 	let deps := metadata{dependencies};
-	if ( typeof deps eq "PairList" ) {
+	if ( deps instanceof PairList ) {
 		let keys := deps.keys();
 		let values := deps.values();
 		let i := 0;
@@ -1108,7 +1114,7 @@ function _copy_source_metadata ( metadata ) {
 
 function _test_ok ( parsed, run_result ) {
 	return false if not Proc.is_success(run_result);
-	return false if typeof parsed{planned} eq "Null";
+	return false if parsed{planned} instanceof Null;
 	return false if parsed{assertions}{failed} > 0;
 	return true;
 }
@@ -1118,7 +1124,7 @@ function _dependency_entries ( metadata ) {
 	return out if not metadata.exists("dependencies");
 
 	let deps := metadata{dependencies};
-	if ( typeof deps eq "PairList" ) {
+	if ( deps instanceof PairList ) {
 		let keys := deps.keys();
 		let values := deps.values();
 		let i := 0;
@@ -1147,7 +1153,7 @@ function _dependency_entries ( metadata ) {
 }
 
 function _version_satisfies ( version, min_version ) {
-	return true if typeof min_version eq "Null";
+	return true if min_version instanceof Null;
 	return true if "" _ min_version eq "0";
 	return compare_versions( version, min_version ) >= 0;
 }
@@ -1236,19 +1242,19 @@ function _candidate_record (
 ) {
 	let record := {
 		module_name: "" _ module_name,
-		min_version: typeof min_version eq "Null" ? null : "" _ min_version,
+		min_version: min_version instanceof Null ? null : "" _ min_version,
 		version: "" _ version,
 		source: source,
 		distribution: distribution,
 		metadata_file: metadata_file,
 	};
-	record{root} := root if typeof root ne "Null";
-	record{install} := install_action if typeof install_action ne "Null";
+	record{root} := root if not( root instanceof Null );
+	record{install} := install_action if not( install_action instanceof Null );
 	return record;
 }
 
 function _better_dependency_candidate ( current, candidate, root_order ) {
-	return true if typeof current eq "Null";
+	return true if current instanceof Null;
 
 	let version_cmp := compare_versions(
 		candidate{version},
@@ -1322,7 +1328,7 @@ function _find_dependency_in_planned ( planned, module_name, min_version ) {
 				install_action,
 			);
 			if (
-					typeof best eq "Null" or
+					best instanceof Null or
 				compare_versions(
 					candidate{version},
 					best{version},
@@ -1350,7 +1356,7 @@ function _runtime_module_path ( module_name ) {
 		inc := __system__.get("inc");
 	}
 	return null if inc ≡ null;
-	if ( typeof inc ≢ "Array" ) {
+	if ( not( inc instanceof Array ) ) {
 		let separator := _is_windows_platform() ? ";" : ":";
 		inc := split( "" _ inc, separator );
 	}
@@ -1372,7 +1378,7 @@ function _runtime_include_dirs () {
 		inc := __system__.get("inc");
 	}
 	return out if inc ≡ null;
-	if ( typeof inc ≢ "Array" ) {
+	if ( not( inc instanceof Array ) ) {
 		let separator := _is_windows_platform() ? ";" : ":";
 		inc := split( "" _ inc, separator );
 	}
@@ -1390,7 +1396,7 @@ function _find_dependency_in_runtime ( module_name, min_version ) {
 	return null if not _version_satisfies( "0", min_version );
 
 	let module_path := _runtime_module_path(module_name);
-	return null if typeof module_path eq "Null";
+	return null if module_path instanceof Null;
 
 	let root := {
 		name: "runtime",
@@ -1423,9 +1429,9 @@ function _find_dependency_for_plan (
 		module_name,
 		min_version,
 	);
-	return found if typeof found ne "Null";
+	return found if not( found instanceof Null );
 	found := _find_dependency_in_roots( roots, module_name, min_version );
-	return found if typeof found ne "Null";
+	return found if not( found instanceof Null );
 	return _find_dependency_in_runtime( module_name, min_version );
 }
 
@@ -1502,7 +1508,7 @@ function _add_owner_for_path ( by_path, String path, owner ) {
 }
 
 function _remove_target_record ( target, options? ) {
-	if ( typeof target eq "Dict" ) {
+	if ( target instanceof Dict ) {
 		let type := target.exists("type") ? "" _ target{type} : "";
 		let value := target.exists("value") ? "" _ target{value} : "";
 		return {
@@ -1519,7 +1525,7 @@ function _remove_target_record ( target, options? ) {
 }
 
 function _latest_module_name ( module_name ) {
-	if ( typeof module_name ne "String" ) {
+	if ( not( module_name instanceof String ) ) {
 		die "latest target must be a module name";
 	}
 	if ( module_name eq "" or _is_url(module_name) ) {
@@ -1533,7 +1539,7 @@ function _latest_module_name ( module_name ) {
 }
 
 function _latest_status ( installed_version, remote_version ) {
-	return "not-installed" if typeof installed_version eq "Null";
+	return "not-installed" if installed_version instanceof Null;
 	let comparison := compare_versions( installed_version, remote_version );
 	return "current" if comparison == 0;
 	return comparison < 0 ? "outdated" : "newer-local";
@@ -1579,11 +1585,11 @@ class Zuzuzoo {
 	let global_root := null;
 
 	method _user_agent () {
-		return typeof user_agent ne "Null" ? user_agent : new UserAgent();
+		return not( user_agent instanceof Null ) ? user_agent : new UserAgent();
 	}
 
 	method config () {
-		let resolved_windows := typeof windows eq "Null"
+		let resolved_windows := windows instanceof Null
 			? _is_windows_platform()
 			: windows;
 		let resolved_global := global ? true: false;
@@ -1592,8 +1598,8 @@ class Zuzuzoo {
 			die "Global Windows installs are not supported";
 		}
 
-		let base_home := typeof home ne "Null" ? home : Env.get( "HOME", "" );
-		let base_userprofile := typeof userprofile ne "Null"
+		let base_home := not( home instanceof Null ) ? home : Env.get( "HOME", "" );
+		let base_userprofile := not( userprofile instanceof Null )
 			? userprofile
 			: Env.get( "USERPROFILE", "" );
 
@@ -1601,9 +1607,9 @@ class Zuzuzoo {
 		let resolved_bin := bin_dir;
 		let resolved_meta := meta_dir;
 		let needs_default := (
-			typeof resolved_lib eq "Null" or
-			typeof resolved_bin eq "Null" or
-			typeof resolved_meta eq "Null"
+			resolved_lib instanceof Null or
+			resolved_bin instanceof Null or
+			resolved_meta instanceof Null
 		);
 
 		if ( resolved_windows ) {
@@ -1620,20 +1626,20 @@ class Zuzuzoo {
 					"modules",
 					true,
 				)
-					if typeof resolved_lib eq "Null";
+					if resolved_lib instanceof Null;
 				resolved_bin := _join_dir( root, "bin", true )
-					if typeof resolved_bin eq "Null";
+					if resolved_bin instanceof Null;
 				resolved_meta := _join_dir( root, "meta", true )
-					if typeof resolved_meta eq "Null";
+					if resolved_meta instanceof Null;
 			}
 		}
 		else if ( resolved_global ) {
 			resolved_lib := "/var/lib/zuzu/modules"
-				if typeof resolved_lib eq "Null";
+				if resolved_lib instanceof Null;
 			resolved_bin := "/usr/local/bin"
-				if typeof resolved_bin eq "Null";
+				if resolved_bin instanceof Null;
 			resolved_meta := "/var/lib/zuzu/meta"
-				if typeof resolved_meta eq "Null";
+				if resolved_meta instanceof Null;
 		}
 		else {
 			if ( needs_default ) {
@@ -1649,15 +1655,15 @@ class Zuzuzoo {
 					"modules",
 					false,
 				)
-					if typeof resolved_lib eq "Null";
+					if resolved_lib instanceof Null;
 				resolved_bin := _join_dir( root, "bin", false )
-					if typeof resolved_bin eq "Null";
+					if resolved_bin instanceof Null;
 				resolved_meta := _join_dir(
 					root,
 					"meta",
 					false,
 				)
-					if typeof resolved_meta eq "Null";
+					if resolved_meta instanceof Null;
 			}
 		}
 
@@ -1785,8 +1791,8 @@ class Zuzuzoo {
 
 	method is_installed ( module_name, min_version? ) {
 		let found := self.find_installed_module(module_name);
-		return false if typeof found eq "Null";
-		if ( typeof min_version ne "Null" ) {
+		return false if found instanceof Null;
+		if ( not( min_version instanceof Null ) ) {
 			let comparison := compare_versions(
 				found{version},
 				min_version,
@@ -1798,7 +1804,7 @@ class Zuzuzoo {
 
 	method installed_version ( module_name ) {
 		let found := self.find_installed_module(module_name);
-		return typeof found eq "Null" ? null : found{version};
+		return found instanceof Null ? null : found{version};
 	}
 
 	method pretty_json ( value ) {
@@ -2083,7 +2089,7 @@ class Zuzuzoo {
 		}
 
 		let installed := self.find_installed_module( module, options );
-			let installed_version := typeof installed eq "Null"
+			let installed_version := installed instanceof Null
 			? null
 			: installed{version};
 		let status := _latest_status(
@@ -2139,7 +2145,7 @@ class Zuzuzoo {
 		}
 
 		let cache_dir := _opt( options, "cache_dir", null );
-		if ( typeof cache_dir ne "Null" ) {
+		if ( not( cache_dir instanceof Null ) ) {
 			let paths := _cache_paths( cache_dir, url );
 			let cached := _validate_cache_entry(paths);
 			if ( cached ) {
@@ -2232,7 +2238,7 @@ class Zuzuzoo {
 			_opt( options, "expected_sha256", null ),
 		);
 
-		if ( typeof cache_dir ne "Null" ) {
+		if ( not( cache_dir instanceof Null ) ) {
 			let paths := _cache_paths( cache_dir, url );
 			try {
 				let sidecar := _write_cache_entry(
@@ -2409,7 +2415,7 @@ class Zuzuzoo {
 				global_root,
 			);
 			let global_dependency_root := null;
-			if ( typeof global_override ne "Null" ) {
+			if ( not( global_override instanceof Null ) ) {
 				global_dependency_root := _root_override(
 					global_override,
 					"global",
@@ -2449,12 +2455,12 @@ class Zuzuzoo {
 			_root_from_config( "user", "user", user_cfg ),
 		);
 
-		let ctor_roots := typeof dependency_roots eq "Null"
+		let ctor_roots := dependency_roots instanceof Null
 			? []
 			: dependency_roots;
 		for ( let root in ctor_roots ) {
 			let where := (
-				typeof root eq "Dict" and root.exists("name")
+				root instanceof Dict and root.exists("name")
 			)
 				? root{name}
 				: "constructor";
@@ -2468,7 +2474,7 @@ class Zuzuzoo {
 		let option_roots := _opt( options, "dependency_roots", [] );
 		for ( let root in option_roots ) {
 			let where := (
-				typeof root eq "Dict" and root.exists("name")
+				root instanceof Dict and root.exists("name")
 			)
 				? root{name}
 				: "options";
@@ -2488,7 +2494,7 @@ class Zuzuzoo {
 			planned,
 			self.dependency_roots(options),
 			module_name,
-			typeof min_version eq "Null" ? "0" : min_version,
+			min_version instanceof Null ? "0" : min_version,
 		);
 	}
 
@@ -2707,7 +2713,7 @@ class Zuzuzoo {
 			kept_owners: kept_owners,
 			blocked: blocked,
 		};
-		file{install_as} := install_as if typeof install_as ne "Null";
+		file{install_as} := install_as if not( install_as instanceof Null );
 		plan{files}.push(file);
 
 		if ( blocked ) {
@@ -2963,7 +2969,7 @@ class Zuzuzoo {
 					target_text,
 					min_version,
 				);
-				if ( typeof found ne "Null" ) {
+				if ( not( found instanceof Null ) ) {
 					if (
 						found{source} eq "planned" and
 						status_by_name.get(found{distribution}, "") eq "visiting"
@@ -2972,7 +2978,7 @@ class Zuzuzoo {
 							_cycle_path( stack, target_text );
 					}
 					let satisfied := found;
-					satisfied{requested_by} := typeof dependency_of eq "Null"
+					satisfied{requested_by} := dependency_of instanceof Null
 						? null
 						: dependency_of{metadata}{name};
 					plan{satisfied_dependencies}.push(satisfied);
@@ -3064,7 +3070,7 @@ class Zuzuzoo {
 				action: "install",
 				target: target_text,
 				requested: requested ? true : false,
-				dependency_of: typeof dependency_of eq "Null"
+				dependency_of: dependency_of instanceof Null
 					? null
 					: dependency_of{metadata}{name},
 				source: dist{source},
@@ -3107,7 +3113,7 @@ class Zuzuzoo {
 					dep{module_name},
 					dep{min_version},
 				);
-				if ( typeof found ne "Null" ) {
+				if ( not( found instanceof Null ) ) {
 					if (
 						found{source} eq "planned" and
 						status_by_name.get(found{distribution}, "") eq "visiting"
@@ -3145,7 +3151,7 @@ class Zuzuzoo {
 							module_name: dep{module_name},
 							min_version: dep{min_version},
 							status: "planned",
-							to: typeof dep_install eq "Null"
+							to: dep_install instanceof Null
 								? null
 								: dep_install{metadata}{name},
 							root: target_root,

@@ -14,6 +14,10 @@ std/task - task helpers for async ZuzuScript code.
     return await { all( [ a, b ] ); };
   }
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 This runtime-supported module provides the task type, cancellation

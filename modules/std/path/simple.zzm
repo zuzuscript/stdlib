@@ -22,6 +22,10 @@ std/path/simple - Tiny JSONPath/XPath-like traversal helper.
     say name;
   }
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 C<SimplePath> implements only a tiny subset of path traversal:
@@ -140,6 +144,7 @@ location when one exists.
 
 from std/string import substr;
 
+
 class SimplePath {
 	let String path;
 	let Array _steps := [];
@@ -241,10 +246,10 @@ class SimplePath {
 				let v := node{value};
 
 				if ( step{kind} ≡ "key" ) {
-					if ( typeof v ≡ "Dict" and v.exists( step{value} ) ) {
+					if ( v instanceof Dict and v.exists( step{value} ) ) {
 						next_nodes.push( self._node( v.get( step{value} ), node, step{value} ) );
 					}
-					else if ( typeof v ≡ "PairList" ) {
+					else if ( v instanceof PairList ) {
 						for ( let item in v.get_all( step{value} ) ) {
 							next_nodes.push( self._node( item, node, step{value} ) );
 						}
@@ -253,12 +258,12 @@ class SimplePath {
 				}
 
 				if ( step{kind} ≡ "dict_wildcard" ) {
-					if ( typeof v ≡ "Dict" ) {
+					if ( v instanceof Dict ) {
 						for ( let k in v.keys() ) {
 							next_nodes.push( self._node( v.get(k), node, k ) );
 						}
 					}
-					else if ( typeof v ≡ "PairList" ) {
+					else if ( v instanceof PairList ) {
 						for ( let pair in v.to_Array() ) {
 							next_nodes.push( self._node( pair.value, node, pair.key ) );
 						}
@@ -267,7 +272,7 @@ class SimplePath {
 				}
 
 				if ( step{kind} ≡ "index" ) {
-					if ( typeof v ≡ "Array" ) {
+					if ( v instanceof Array ) {
 						let idx := step{value};
 						if ( idx < 0 ) {
 							idx := v.length() + idx;
@@ -280,14 +285,14 @@ class SimplePath {
 				}
 
 				if ( step{kind} ≡ "list_wildcard" ) {
-					if ( typeof v ≡ "Array" ) {
+					if ( v instanceof Array ) {
 						let i := 0;
 						while ( i < v.length() ) {
 							next_nodes.push( self._node( v[i], node, i ) );
 							i++;
 						}
 					}
-					else if ( typeof v ≡ "Bag" or typeof v ≡ "Set" ) {
+					else if ( v instanceof Bag or v instanceof Set ) {
 						for ( let item in v.to_Array() ) {
 							next_nodes.push( self._node( item, node, "*" ) );
 						}
@@ -335,23 +340,23 @@ class SimplePath {
 		let container := parent{value};
 		let key := node{key};
 
-		if ( typeof container ≡ "Array" ) {
+		if ( container instanceof Array ) {
 			die "SimplePath assignment expects numeric array index"
-				if typeof key ≢ "Number";
+				if not( key instanceof Number );
 			container[key] := value;
 			return value;
 		}
 
-		if ( typeof container ≡ "Dict" ) {
+		if ( container instanceof Dict ) {
 			die "SimplePath assignment expects string dict key"
-				if typeof key ≢ "String";
+				if not( key instanceof String );
 			container{(key)} := value;
 			return value;
 		}
 
-		if ( typeof container ≡ "PairList" ) {
+		if ( container instanceof PairList ) {
 			die "SimplePath assignment expects string pairlist key"
-				if typeof key ≢ "String";
+				if not( key instanceof String );
 			container.set( key, value );
 			return value;
 		}
@@ -367,21 +372,21 @@ class SimplePath {
 		let container := parent{value};
 		let key := node{key};
 
-		if ( typeof container ≡ "Array" ) {
+		if ( container instanceof Array ) {
 			die "SimplePath assignment expects numeric array index"
-				if typeof key ≢ "Number";
+				if not( key instanceof Number );
 			return \ container[key];
 		}
 
-		if ( typeof container ≡ "Dict" ) {
+		if ( container instanceof Dict ) {
 			die "SimplePath assignment expects string dict key"
-				if typeof key ≢ "String";
+				if not( key instanceof String );
 			return \ container{(key)};
 		}
 
-		if ( typeof container ≡ "PairList" ) {
+		if ( container instanceof PairList ) {
 			die "SimplePath assignment expects string pairlist key"
-				if typeof key ≢ "String";
+				if not( key instanceof String );
 			return \ container{(key)};
 		}
 

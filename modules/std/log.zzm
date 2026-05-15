@@ -17,6 +17,10 @@ std/log - Structured logging helpers for scripts.
   Log.info( "started" );
   Log.warn( "missing value for ", "foo" );
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 This module provides lightweight structured logging with level
@@ -70,6 +74,7 @@ License version 2.
 =cut
 
 from std/string import join;
+
 
 let _LEVEL_NUM := {
 	debug: 10,

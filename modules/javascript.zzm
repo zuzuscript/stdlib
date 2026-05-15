@@ -19,6 +19,11 @@ javascript - Evaluate JavaScript from ZuzuScript.
   let n;
   n := r2.value() if r2.isSafe();
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by zuzu-js on Node, Electron, and Browser. It
+is not supported by zuzu.pl or zuzu-rust.
+
 =head1 DESCRIPTION
 
 This runtime-supported module is only implemented by C<zuzu-js>.

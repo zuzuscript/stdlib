@@ -16,6 +16,10 @@ std/string/quoted_printable - Quoted-printable encoders and decoders.
   let binary_text := encode(raw, binary: true);
   let short_lines := encode(raw, line_length: 40, newline: "\n");
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 This module provides quoted-printable encoding and decoding helpers for
@@ -84,6 +88,7 @@ the terms of either the Artistic License 1.0 or the GNU General Public
 License version 2.
 
 =cut
+
 
 let encode := null;
 let decode := null;
@@ -207,19 +212,19 @@ let decode := null;
 			}
 		}
 
-		if ( typeof line_length ne "Number" ) {
+		if ( not( line_length instanceof Number ) ) {
 			die "quoted_printable line_length option expects Number";
 		}
 		if ( line_length < 4 ) {
 			die "quoted_printable line_length option must be at least 4";
 		}
-		if ( typeof newline ne "String" ) {
+		if ( not( newline instanceof String ) ) {
 			die "quoted_printable newline option expects String";
 		}
-		if ( typeof binary ne "Boolean" ) {
+		if ( not( binary instanceof Boolean ) ) {
 			die "quoted_printable binary option expects Boolean";
 		}
-		if ( typeof strict ne "Boolean" ) {
+		if ( not( strict instanceof Boolean ) ) {
 			die "quoted_printable strict option expects Boolean";
 		}
 

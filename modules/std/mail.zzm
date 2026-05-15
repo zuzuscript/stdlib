@@ -12,6 +12,10 @@ std/mail - Pure ZuzuScript mail message object model.
     body: Body.bytes( to_binary("Hello\r\n") )
   );
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 This module provides the object model for RFC 5322-style message
@@ -235,6 +239,7 @@ License version 2.
 =cut
 
 from std/string import chr, index, join, ord, substr, trim;
+
 from std/string/base64 import
 	encode as _base64_encode,
 	decode as _base64_decode;
@@ -785,16 +790,16 @@ function _copy_pairlist ( fields ) {
 }
 
 function _mail_send_recipients_option ( value ) {
-	if ( typeof value eq "String" ) {
+	if ( value instanceof String ) {
 		return [ value ];
 	}
-	if ( typeof value ne "Array" ) {
+	if ( not( value instanceof Array ) ) {
 		die "mail.send: envelope_to expects String or Array";
 	}
 
 	let out := [];
 	for ( let item in value ) {
-		if ( typeof item ne "String" ) {
+		if ( not( item instanceof String ) ) {
 			die "mail.send: envelope_to expects String or Array of String";
 		}
 		out.push(item);
@@ -815,7 +820,7 @@ function _mail_send_options ( PairList options ) {
 
 	for ( let pair in options.to_Array() ) {
 		if ( pair.key eq "envelope_from" ) {
-			if ( typeof pair.value ne "String" ) {
+			if ( not( pair.value instanceof String ) ) {
 				die "mail.send: envelope_from expects String";
 			}
 			out{envelope_from} := pair.value;
@@ -824,8 +829,8 @@ function _mail_send_options ( PairList options ) {
 			out{envelope_to} := _mail_send_recipients_option(pair.value);
 		}
 		else if ( pair.key eq "send_options" ) {
-			if ( typeof pair.value ne "Dict"
-				and typeof pair.value ne "PairList" ) {
+			if ( not( pair.value instanceof Dict )
+				and not( pair.value instanceof PairList ) ) {
 				die "mail.send: send_options expects Dict or PairList";
 			}
 			out{send_options} := pair.value;
@@ -857,7 +862,7 @@ function _check_header_name ( String name ) {
 }
 
 function _check_header_value ( value ) {
-	if ( typeof value ne "String" ) {
+	if ( not( value instanceof String ) ) {
 		die "mail.invalid_headers: header value expects String, got "
 			_ typeof value;
 	}
@@ -1461,7 +1466,7 @@ function _datetime_day_of_week ( Number days ) {
 }
 
 function _datetime_apply_option ( Dict opts, Dict seen, key, value ) {
-	if ( typeof key ne "String" ) {
+	if ( not( key instanceof String ) ) {
 		_invalid_datetime("format option names must be strings");
 	}
 	if ( seen.exists(key) ) {
@@ -1470,7 +1475,7 @@ function _datetime_apply_option ( Dict opts, Dict seen, key, value ) {
 	seen.set( key, true );
 
 	if ( key eq "utc" ) {
-		if ( typeof value ne "Boolean" ) {
+		if ( not( value instanceof Boolean ) ) {
 			_invalid_datetime("format option 'utc' expects Boolean");
 		}
 		opts{utc} := value;
@@ -1478,7 +1483,7 @@ function _datetime_apply_option ( Dict opts, Dict seen, key, value ) {
 		return;
 	}
 	if ( key eq "offset" ) {
-		if ( typeof value ne "String" ) {
+		if ( not( value instanceof String ) ) {
 			_invalid_datetime("format option 'offset' expects String");
 		}
 		let seconds := _numeric_zone_seconds(value);
@@ -1491,7 +1496,7 @@ function _datetime_apply_option ( Dict opts, Dict seen, key, value ) {
 		return;
 	}
 	if ( key eq "include_weekday" ) {
-		if ( typeof value ne "Boolean" ) {
+		if ( not( value instanceof Boolean ) ) {
 			_invalid_datetime("format option 'include_weekday' expects Boolean");
 		}
 		opts{include_weekday} := value;
@@ -1512,12 +1517,12 @@ function _datetime_options ( options, PairList named_options ) {
 	};
 	let seen := {};
 
-	if ( typeof options eq "Dict" ) {
+	if ( options instanceof Dict ) {
 		for ( let key in options.keys() ) {
 			_datetime_apply_option( opts, seen, key, options.get(key) );
 		}
 	}
-	else if ( typeof options eq "PairList" ) {
+	else if ( options instanceof PairList ) {
 		for ( let pair in options.to_Array() ) {
 			_datetime_apply_option( opts, seen, pair.key, pair.value );
 		}
@@ -1553,7 +1558,7 @@ function parse_datetime ( String text ) {
 	let second_text := null;
 	let zone_text := null;
 
-	if ( typeof m eq "Array" ) {
+	if ( m instanceof Array ) {
 		weekday := m[1];
 		day_text := m[2];
 		month_text := m[3];
@@ -1565,7 +1570,7 @@ function parse_datetime ( String text ) {
 	}
 	else {
 		m := source ~ /^([0-9]{1,2})\s+([A-Za-z.]+)\s+([0-9]{2}|[0-9]{4})\s+([0-9]{1,2}):([0-9]{2})(?::([0-9]{2}))?\s+([+-][0-9]{4}|[A-Za-z]{1,5})$/i;
-		if ( typeof m ne "Array" ) {
+		if ( not( m instanceof Array ) ) {
 			_invalid_datetime("expected RFC 5322 date-time");
 		}
 		day_text := m[1];
@@ -1597,7 +1602,7 @@ function parse_datetime ( String text ) {
 	let hour := int(hour_text);
 	let minute := int(minute_text);
 	let second := 0;
-	if ( typeof second_text eq "String" and length second_text > 0 ) {
+	if ( second_text instanceof String and length second_text > 0 ) {
 		second := int(second_text);
 	}
 	if ( hour > 23 or minute > 59 or second > 59 ) {
@@ -1658,13 +1663,13 @@ class Address {
 	let display_name := null;
 
 	method __build__ () {
-		if ( typeof local ne "String" or local eq "" ) {
+		if ( not( local instanceof String ) or local eq "" ) {
 			die "mail.invalid_address: local part expects non-empty String";
 		}
-		if ( typeof domain ne "String" or domain eq "" ) {
+		if ( not( domain instanceof String ) or domain eq "" ) {
 			die "mail.invalid_address: domain expects non-empty String";
 		}
-		if ( not( display_name == null ) and typeof display_name ne "String" ) {
+		if ( not( display_name == null ) and not( display_name instanceof String ) ) {
 			die "mail.invalid_address: display_name expects String or null";
 		}
 
@@ -2354,16 +2359,16 @@ class Parser {
 	let _warnings := [];
 
 	method __build__ () {
-		if ( typeof strict ne "Boolean" ) {
+		if ( not( strict instanceof Boolean ) ) {
 			die "mail.parse: strict expects Boolean";
 		}
-		if ( typeof max_header_bytes ne "Number" or max_header_bytes < 0 ) {
+		if ( not( max_header_bytes instanceof Number ) or max_header_bytes < 0 ) {
 			die "mail.parse: max_header_bytes expects non-negative Number";
 		}
-		if ( typeof max_depth ne "Number" or max_depth < 0 ) {
+		if ( not( max_depth instanceof Number ) or max_depth < 0 ) {
 			die "mail.parse: max_depth expects non-negative Number";
 		}
-		if ( typeof decode_transfer ne "Boolean" ) {
+		if ( not( decode_transfer instanceof Boolean ) ) {
 			die "mail.parse: decode_transfer expects Boolean";
 		}
 
@@ -2718,25 +2723,25 @@ class Serializer {
 	let _boundary_counter := 0;
 
 	method __build__ () {
-		if ( typeof newline ne "String" ) {
+		if ( not( newline instanceof String ) ) {
 			self._fail("newline expects String");
 		}
 		if ( newline ne "\r\n" and newline ne "\n" ) {
 			self._fail("newline must be CRLF or LF");
 		}
-		if ( typeof fold_headers ne "Boolean" ) {
+		if ( not( fold_headers instanceof Boolean ) ) {
 			self._fail("fold_headers expects Boolean");
 		}
-		if ( typeof line_length ne "Number" ) {
+		if ( not( line_length instanceof Number ) ) {
 			self._fail("line_length expects Number");
 		}
 		if ( line_length < 1 ) {
 			self._fail("line_length must be positive");
 		}
-		if ( typeof generate_boundary ne "Boolean" ) {
+		if ( not( generate_boundary instanceof Boolean ) ) {
 			self._fail("generate_boundary expects Boolean");
 		}
-		if ( typeof _boundary_counter ne "Number" or _boundary_counter < 0 ) {
+		if ( not( _boundary_counter instanceof Number ) or _boundary_counter < 0 ) {
 			self._fail("_boundary_counter expects non-negative Number");
 		}
 
@@ -2759,10 +2764,10 @@ class Serializer {
 	}
 
 	method _validate_header_pair ( pair ) {
-		if ( typeof pair.key ne "String" or not _valid_header_name(pair.key) ) {
+		if ( not( pair.key instanceof String ) or not _valid_header_name(pair.key) ) {
 			self._fail("invalid header name");
 		}
-		if ( typeof pair.value ne "String" ) {
+		if ( not( pair.value instanceof String ) ) {
 			self._fail("header value expects String, got " _ typeof pair.value);
 		}
 		if ( _has_crlf(pair.value) ) {
@@ -2823,7 +2828,7 @@ class Serializer {
 		let data := body.to_Dict();
 		let content_type := data{content_type};
 		return "multipart/mixed" if content_type == null;
-		if ( typeof content_type ne "String" ) {
+		if ( not( content_type instanceof String ) ) {
 			self._fail("multipart content_type expects String");
 		}
 		return content_type;
@@ -2873,13 +2878,13 @@ class Serializer {
 		}
 
 		let boundary := data{boundary};
-		if ( not( boundary == null ) and typeof boundary ne "String" ) {
+		if ( not( boundary == null ) and not( boundary instanceof String ) ) {
 			self._fail("multipart boundary expects String");
 		}
 		if ( boundary == null or boundary eq "" ) {
 			boundary := self._header_boundary( message.head() );
 		}
-		if ( not( boundary == null ) and typeof boundary ne "String" ) {
+		if ( not( boundary == null ) and not( boundary instanceof String ) ) {
 			self._fail("multipart boundary expects String");
 		}
 		if ( boundary == null or boundary eq "" ) {
@@ -2911,7 +2916,7 @@ class Serializer {
 			}
 			self._fail("multipart body missing boundary");
 		}
-		if ( typeof boundary ne "String" ) {
+		if ( not( boundary instanceof String ) ) {
 			self._fail("multipart boundary expects String");
 		}
 		return self._validate_boundary(boundary);

@@ -1,5 +1,4 @@
 from std/web import Request, Response, Routes;
-from std/io import Path;
 from std/template/z import ZTemplate;
 from test/more import *;
 
@@ -91,28 +90,37 @@ is(
 	"response renders template-like object",
 );
 
-let template_path := Path.tempfile();
-template_path.spew_utf8( "Cached {{ name }} {{ count + 1 }}" );
-let path_rendered := new Response().render(
-	template_path,
-	{ name: "first", count: 2 },
-);
-is(
-	path_rendered.body(),
-	"Cached first 3",
-	"response renders Path template with ZZTemplate",
-);
+if ( __system__{deny_fs} ) {
+	pass(
+		"response renders and caches Path templates # SKIP filesystem is unavailable",
+	);
+}
+else {
+	from std/io import Path;
 
-template_path.spew_utf8( "Changed {{ name }}" );
-let cached_rendered := new Response().render(
-	template_path,
-	{ name: "second", count: 9 },
-);
-is(
-	cached_rendered.body(),
-	"Cached second 10",
-	"response caches Path templates",
-);
+	let template_path := Path.tempfile();
+	template_path.spew_utf8( "Cached {{ name }} {{ count + 1 }}" );
+	let path_rendered := new Response().render(
+		template_path,
+		{ name: "first", count: 2 },
+	);
+	is(
+		path_rendered.body(),
+		"Cached first 3",
+		"response renders Path template with ZZTemplate",
+	);
+
+	template_path.spew_utf8( "Changed {{ name }}" );
+	let cached_rendered := new Response().render(
+		template_path,
+		{ name: "second", count: 9 },
+	);
+	is(
+		cached_rendered.body(),
+		"Cached second 10",
+		"response caches Path templates",
+	);
+}
 
 let json_response := new Response().render_json([ 1, 2, 3 ]);
 is( json_response.body(), "[1,2,3]", "response renders JSON body" );

@@ -12,6 +12,10 @@ std/math - Mathematical constants and functions.
   let a := π * Math.pow(r, 2);
   let s := Math.sin(Math.deg2rad(90));
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 This module exports the C<Math> class with static math helpers and

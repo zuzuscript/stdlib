@@ -20,6 +20,13 @@ std/marshal - Serialize and deserialize ZuzuScript values.
       // Store blob, send it to another trusted worker, etc.
   }
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by zuzu.pl, zuzu-rust, and zuzu-js on Node and
+Electron. It is partially supported by zuzu-js in the browser: general
+marshal round-trip coverage passes, but C<Path> round-trip and
+C<safe_to_dump> coverage for paths is unsupported.
+
 =head1 DESCRIPTION
 
 C<std/marshal> exposes the Zuzu Marshal CBOR v1 format. It serializes

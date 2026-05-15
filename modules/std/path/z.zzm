@@ -23,6 +23,10 @@ std/path/z - Pure Zuzu implementation of ZPath selectors.
   say( first( data, "/users/#0/updated/@year" ) );
   say( zp.assign_first( data, "Adele" ) );
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 Native (pure-Zuzu) path traversal for structured values.

@@ -20,6 +20,10 @@ test/parser - Parse TAP output and summarize test counts.
   # Top-level plan, if present
   say( summary{planned} );
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 C<test/parser> parses lines in TAP (Test Anything Protocol) format and

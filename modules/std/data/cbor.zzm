@@ -16,6 +16,13 @@ std/data/cbor - CBOR encoding and decoding for ZuzuScript.
   // This preserves key order and allows duplicate keys.
   codec := new CBOR( pairlists: true );
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by zuzu.pl, zuzu-rust, and zuzu-js on Node and
+Electron. It is partially supported by zuzu-js in the browser: in-memory
+CBOR encode/decode coverage passes, but file-backed load/dump coverage is
+unsupported because browser filesystem capability is unavailable.
+
 =head1 DESCRIPTION
 
 Pure-Zuzu implementation of CBOR (RFC 8949).
@@ -76,6 +83,7 @@ License version 2.
 from std/string import substr, index;
 from std/string/base64 import encode, decode;
 from std/time import Time;
+
 
 let _B64_ALPHABET  := "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
@@ -181,7 +189,7 @@ function _binary_to_bytes ( BinaryString raw ) {
 }
 
 function _is_int ( value ) {
-	if ( typeof value ≢ "Number" ) {
+	if ( not( value instanceof Number ) ) {
 		return false;
 	}
 
@@ -240,8 +248,7 @@ function _encode_value ( Array out, value ) {
 		return;
 	}
 
-	let t := typeof value;
-	if ( t ≡ "Number" ) {
+	if ( value instanceof Number ) {
 		die "CBOR.encode currently supports only integer Number values" if not _is_int(value);
 		if ( value >= 0 ) {
 			_emit_uint( out, 0, value );
@@ -252,18 +259,7 @@ function _encode_value ( Array out, value ) {
 		return;
 	}
 
-	if ( t ≡ "String" ) {
-		let b := _binary_to_bytes( to_binary(value) );
-		_emit_uint( out, 3, b.length() );
-		let i := 0;
-		while ( i < b.length() ) {
-			out.push( b[i] );
-			i++;
-		}
-		return;
-	}
-
-	if ( t ≡ "BinaryString" ) {
+	if ( value instanceof BinaryString ) {
 		let b := _binary_to_bytes(value);
 		_emit_uint( out, 2, b.length() );
 		let i := 0;
@@ -274,7 +270,18 @@ function _encode_value ( Array out, value ) {
 		return;
 	}
 
-	if ( t ≡ "Array" ) {
+	if ( value instanceof String ) {
+		let b := _binary_to_bytes( to_binary(value) );
+		_emit_uint( out, 3, b.length() );
+		let i := 0;
+		while ( i < b.length() ) {
+			out.push( b[i] );
+			i++;
+		}
+		return;
+	}
+
+	if ( value instanceof Array ) {
 		_emit_uint( out, 4, value.length() );
 		let i := 0;
 		while ( i < value.length() ) {
@@ -284,18 +291,18 @@ function _encode_value ( Array out, value ) {
 		return;
 	}
 
-	if ( t ≡ "Set" ) {
+	if ( value instanceof Set ) {
 		_emit_uint( out, 6, 258 );
 		_encode_value( out, value.sortstr() );
 		return;
 	}
 
-	if ( t ≡ "Bag" ) {
+	if ( value instanceof Bag ) {
 		_encode_value( out, value.sortstr() );
 		return;
 	}
 
-	if ( t ≡ "PairList" ) {
+	if ( value instanceof PairList ) {
 		let pairs := value.to_Array();
 		_emit_uint( out, 5, pairs.length() );
 		let i := 0;
@@ -308,7 +315,7 @@ function _encode_value ( Array out, value ) {
 		return;
 	}
 
-	if ( t ≡ "Dict" ) {
+	if ( value instanceof Dict ) {
 		let keys := value.sorted_keys();
 		_emit_uint( out, 5, keys.length() );
 		let i := 0;
@@ -332,7 +339,7 @@ function _encode_value ( Array out, value ) {
 		return;
 	}
 
-	die `CBOR cannot encode value of type ${t}`;
+	die `CBOR cannot encode value of type ${typeof value}`;
 }
 
 function _read_uint ( Array bytes, Number ai, Number pos ) {
@@ -416,10 +423,10 @@ function _decode_at ( Array bytes, Number pos ) {
 	}
 	if ( major ≡ 6 ) {
 		let tagged := _decode_at( bytes, p );
-		if ( arg ≡ 0 and typeof tagged[0] ≡ "Number" ) {
+		if ( arg ≡ 0 and tagged[0] instanceof Number ) {
 			return [ new Time( tagged[0] ), tagged[1] ];
 		}
-		if ( arg ≡ 258 and typeof tagged[0] ≡ "Array" ) {
+		if ( arg ≡ 258 and tagged[0] instanceof Array ) {
 			return [ tagged[0].to_Set(), tagged[1] ];
 		}
 		return [ new TaggedValue( tag: arg, value: tagged[0] ), tagged[1] ];

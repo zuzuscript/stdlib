@@ -4,6 +4,10 @@
 
 std/path/zz/functions - Function definitions for ZZPath expressions.
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 This module extends the base ZPath function table with
@@ -104,6 +108,7 @@ License version 2.
 
 from std/path/z/functions import Func, STANDARD_FUNCTIONS as Z_STANDARD_FUNCTIONS;
 
+
 const STANDARD_FUNCTION_NAMES := [
 	"true",
 	"false",
@@ -162,7 +167,7 @@ function nth_array_arg ( name, ev, ctx, args, i ) {
 	const got := ev.eval_expr( args[i], ev.nested_ctx( ctx ) );
 	if ( got.length() = 1 ) {
 		const one := got[0].primitive_value();
-		return one if typeof one eq "Array";
+		return one if one instanceof Array;
 	}
 	return got.map( fn node → node.primitive_value() );
 }
@@ -172,7 +177,7 @@ function number_args ( ev, ctx, args ) {
 	if ( args.length() = 0 ) {
 		for ( let node in ctx.nodeset ) {
 			const value := ev.to_number(node);
-			nums.push(value) if typeof value eq "Number";
+			nums.push(value) if value instanceof Number;
 		}
 		return nums;
 	}
@@ -180,7 +185,7 @@ function number_args ( ev, ctx, args ) {
 		const got := ev.eval_expr( arg, ev.nested_ctx( ctx ) );
 		for ( let node in got ) {
 			const value := ev.to_number(node);
-			nums.push(value) if typeof value eq "Number";
+			nums.push(value) if value instanceof Number;
 		}
 	}
 	return nums;
@@ -245,12 +250,17 @@ function empty_function ( funk, ev, ast, ctx, args ) {
 	const value := first_arg_value( "empty", ev, ctx, args );
 	return funk.wrap( true ) if value ≡ null;
 
-	const type := typeof value;
-	if ( type in [ "Array", "Bag", "Set", "Dict", "PairList" ] ) {
+	if (
+		value instanceof Array or
+		value instanceof Bag or
+		value instanceof Set or
+		value instanceof Dict or
+		value instanceof PairList
+	) {
 		return funk.wrap( value.length() = 0 );
 	}
 
-	die `empty() expects a Collection or null, got ${type}`;
+	die `empty() expects a Collection or null, got ${typeof value}`;
 }
 
 // Start with a base of functions inherited from ZPath:

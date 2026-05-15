@@ -27,6 +27,11 @@ std/net/smtp - low-level mail delivery.
     to_binary( "Hello\r\n" )
   );
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by zuzu.pl, zuzu-rust, and zuzu-js on Node and
+Electron. It is not supported by zuzu-js in the browser.
+
 =head1 DESCRIPTION
 
 This runtime-supported module provides a deliberately low-level mail

@@ -29,6 +29,13 @@ std/config - High-level configuration loading, merging, and querying.
   let host := cfg @ "/database/host";
   let port := cfg.get( "/port", 3000 );
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by zuzu.pl, zuzu-rust, and zuzu-js on Node and
+Electron. It is partially supported by zuzu-js in the browser: environment
+override and multi-format branch selection coverage passes, but the main
+filesystem-backed configuration coverage is unsupported.
+
 =head1 DESCRIPTION
 
 This module provides a C<Config> object for application-style
@@ -223,10 +230,11 @@ from std/path/z import ZPath;
 from std/path/z/node import Node;
 from std/string import join, split, substr, trim;
 
+
 const _PATH_CACHE := new Cache( capacity: 50 );
 
 function _opt ( options, key, fallback := null ) {
-	if ( typeof options ≡ "Dict" and options.exists(key) ) {
+	if ( options instanceof Dict and options.exists(key) ) {
 		return options.get(key);
 	}
 	return fallback;
@@ -245,7 +253,8 @@ function _unwrap_config_value ( value ) {
 }
 
 function _stringify_pathish ( pathish ) {
-	if ( typeof pathish ≡ "Path" ) {
+	from std/io import Path;
+	if ( pathish instanceof Path ) {
 		return pathish.to_String();
 	}
 	return "" _ pathish;
@@ -347,7 +356,7 @@ function _coerce_scalar_text ( raw_value, options? ) {
 		return raw_value;
 	}
 
-	if ( typeof raw_value ≢ "String" ) {
+	if ( not( raw_value instanceof String ) ) {
 		return raw_value;
 	}
 
@@ -397,7 +406,7 @@ function _merge_values ( left, right, options? ) {
 	let left_value := _unwrap_config_value(left);
 	let right_value := _unwrap_config_value(right);
 
-	if ( typeof left_value ≡ "Dict" and typeof right_value ≡ "Dict" ) {
+	if ( left_value instanceof Dict and right_value instanceof Dict ) {
 		for ( let key in right_value.keys() ) {
 			if ( left_value.exists(key) ) {
 				left_value{(key)} := _merge_values(
@@ -414,8 +423,8 @@ function _merge_values ( left, right, options? ) {
 	}
 
 	if (
-		typeof left_value ≡ "Array" and
-		typeof right_value ≡ "Array" and
+		left_value instanceof Array and
+		right_value instanceof Array and
 		_opt( options, "array_merge", "replace" ) ≡ "append"
 	) {
 		for ( let item in right_value ) {
@@ -453,7 +462,7 @@ function _ensure_root_dict ( current ) {
 	if ( current ≡ null ) {
 		return {};
 	}
-	if ( typeof current ≡ "Dict" ) {
+	if ( current instanceof Dict ) {
 		return current;
 	}
 	die "std/config expected Dict root for simple path mutation";
@@ -502,7 +511,7 @@ class Config extends Node {
 
 	static method load ( sources, options? ) {
 		let cfg := new Config( raw: {}, _layers: [] );
-		for ( let source in ( typeof sources ≡ "Array" ? sources : [ sources ] ) ) {
+		for ( let source in ( sources instanceof Array ? sources : [ sources ] ) ) {
 			cfg.load_file( source, options );
 		}
 		return cfg;
@@ -586,19 +595,19 @@ class Config extends Node {
 		return super( child, action ) if action{op} ne ":=";
 
 		let container := self.raw;
-		if ( typeof container ≡ "Dict" ) {
+		if ( container instanceof Dict ) {
 			let key := child.key();
 			die "Path assignment expects string dict key" if key ≡ null;
 			container{(key)} := action{value};
 			return action{value};
 		}
-		if ( typeof container ≡ "Array" ) {
+		if ( container instanceof Array ) {
 			let ix := child.ix();
 			die "Path assignment expects numeric array index" if ix ≡ null;
 			container[ix] := action{value};
 			return action{value};
 		}
-		if ( typeof container ≡ "PairList" ) {
+		if ( container instanceof PairList ) {
 			let key := child.key();
 			die "Path assignment expects string pairlist key" if key ≡ null;
 			container.set( key, action{value} );
@@ -609,17 +618,17 @@ class Config extends Node {
 
 	method ref_on_child ( child ) {
 		let container := self.raw;
-		if ( typeof container ≡ "Dict" ) {
+		if ( container instanceof Dict ) {
 			let key := child.key();
 			die "Path assignment expects string dict key" if key ≡ null;
 			return \ container{(key)};
 		}
-		if ( typeof container ≡ "Array" ) {
+		if ( container instanceof Array ) {
 			let ix := child.ix();
 			die "Path assignment expects numeric array index" if ix ≡ null;
 			return \ container[ix];
 		}
-		if ( typeof container ≡ "PairList" ) {
+		if ( container instanceof PairList ) {
 			let key := child.key();
 			die "Path assignment expects string pairlist key" if key ≡ null;
 			return \ container{(key)};
@@ -696,7 +705,7 @@ class Config extends Node {
 	}
 
 	method merge_flat ( values, options? ) {
-		return self if typeof values ≢ "Dict";
+		return self if not( values instanceof Dict );
 
 		let prefix := "" _ _opt( options, "prefix", "" );
 		let separator := "" _ _opt( options, "separator", "__" );
@@ -745,7 +754,7 @@ class Config extends Node {
 			if ( not cursor.exists(key) or cursor.get(key) ≡ null ) {
 				cursor{(key)} := {};
 			}
-			else if ( typeof cursor.get(key) ≢ "Dict" ) {
+			else if ( not( cursor.get(key) instanceof Dict ) ) {
 				die `std/config cannot create child path below non-Dict setting '${key}'`;
 			}
 			cursor := cursor.get(key);

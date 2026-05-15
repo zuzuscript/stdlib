@@ -15,6 +15,11 @@ std/io - Filesystem paths and standard stream helpers.
     STDOUT.print(line);
   } );
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by zuzu.pl, zuzu-rust, and zuzu-js on Node and
+Electron. It is not supported by zuzu-js in the browser.
+
 =head1 DESCRIPTION
 
 This module provides path objects built on path semantics, an

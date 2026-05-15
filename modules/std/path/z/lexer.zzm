@@ -4,6 +4,10 @@
 
 std/path/z/lexer - Pure Zuzu lexer for ZPath expressions.
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 This module provides the pure-Zuzu lexer used by ZPath.

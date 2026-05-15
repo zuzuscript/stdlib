@@ -13,6 +13,10 @@ std/data/kdl/json - JSON-in-KDL structure conversion.
   let data := kdl_to_json(kdl_doc);
   let roundtrip := json_to_kdl(data);
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 This module implements the JSON-in-KDL (JiK) mapping for parsed Zuzu
@@ -55,6 +59,8 @@ License version 2.
 
 from std/data/kdl import KDLDocument, KDLNode, KDLValue;
 from std/data/kdl/xml import xml_to_kdl;
+from std/time import Time;
+
 
 function _jik_has_props ( KDLNode node ) {
 	return node.props().to_Array().length() > 0;
@@ -70,7 +76,7 @@ function _jik_literal_value ( value ) {
 }
 
 function _jik_is_time_native ( value ) {
-	return typeof value ≡ "Time";
+	return value instanceof Time;
 }
 
 function _jik_pad2 ( value ) {
@@ -103,14 +109,13 @@ function _jik_value ( value ) {
 		return new KDLValue( type: "null", value: null );
 	}
 
-	let t := typeof value;
-	if ( t ≡ "Boolean" ) {
+	if ( value instanceof Boolean ) {
 		return new KDLValue( type: "boolean", value: value );
 	}
-	if ( t ≡ "Number" ) {
+	if ( value instanceof Number ) {
 		return new KDLValue( type: "number", kind: "float", value: value );
 	}
-	if ( t ≡ "String" or t ≡ "BinaryString" ) {
+	if ( value instanceof String or value instanceof BinaryString ) {
 		return new KDLValue( type: "string", value: "" _ value );
 	}
 	if ( _jik_is_time_native(value) ) {
@@ -121,17 +126,15 @@ function _jik_value ( value ) {
 		);
 	}
 
-	return new KDLValue( type: t, value: value );
+	return new KDLValue( type: typeof value, value: value );
 }
 
 function _jik_is_array_native ( value ) {
-	let t := typeof value;
-	return t ≡ "Array" or t ≡ "Set" or t ≡ "Bag";
+	return value instanceof Array or value instanceof Set or value instanceof Bag;
 }
 
 function _jik_is_object_native ( value ) {
-	let t := typeof value;
-	return t ≡ "Dict" or t ≡ "PairList";
+	return value instanceof Dict or value instanceof PairList;
 }
 
 function _jik_is_kdl_native ( value ) {
@@ -139,12 +142,23 @@ function _jik_is_kdl_native ( value ) {
 }
 
 function _jik_is_xml_native ( value ) {
-	let t := typeof value;
-	return t ≡ "XMLDocument" or t ≡ "XMLNode"
-		or t ≡ "XMLElement"
-		or t ≡ "DOMDocument" or t ≡ "DOMNode"
-		or t ≡ "DOMElement" or t ≡ "DOMText"
-		or t ≡ "DOMComment" or t ≡ "DOMAttr";
+	try {
+		if ( value can nodeType ) {
+			return true if value.nodeType() ≢ null;
+		}
+	}
+	catch {
+	}
+
+	try {
+		return false if not( value can documentElement );
+		value.documentElement();
+		return true;
+	}
+	catch {
+	}
+
+	return false;
 }
 
 function _jik_is_opaque_literal_native ( value ) {
@@ -156,18 +170,17 @@ function _jik_is_opaque_literal_native ( value ) {
 
 function _jik_is_literal_native ( value ) {
 	return value ≡ null
-		or typeof value ≡ "Boolean"
-		or typeof value ≡ "Number"
-		or typeof value ≡ "String"
-		or typeof value ≡ "BinaryString"
+		or value instanceof Boolean
+		or value instanceof Number
+		or value instanceof String
+		or value instanceof BinaryString
 		or _jik_is_time_native(value)
 		or value instanceof KDLValue
 		or _jik_is_opaque_literal_native(value);
 }
 
 function _jik_sorted_array ( value ) {
-	let t := typeof value;
-	if ( t ≡ "Set" or t ≡ "Bag" ) {
+	if ( value instanceof Set or value instanceof Bag ) {
 		return value.sortstr();
 	}
 	return value;
@@ -175,7 +188,7 @@ function _jik_sorted_array ( value ) {
 
 function _jik_pairs ( obj ) {
 	let out := [];
-	if ( typeof obj ≡ "PairList" ) {
+	if ( obj instanceof PairList ) {
 		for ( let p in obj.to_Array() ) {
 			out.push( p{pair} );
 		}
@@ -256,7 +269,7 @@ function _jik_object_needs_annotation ( Array pairs, Boolean pairlist ) {
 
 function _jik_make_object_node ( value, String name := "-" ) {
 	let pairs := _jik_pairs(value);
-	let pairlist := typeof value ≡ "PairList";
+	let pairlist := value instanceof PairList;
 	let props := new PairList();
 	let children := [];
 

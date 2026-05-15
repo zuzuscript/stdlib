@@ -13,6 +13,10 @@ std/math/roman - Roman numeral formatter for ZuzuScript.
   say( roman( 1.6 ) );    # IS·
   say( roman( 0.5 ) );    # S
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 This module exports a single pure-Zuzu helper, C<roman>, which

@@ -21,6 +21,11 @@ std/clib - Dynamic C library loading and scalar FFI calls.
 
   say to_string(greet.call());
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by zuzu.pl, zuzu-rust, and zuzu-js on Node and
+Electron. It is not supported by zuzu-js in the browser.
+
 =head1 DESCRIPTION
 
 This runtime-supported module loads C dynamic libraries and calls

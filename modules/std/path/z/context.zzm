@@ -4,6 +4,10 @@
 
 std/path/z/context - Evaluation context used by std/path/z.
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 This module provides the pure-Zuzu evaluation context used by ZPath.
@@ -74,7 +78,6 @@ class Ctx {
 	method __build__ () {
 		if ( not ( root instanceof Node ) ) {
 			let root_obj := root;
-			let root_type := typeof root_obj;
 			let node_type := null;
 
 			try {
@@ -83,11 +86,17 @@ class Ctx {
 			catch {
 			}
 
-			if (
-				root_type eq "XMLDocument"
-				or root_type eq "DOMDocument"
-				or node_type = 9
-			) {
+			let xml_document := node_type = 9;
+			if ( not xml_document and root_obj can documentElement ) {
+				try {
+					root_obj.documentElement();
+					xml_document := true;
+				}
+				catch {
+				}
+			}
+
+			if ( xml_document ) {
 				try {
 					let de := root_obj.documentElement();
 					root_obj := de if de ≢ null;

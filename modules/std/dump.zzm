@@ -13,6 +13,10 @@ std/dump - Structured value dumper for ZuzuScript.
     { pretty: true, sort_keys: true }
   );
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 This module provides a pure-Zuzu C<Dumper> class which serializes
@@ -55,6 +59,7 @@ License version 2.
 
 from std/internals import class_name, object_slots, ansi_esc, ref_id;
 from std/string import join, substr;
+
 let _ANSI_RESET := ansi_esc() _ "[0m";
 let _ANSI_NUMBER := ansi_esc() _ "[33m";
 let _ANSI_STRING := ansi_esc() _ "[32m";
@@ -83,13 +88,13 @@ function _indent_pad ( depth, cfg ) {
 	return out;
 }
 
-function _colorize ( String text, String tone, Dict cfg ) {
-	return text if not cfg{color};
+function _colourize ( String text, String tone, Dict cfg ) {
+	return text if not cfg{colour};
 	return tone _ text _ _ANSI_RESET;
 }
 
 function _punc ( String text, Dict cfg ) {
-	return _colorize( text, _ANSI_PUNC, cfg );
+	return _colourize( text, _ANSI_PUNC, cfg );
 }
 
 function _quote ( String text, Dict cfg ) {
@@ -122,7 +127,7 @@ function _quote ( String text, Dict cfg ) {
 		i++;
 	}
 
-	return _colorize( "\"" _ out _ "\"", _ANSI_STRING, cfg );
+	return _colourize( "\"" _ out _ "\"", _ANSI_STRING, cfg );
 }
 
 function _keys_for ( Dict d, Dict cfg ) {
@@ -130,7 +135,7 @@ function _keys_for ( Dict d, Dict cfg ) {
 }
 
 function _null_literal ( Dict cfg ) {
-	return _colorize( "null", _ANSI_NULL, cfg );
+	return _colourize( "null", _ANSI_NULL, cfg );
 }
 
 function _seen_check_and_mark ( value, String label, Dict cfg, Dict state ) {
@@ -147,21 +152,20 @@ function _seen_check_and_mark ( value, String label, Dict cfg, Dict state ) {
 }
 
 function _dump_value ( value, Dict cfg, Dict state, Number depth ) {
-	let t := typeof value;
-	if ( t ≡ "Null" ) {
+	if ( value instanceof Null ) {
 		return _null_literal(cfg);
 	}
-	if ( t ≡ "Boolean" ) {
-		return _colorize( value ? "true": "false", _ANSI_BOOL, cfg );
+	if ( value instanceof Boolean ) {
+		return _colourize( value ? "true": "false", _ANSI_BOOL, cfg );
 	}
-	if ( t ≡ "Number" ) {
-		return _colorize( "" _ value, _ANSI_NUMBER, cfg );
+	if ( value instanceof Number ) {
+		return _colourize( "" _ value, _ANSI_NUMBER, cfg );
 	}
-	if ( t ≡ "String" ) {
+	if ( value instanceof String ) {
 		return _quote( value, cfg );
 	}
 
-	if ( t ≡ "Array" ) {
+	if ( value instanceof Array ) {
 		return _null_literal(cfg) if _seen_check_and_mark( value, "array", cfg, state );
 		if ( value.length() ≡ 0 ) {
 			return _punc( "[", cfg ) _ _punc( "]", cfg );
@@ -183,7 +187,7 @@ function _dump_value ( value, Dict cfg, Dict state, Number depth ) {
 		    _punc( "]", cfg );
 	}
 
-	if ( t ≡ "Dict" ) {
+	if ( value instanceof Dict ) {
 		return _null_literal(cfg) if _seen_check_and_mark( value, "dict", cfg, state );
 		let keys := _keys_for( value, cfg );
 		if ( keys.length() ≡ 0 ) {
@@ -208,7 +212,7 @@ function _dump_value ( value, Dict cfg, Dict state, Number depth ) {
 		    _punc( "}", cfg );
 	}
 
-	if ( t ≡ "PairList" ) {
+	if ( value instanceof PairList ) {
 		return _null_literal(cfg) if _seen_check_and_mark( value, "pairlist", cfg, state );
 		if ( value.empty ) {
 			return _punc( "{{" , cfg ) _ _punc( "}}", cfg );
@@ -232,10 +236,12 @@ function _dump_value ( value, Dict cfg, Dict state, Number depth ) {
 		    _punc( "}}", cfg );
 	}
 
-	if ( t ≡ "Set" or t ≡ "Bag" ) {
-		return _null_literal(cfg) if _seen_check_and_mark( value, lc t, cfg, state );
-		let left :=( t ≡ "Set" ) ? "<<": "<<<";
-		let right :=( t ≡ "Set" ) ? ">>": ">>>";
+	if ( value instanceof Set or value instanceof Bag ) {
+		let is_set := value instanceof Set;
+		return _null_literal(cfg)
+			if _seen_check_and_mark( value, is_set ? "set" : "bag", cfg, state );
+		let left := is_set ? "<<": "<<<";
+		let right := is_set ? ">>": ">>>";
 		let sep := cfg{pretty} ? _punc( ", ", cfg ): _punc(",", cfg );
 		let items := [];
 		for ( let item in value ) {
@@ -244,27 +250,33 @@ function _dump_value ( value, Dict cfg, Dict state, Number depth ) {
 		return _punc( left, cfg ) _ join( sep, items ) _ _punc( right, cfg );
 	}
 
-	if ( t ≡ "Pair" ) {
+	if ( value instanceof Pair ) {
 		let pair_value := value{pair};
-		if ( typeof pair_value ≢ "Array" or pair_value.length() < 2 ) {
+		if ( not( pair_value instanceof Array ) or pair_value.length() < 2 ) {
 			_warn_unless_quiet( "Dumper: invalid Pair shape; using null", cfg );
 			return _null_literal(cfg);
 		}
 		let first := _dump_value( pair_value[0], cfg, state, depth + 1 );
 		let second := _dump_value( pair_value[1], cfg, state, depth + 1 );
 		let body := _punc( "[", cfg ) _ first _ _punc(",", cfg ) _ second _ _punc( "]", cfg );
-		let kw_new := _colorize( "new", _ANSI_KEYWORD, cfg );
+		let kw_new := _colourize( "new", _ANSI_KEYWORD, cfg );
 		return kw_new _ " Pair" _ _punc("(", cfg ) _ "pair" _ _punc(":", cfg ) _ body _ _punc(")", cfg );
 	}
 
-	if ( t ≡ "Function" or t ≡ "Method" or t ≡ "Class" or t ≡ "Regexp" ) {
+	if (
+		value instanceof Function or
+		value instanceof Class or
+		typeof value ≡ "Regexp" or
+		typeof value ≡ "Method"
+	) {
+		let t := typeof value;
 		_warn_unless_quiet( "Dumper: value of type '" _ t _ "' is not dumpable; using null", cfg, );
 		return _null_literal(cfg);
 	}
 	return _null_literal(cfg) if _seen_check_and_mark( value, "object", cfg, state );
 	let cname := class_name(value);
 	let slots := object_slots(value);
-	if ( cname ≡ null or typeof slots ≢ "Dict" ) {
+	if ( cname ≡ null or not( slots instanceof Dict ) ) {
 		_warn_unless_quiet( "Dumper: object internals unavailable; dumping null", cfg );
 		return _null_literal(cfg);
 	}
@@ -274,7 +286,7 @@ function _dump_value ( value, Dict cfg, Dict state, Number depth ) {
 	for ( let key in keys ) {
 		args.push( key _ colon _ _dump_value( slots.get(key), cfg, state, depth + 1 ) );
 	}
-	let kw_new := _colorize( "new", _ANSI_KEYWORD, cfg );
+	let kw_new := _colourize( "new", _ANSI_KEYWORD, cfg );
 	if ( args.length() ≡ 0 ) {
 		return kw_new _ " " _ cname _ _punc( "()", cfg );
 	}
@@ -292,11 +304,11 @@ function _dump_value ( value, Dict cfg, Dict state, Number depth ) {
 class Dumper {
 
 	static method dump ( value, options? ) {
-		let cfg := { pretty: false, sort_keys: false, color: false, quiet: false };
-		if ( typeof options ≡ "Dict" ) {
+		let cfg := { pretty: false, sort_keys: false, colour: false, quiet: false };
+		if ( options instanceof Dict ) {
 			cfg{pretty} := _is_true( options{pretty} ) if "pretty" in options;
 			cfg{sort_keys} := _is_true( options{sort_keys} ) if "sort_keys" in options;
-			cfg{color} := _is_true( options{color} ) if "color" in options;
+			cfg{colour} := _is_true( options{colour} ) if "colour" in options;
 			cfg{quiet} := _is_true( options{quiet} ) if "quiet" in options;
 		}
 		return _dump_value( value, cfg, { seen: {} }, 0 );

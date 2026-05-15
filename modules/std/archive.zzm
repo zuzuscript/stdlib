@@ -23,6 +23,11 @@ std/archive - Small archive and compression helpers.
   Archive.dump( path, archive );
   let loaded := Archive.load(path);
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by zuzu.pl, zuzu-rust, and zuzu-js on Node and
+Electron. It is not supported by zuzu-js in the browser.
+
 =head1 DESCRIPTION
 
 This module provides a small, runtime-supported archive API centred on

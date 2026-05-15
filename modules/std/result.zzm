@@ -14,6 +14,10 @@ std/result - A simple Result object for explicit success and failure values.
     say r.unwrap();
   }
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 C<Result> is a small, subclassable object modelled on a simplified version

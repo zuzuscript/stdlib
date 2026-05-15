@@ -21,6 +21,10 @@ std/worker - isolated workers for shared-nothing parallel work.
     };
   }
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 This runtime-supported module provides isolated workers for CPU-heavy

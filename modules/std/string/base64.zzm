@@ -16,6 +16,10 @@ std/string/base64 - Base64 encoders and decoders.
   let safe := encode_urlsafe(raw);
   let original := decode_urlsafe(safe);
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 This module provides Base64 encoding and decoding helpers.

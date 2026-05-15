@@ -14,6 +14,14 @@ std/data/kdl - KDL parsing and serialization for ZuzuScript.
   """);
   let text := kdl.encode(doc);
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by zuzu.pl, zuzu-rust, and zuzu-js on Node and
+Electron. It is partially supported by zuzu-js in the browser: in-memory
+KDL parsing and serialization coverage passes, but fixture and load/dump
+coverage is unsupported because browser filesystem capability is
+unavailable.
+
 =head1 DESCRIPTION
 
 This module provides a pure-Zuzu implementation of the KDL document
@@ -294,6 +302,7 @@ License version 2.
 =cut
 
 from std/string import substr, index, chr, ord, sprint;
+
 
 function _kdl_starts_with ( String text, Number pos, String prefix ) {
 	return substr( text, pos, length prefix ) ≡ prefix;
@@ -1461,11 +1470,10 @@ function _kdl_value ( value ) {
 	if ( value ≡ null ) {
 		return new KDLValue( type: "null", value: null );
 	}
-	let t := typeof value;
-	if ( t ≡ "Boolean" ) {
+	if ( value instanceof Boolean ) {
 		return new KDLValue( type: "boolean", value: value );
 	}
-	if ( t ≡ "Number" ) {
+	if ( value instanceof Number ) {
 		return new KDLValue( type: "number", kind: "float", value: value );
 	}
 	return new KDLValue( type: "string", value: "" _ value );
@@ -1579,7 +1587,7 @@ class KDL {
 		if ( value instanceof KDLNode ) {
 			return _kdl_encode_node( value, 0, canonical );
 		}
-		if ( typeof value ≡ "Array" ) {
+		if ( value instanceof Array ) {
 			return _kdl_encode_document(
 				new KDLDocument( nodes: value ),
 				canonical,

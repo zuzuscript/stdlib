@@ -4,6 +4,10 @@
 
 std/path/z/functions - Function definitions for ZPath.
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 This module defines the function objects and standard function table used
@@ -85,11 +89,12 @@ License version 2.
 
 =cut
 
-from std/path/z/node import Node;
+from std/path/z/node import KDLNodeNode, KDLValueNode, Node, XmlNodeNode;
 from std/path/z/operators import EvalHelpers;
 from std/data/xml/escape import escape_xml, unescape_xml;
 from std/string import index, rindex, search, sprint, substr, join;
 from std/math import Math;
+
 
 class Func with EvalHelpers {
 	let String spelling with get;
@@ -133,7 +138,7 @@ function mk_single_number_function ( String name, Function impl ) {
 		}
 		return nodes
 			.map( fn x → x.number_value )
-			.grep( fn x → typeof x eq "Number" )
+			.grep( fn x → x instanceof Number )
 			.map( fn x → funk.wrap_for_array( impl(x) ) );
 	};
 }
@@ -152,7 +157,7 @@ function mk_aggregate_number_function ( String name, Function impl ) {
 		}
 		const nums := nodes
 			.map( fn x → x.number_value )
-			.grep( fn x → typeof x eq "Number" );
+			.grep( fn x → x instanceof Number );
 		return funk.wrap( impl( nums ) );
 	};
 }
@@ -171,7 +176,7 @@ function mk_single_string_function ( String name, Function impl ) {
 		}
 		return nodes
 			.map( fn x → x.string_value )
-			.grep( fn x → typeof x eq "String" )
+			.grep( fn x → x instanceof String )
 			.map( fn x → funk.wrap_for_array( impl(x) ) );
 	};
 }
@@ -204,7 +209,7 @@ function mk_match_function () {
 		
 		return nodes
 			.map( fn x → x.string_value )
-			.grep( fn x → typeof x eq "String" )
+			.grep( fn x → x instanceof String )
 			.map( fn x → funk.wrap_for_array( ( x ~ re ) ? true : false ) );
 	}
 }
@@ -578,7 +583,7 @@ const STANDARD_FUNCTIONS := [
 			
 			return nodes
 				.map( fn x → x.string_value )
-				.grep( fn x → typeof x eq "String" )
+				.grep( fn x → x instanceof String )
 				.map( fn x → funk.wrap_for_array( index(x, search) ) );
 		}
 	),
@@ -612,7 +617,7 @@ const STANDARD_FUNCTIONS := [
 			
 			return nodes
 				.map( fn x → x.string_value )
-				.grep( fn x → typeof x eq "String" )
+				.grep( fn x → x instanceof String )
 				.map( fn x → funk.wrap_for_array( rindex(x, search) ) );
 		}
 	),
@@ -653,7 +658,7 @@ const STANDARD_FUNCTIONS := [
 			
 			return nodes
 				.map( fn x → x.string_value )
-				.grep( fn x → typeof x eq "String" )
+				.grep( fn x → x instanceof String )
 				.map( fn x → funk.wrap_for_array( substr(x, start, len) ) );
 		}
 	),
@@ -687,7 +692,7 @@ const STANDARD_FUNCTIONS := [
 			
 			return nodes
 				.map( fn x → x.string_value )
-				.grep( fn x → typeof x eq "String" )
+				.grep( fn x → x instanceof String )
 				.map( fn x → funk.wrap_for_array( sprint(fmt, x) ) );
 		}
 	),
@@ -742,7 +747,7 @@ const STANDARD_FUNCTIONS := [
 			
 			return nodes
 				.map( fn x → x.string_value )
-				.grep( fn x → typeof x eq "String" )
+				.grep( fn x → x instanceof String )
 				.map( fn x → funk.wrap_for_array( replace( x, pattern, replacement ) ) );
 		}
 	),
@@ -776,7 +781,7 @@ const STANDARD_FUNCTIONS := [
 			
 			const strings := nodes
 				.map( fn x → x.string_value )
-				.grep( fn x → typeof x eq "String" );
+				.grep( fn x → x instanceof String );
 			return funk.wrap( join( joiner, strings ) );
 		}
 	),
@@ -787,13 +792,13 @@ const STANDARD_FUNCTIONS := [
 			if ( args.length = 0 ) {
 				const cur := ctx.nodeset.get( 0, null );
 				return [] unless cur;
-				return funk.wrap( typeof cur eq "XmlNodeNode" ? cur.raw.namespaceURI() : null );
+				return funk.wrap( cur instanceof XmlNodeNode ? cur.raw.namespaceURI() : null );
 			}
 			else if ( args.length = 1 ) {
 				const got := ev.eval_expr( args[0], ev.nested_ctx( ctx ) );
 				return got.map(
 					fn x → funk.wrap_for_array(
-						typeof x eq "XmlNodeNode" ? x.raw.namespaceURI() : null
+						x instanceof XmlNodeNode ? x.raw.namespaceURI() : null
 					)
 				);
 			}
@@ -808,8 +813,8 @@ const STANDARD_FUNCTIONS := [
 				const cur := ctx.nodeset.get( 0, null );
 				return [] unless cur;
 				return funk.wrap(
-					typeof cur eq "XmlNodeNode" ? cur.raw.localName()
-						: typeof cur eq "KDLNodeNode" ? cur.name()
+					cur instanceof XmlNodeNode ? cur.raw.localName()
+						: cur instanceof KDLNodeNode ? cur.name()
 						: null
 				);
 			}
@@ -817,8 +822,8 @@ const STANDARD_FUNCTIONS := [
 				const got := ev.eval_expr( args[0], ev.nested_ctx( ctx ) );
 				return got.map(
 					fn x → funk.wrap_for_array(
-						typeof x eq "XmlNodeNode" ? x.raw.localName()
-							: typeof x eq "KDLNodeNode" ? x.name()
+						x instanceof XmlNodeNode ? x.raw.localName()
+							: x instanceof KDLNodeNode ? x.name()
 							: null
 					)
 				);
@@ -833,11 +838,11 @@ const STANDARD_FUNCTIONS := [
 			if ( args.length = 0 ) {
 				const cur := ctx.nodeset.get( 0, null );
 				return [] unless cur;
-				if ( typeof cur eq "KDLNodeNode" ) {
+				if ( cur instanceof KDLNodeNode ) {
 					let ann := cur.raw().type_annotation();
 					return funk.wrap( ann ≡ null ? null : "" _ ann );
 				}
-				if ( typeof cur eq "KDLValueNode" ) {
+				if ( cur instanceof KDLValueNode ) {
 					let ann := cur.raw().type_annotation();
 					return funk.wrap( ann ≡ null ? null : "" _ ann );
 				}
@@ -847,19 +852,19 @@ const STANDARD_FUNCTIONS := [
 				const got := ev.eval_expr( args[0], ev.nested_ctx( ctx ) );
 				return got.map(
 					fn x → funk.wrap_for_array(
-						typeof x eq "KDLNodeNode"
+						x instanceof KDLNodeNode
 							? (
 								x.raw().type_annotation() ≡ null
 									? null
 									: "" _ x.raw().type_annotation()
 							)
-							: typeof x eq "KDLValueNode"
+							: x instanceof KDLValueNode
 							? (
 								x.raw().type_annotation() ≡ null
 									? null
 									: "" _ x.raw().type_annotation()
 							)
-							: typeof x.has_tagged ? x.tagged{tag} : null
+							: x can has_tagged ? x.tagged{tag} : null
 					)
 				);
 			}

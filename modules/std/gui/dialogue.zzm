@@ -12,6 +12,11 @@ std/gui/dialogue - Dialogue helpers.
   let ok := confirm("Continue?");
   let name := prompt("Name:", value: "Ada");
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by zuzu.pl, zuzu-rust, and zuzu-js on Electron
+and Browser. It is not supported by zuzu-js on Node.
+
 =head1 DESCRIPTION
 
 This module provides convenience dialogue helpers layered on top of the

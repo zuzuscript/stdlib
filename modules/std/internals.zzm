@@ -15,6 +15,10 @@ std/internals - Runtime internals helpers for advanced modules.
   let slots := object_slots(some_object);
   let id := ref_id(some_object);
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 This module provides low-level reflection helpers used by advanced

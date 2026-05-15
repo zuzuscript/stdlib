@@ -12,6 +12,11 @@ std/gui/objects - Runtime-supported GUI object classes.
   let b := new Button( text: "OK", id: "submit" );
   w.set_content( new VBox( children: [ b ] ) );
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by zuzu.pl, zuzu-rust, and zuzu-js on Electron.
+It is not supported by zuzu-js on Node or Browser.
+
 =head1 DESCRIPTION
 
 This runtime-supported module provides the C<std/gui> object model.

@@ -17,6 +17,13 @@ std/gui - User-facing GUI constructor helpers.
   	),
   );
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by zuzu.pl, zuzu-rust, and zuzu-js on Electron.
+It is not supported by zuzu-js on Node. It is partially supported by
+zuzu-js in the browser: core GUI and widget lifecycle coverage passes,
+but filesystem-backed file and directory dialogue coverage is unsupported.
+
 =head1 DESCRIPTION
 
 This module provides thin constructor helpers over C<std/gui/objects>.
@@ -178,6 +185,7 @@ from std/internals import getupperprop;
 from std/path/zz import ZZPath;
 from std/string import join, split, substr, trim;
 
+
 const Number EM := _gui_meta{font_size_pixels};
 
 function _assert_known_props ( String ctor, PairList props, Array allowed ) {
@@ -203,7 +211,7 @@ function _assert_prop_value ( String ctor, String prop, value, Array allowed ) {
 }
 
 function _assert_prop_array ( String ctor, String prop, value ) {
-	if ( typeof value ≢ "Array" ) {
+	if ( not( value instanceof Array ) ) {
 		die `GUI_PROP_TYPE: ${ctor} property '${prop}' expects Array`;
 	}
 }
@@ -951,7 +959,7 @@ function _binding_path_class ( path_class ) {
 	if ( path_class ≡ null ) {
 		return ZZPath;
 	}
-	if ( typeof path_class ≢ "Class" ) {
+	if ( not( path_class instanceof Class ) ) {
 		die "GUI_BIND_PATH: paths special property must be Class or null";
 	}
 	return path_class;
@@ -977,7 +985,7 @@ function _binding_compile_path ( String path_text, path_class ) {
 }
 
 function _binding_path ( pathish, path_class ) {
-	if ( typeof pathish ≡ "String" ) {
+	if ( pathish instanceof String ) {
 		return _binding_compile_path( pathish, path_class );
 	}
 	if (

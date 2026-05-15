@@ -11,6 +11,10 @@ std/uuid - Pure ZuzuScript UUID v1 generator.
   let text := create_uuid();
   let raw := create_uuid_binary();
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 This module implements UUID version 1 generation using only

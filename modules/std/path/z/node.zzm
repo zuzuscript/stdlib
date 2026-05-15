@@ -4,6 +4,10 @@
 
 std/path/z/node - Node wrapper used by std/path/z.
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 Objects of this class wrap underlying values and provide traversal and
@@ -177,9 +181,14 @@ License version 2.
 
 =cut
 
+from std/data/cbor import TaggedValue;
+from std/data/kdl import KDLDocument, KDLNode, KDLValue;
 from std/internals import class_name, load_module, ref_id;
+from std/io import Path;
 from std/math import Math;
 from std/string import index, substr;
+from std/time import Time;
+
 
 let determine_class;
 let _widget_class_loaded := false;
@@ -252,6 +261,33 @@ function _zpath_widget_class () {
 function _zpath_is_widget ( obj ) {
 	let Widget := _zpath_widget_class();
 	return Widget ≢ null and obj instanceof Widget;
+}
+
+function _zpath_xml_node_type ( obj ) {
+	return null if not( obj can nodeType );
+	try {
+		return int( "" _ obj.nodeType() );
+	}
+	catch {
+	}
+	return null;
+}
+
+function _zpath_is_xml_document ( obj ) {
+	return true if _zpath_xml_node_type(obj) = 9;
+	return false if not( obj can documentElement );
+	try {
+		obj.documentElement();
+		return true;
+	}
+	catch {
+	}
+	return false;
+}
+
+function _zpath_is_xml_node ( obj ) {
+	return true if _zpath_xml_node_type(obj) ≢ null;
+	return _zpath_is_xml_document(obj);
 }
 
 function _zpath_widget_attr_name ( name ) {
@@ -405,9 +441,9 @@ class Node {
 			ix: ix,
 		);
 		
-		if ( typeof obj eq "TaggedValue" ) {
+		if ( obj instanceof TaggedValue ) {
 			n.set_tagged(obj);
-			while ( typeof obj eq "TaggedValue" ) {
+			while ( obj instanceof TaggedValue ) {
 				obj := obj{value}
 			}
 			n.set_raw(obj);
@@ -603,7 +639,7 @@ class StringNode extends SimpleNode {
 	
 	method string_value () {
 		let raw := self.raw;
-		if ( typeof raw eq "BinaryString" ) {
+		if ( raw instanceof BinaryString ) {
 			return to_string( raw );
 		}
 		return raw;
@@ -989,7 +1025,7 @@ class XmlNodeNode extends Node {
 
 	method type () {
 		let raw := self.raw;
-		if ( typeof raw eq "XMLDocument" ) {
+		if ( _zpath_is_xml_document(raw) ) {
 			return "document";
 		}
 		switch ( Node._xml_node_type_code(raw) ) {
@@ -1044,7 +1080,7 @@ class XmlNodeNode extends Node {
 
 	method primitive_value () {
 		let raw := self.raw;
-		if ( typeof raw eq "XMLDocument" ) {
+		if ( _zpath_is_xml_document(raw) ) {
 			let de := raw.documentElement();
 			return de ≡ null ? null : de.textContent();
 		}
@@ -1065,7 +1101,7 @@ class XmlNodeNode extends Node {
 	
 	method string_value () {
 		let raw := self.raw;
-		if ( typeof raw eq "XMLDocument" ) {
+		if ( _zpath_is_xml_document(raw) ) {
 			let de := raw.documentElement();
 			return de ≡ null ? null : de.textContent();
 		}
@@ -1098,7 +1134,7 @@ class XmlNodeNode extends Node {
 	
 	method children () {
 		let raw := self.raw;
-		if ( typeof raw eq "XMLDocument" ) {
+		if ( _zpath_is_xml_document(raw) ) {
 			let de := raw.documentElement();
 			return de ≡ null ? []
 				: [ Node.wrap( de, self, de.nodeName(), 0 ) ];
@@ -1276,51 +1312,62 @@ determine_class := function ( obj ) {
 	let Klass;
 	
 	let real_obj := obj;
-	while ( typeof real_obj eq "TaggedValue" ) {
+	while ( real_obj instanceof TaggedValue ) {
 		real_obj := real_obj{value};
 	}
 	
-	switch ( typeof real_obj : eq ) {
-		case "Null":
-			Klass := NullNode;
-		case "Boolean":
-			Klass := BooleanNode;
-		case "Number":
-			Klass := NumberNode;
-		case "String", "BinaryString":
-			Klass := StringNode;
-		case "Array":
-			Klass := ArrayNode;
-		case "Bag":
-			Klass := BagNode;
-		case "Set":
-			Klass := SetNode;
-		case "Dict":
-			Klass := DictNode;
-		case "PairList":
-			Klass := PairListNode;
-		case "Pair":
-			Klass := PairNode;
-		case "KDLDocument":
-			Klass := KDLDocumentNode;
-		case "KDLNode":
-			Klass := KDLNodeNode;
-		case "KDLValue":
-			Klass := KDLValueNode;
-		case "XMLNode", "XMLDocument", "DOMNode":
-			Klass := XmlNodeNode;
-		case "DOMElement", "DOMAttr", "DOMText", "DOMComment", "DOMDocument":
-			Klass := XmlNodeNode;
-		case "Time":
-			Klass := TimeNode;
-		case "Path":
-			Klass := PathNode;
-		default:
-			if ( real_obj instanceof "Object" ) {
-				if ( real_obj can __zpath_node_class__ ) {
-					Klass = real_obj.__zpath_node_class__;
-				}
-			}
+	if ( real_obj instanceof Null ) {
+		Klass := NullNode;
+	}
+	else if ( real_obj instanceof Boolean ) {
+		Klass := BooleanNode;
+	}
+	else if ( real_obj instanceof Number ) {
+		Klass := NumberNode;
+	}
+	else if ( real_obj instanceof String or real_obj instanceof BinaryString ) {
+		Klass := StringNode;
+	}
+	else if ( real_obj instanceof Array ) {
+		Klass := ArrayNode;
+	}
+	else if ( real_obj instanceof Bag ) {
+		Klass := BagNode;
+	}
+	else if ( real_obj instanceof Set ) {
+		Klass := SetNode;
+	}
+	else if ( real_obj instanceof Dict ) {
+		Klass := DictNode;
+	}
+	else if ( real_obj instanceof PairList ) {
+		Klass := PairListNode;
+	}
+	else if ( real_obj instanceof Pair ) {
+		Klass := PairNode;
+	}
+	else if ( real_obj instanceof KDLDocument ) {
+		Klass := KDLDocumentNode;
+	}
+	else if ( real_obj instanceof KDLNode ) {
+		Klass := KDLNodeNode;
+	}
+	else if ( real_obj instanceof KDLValue ) {
+		Klass := KDLValueNode;
+	}
+	else if ( _zpath_is_xml_node(real_obj) ) {
+		Klass := XmlNodeNode;
+	}
+	else if ( real_obj instanceof Time ) {
+		Klass := TimeNode;
+	}
+	else if ( real_obj instanceof Path ) {
+		Klass := PathNode;
+	}
+	else if ( real_obj instanceof Object ) {
+		if ( real_obj can __zpath_node_class__ ) {
+			Klass = real_obj.__zpath_node_class__;
+		}
 	}
 
 	if ( Klass ≡ null and _zpath_is_widget(real_obj) ) {
@@ -1328,12 +1375,7 @@ determine_class := function ( obj ) {
 	}
 
 	if ( Klass ≡ null ) {
-		try {
-			let maybe_node_type := real_obj.nodeType();
-			Klass := XmlNodeNode if maybe_node_type ≢ null;
-		}
-		catch {
-		}
+		Klass := XmlNodeNode if _zpath_is_xml_node(real_obj);
 	}
 	
 	return Klass ?: Node;

@@ -11,6 +11,10 @@ std/eval - Evaluate Zuzu code in a nested caller scope.
   let x := 2;
   let y := eval("x + 40;");
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 This module exports C<eval(str)>, which parses and runs C<str>

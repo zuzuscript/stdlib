@@ -23,13 +23,21 @@ std/secure - Secure runtime services and capability inspection.
   let caps := Secure.capabilities();
   Secure.require( "random", "bytes" );
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript, though
+the ciphers, hashes, and other algorithms supported by the module vary
+from platform to platform. Many synchronous operations are unsupported
+by zuzu-js on the browser; using async variants is recommended if you
+need to support that platform.
+
 =head1 DESCRIPTION
 
 This runtime-supported module is the public namespace for secure random
 generation, key derivation, authenticated encryption, password hashing,
 signing, key agreement, certificate handling, and TLS identity objects.
 
-Phase 9 provides secure random bytes, URL-safe random tokens, unbiased
+It implements secure random bytes, URL-safe random tokens, unbiased
 random integers, host identification, capability queries, HKDF-SHA256
 key derivation, AES-256-GCM authenticated encryption, password hashing,
 Ed25519 and ECDSA signing, and X25519 key agreement.

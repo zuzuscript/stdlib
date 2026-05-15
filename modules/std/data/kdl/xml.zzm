@@ -16,6 +16,10 @@ std/data/kdl/xml - XML-in-KDL structure conversion.
   let xml_doc := kdl_to_xml(kdl_doc);
   let roundtrip := xml_to_kdl(xml_doc);
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 This module implements the XML-in-KDL (XiK) mapping for parsed Zuzu

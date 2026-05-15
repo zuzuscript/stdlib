@@ -19,6 +19,14 @@ std/template/z - Pure ZuzuScript template engine.
   );
   say( file_tmpl.process( data ) );
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by zuzu.pl, zuzu-rust, and zuzu-js on Node and
+Electron. It is partially supported by zuzu-js in the browser: complex,
+HTTP/JSON/ZPath pipeline, self-contained, and trait-object rendering
+coverage passes, but filesystem-backed template loading and database row
+rendering coverage are unsupported.
+
 =head1 DESCRIPTION
 
 C<std/template/z> is a pure ZuzuScript template renderer.
@@ -297,10 +305,10 @@ class ZTemplate {
 	}
 
 	method _to_path ( raw_file ) {
-		if ( typeof raw_file ≡ "Path" ) {
+		from std/io import Path;
+		if ( raw_file instanceof Path ) {
 			return raw_file;
 		}
-		from std/io import Path;
 		return new Path( "" _ raw_file );
 	}
 
@@ -313,7 +321,8 @@ class ZTemplate {
 		if ( canonical ≡ null ) {
 			return obj.to_String;
 		}
-		if ( typeof canonical ≡ "Path" ) {
+		from std/io import Path;
+		if ( canonical instanceof Path ) {
 			return canonical.to_String;
 		}
 		return "" _ canonical;

@@ -1,3 +1,11 @@
+from test/more import *;
+
+requires_capability("net");
+
+if ( __system__{runtime} eq "zuzu-js" and __system__{platform} eq "browser" ) {
+	skip_all( "std/net/dns is not supported in JS/Browser" );
+}
+
 from std/net/dns import
 	lookup,
 	lookup_async,
@@ -5,9 +13,6 @@ from std/net/dns import
 	addresses_async,
 	reverse,
 	reverse_async;
-from test/more import *;
-
-requires_capability("net");
 
 let ipv4 := addresses( "localhost", "ipv4" );
 ok( ipv4.length() >= 1, "addresses() resolves localhost IPv4" );

@@ -12,6 +12,10 @@ std/math/range - Format integer lists as compact display ranges.
   let compact := abbreviate( values );
   # [ "3", "4", "9-12", "15" ]
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 This module exports C<abbreviate>, which converts a list of test

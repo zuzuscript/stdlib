@@ -11,6 +11,10 @@ std/tui - Terminal UI helpers.
   write_line( "Warning", "yellow" );
   let path := readline( "File: ", "", filename_completions );
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 This runtime-supported module provides small terminal UI primitives for

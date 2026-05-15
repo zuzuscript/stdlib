@@ -26,6 +26,13 @@ std/data/csv - CSV/TSV and delimited text data handling.
   writer.write_row( { name: "Ada", age: 32 } );
   writer.close();
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by zuzu.pl, zuzu-rust, and zuzu-js on Node and
+Electron. It is partially supported by zuzu-js in the browser: in-memory
+CSV encode/decode coverage passes, but file-backed load/dump coverage is
+unsupported because browser filesystem capability is unavailable.
+
 =head1 DESCRIPTION
 
 This module provides CSV-style parsing and writing backed by the runtime.

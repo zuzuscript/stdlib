@@ -17,6 +17,10 @@ std/cache/lru - Pure ZuzuScript in-memory LRU cache.
 
   cache.empty();
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 This module provides a tiny in-memory least-recently-used (LRU)
@@ -84,6 +88,7 @@ License version 2.
 
 =cut
 
+
 class Cache {
 	let Number capacity := 128;
 	let Dict _items := {};
@@ -133,7 +138,7 @@ class Cache {
 			return _items.get(item_key);
 		}
 
-		die "Cache.get expects a producer Function" if not( typeof producer ≡ "Function" );
+		die "Cache.get expects a producer Function" if not( producer instanceof Function );
 
 		let value := producer(item_key);
 		self.set( item_key, value );

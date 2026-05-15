@@ -27,5 +27,5 @@ is( Dumper.dump(pair), "new Pair(pair:[\"k\",\"v\"])", "Pair values are dumpable
 let plist := new PairList( [ "alpha", 1 ], [ "beta", 2 ] );
 is( Dumper.dump( plist, { sort_keys: true } ), "{{\"alpha\":1,\"beta\":2}}",
     "PairList values are dumpable", );
-like( Dumper.dump( [1], { color: true } ), /\x1b\[/, "color option emits ANSI escape sequences", );
+like( Dumper.dump( [1], { colour: true } ), /\x1b\[/, "colour option emits ANSI escape sequences", );
 done_testing();

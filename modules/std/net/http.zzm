@@ -22,6 +22,13 @@ std/net/http - HTTP/web client foundation.
   let res := ua.send(req);
   let data := res.expect_success().json();
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by zuzu.pl, zuzu-rust, and zuzu-js on Node and
+Electron. It is partially supported by zuzu-js in the browser: asynchronous
+HTTP, cookie jar, header normalization, URL, timeout, and retry coverage
+passes, but synchronous request coverage is unsupported.
+
 =head1 DESCRIPTION
 
 This module provides an HTTP client API with classes for cookie

@@ -12,6 +12,11 @@ std/net/dns - DNS lookup helpers.
   let mx  := lookup("example.com", "MX");
   let ptr := reverse("127.0.0.1");
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by zuzu.pl, zuzu-rust, and zuzu-js on Node and
+Electron. It is not supported by zuzu-js in the browser.
+
 =head1 DESCRIPTION
 
 This runtime-supported module provides small DNS helper functions for

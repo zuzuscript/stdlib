@@ -11,6 +11,10 @@ std/colour - Colour parsing helpers.
   say( parse_colour("red") );  # #ff0000
   say( parse_colour("#abc") ); # #aabbcc
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 C<parse_colour> accepts three- and six-digit hexadecimal colours and the

@@ -12,6 +12,13 @@ std/data/toml - TOML encoding and decoding for ZuzuScript.
   let text := codec.encode({ answer: 42, name: "Zuzu" });
   let data := codec.decode(text);
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by zuzu.pl, zuzu-rust, and zuzu-js on Node and
+Electron. It is partially supported by zuzu-js in the browser: in-memory
+TOML encode/decode coverage passes, but file-backed load/dump coverage is
+unsupported because browser filesystem capability is unavailable.
+
 =head1 DESCRIPTION
 
 This module provides a pure-Zuzu implementation of TOML parsing and
@@ -62,6 +69,7 @@ License version 2.
 =cut
 
 from std/string import substr, index;
+
 
 function _is_space ( String ch ) {
 	return ch ≡ " " or ch ≡ "\t" or ch ≡ "\r" or ch ≡ "\n";
@@ -358,7 +366,7 @@ function _ensure_table_path ( Dict root, Array path ) {
 		if ( not cursor.exists(key) ) {
 			cursor.set( key, {} );
 		}
-		else if ( typeof cursor.get(key) ≢ "Dict" ) {
+		else if ( not( cursor.get(key) instanceof Dict ) ) {
 			die `TOML path '${key}' conflicts with non-table value`;
 		}
 		cursor := cursor.get(key);
@@ -377,7 +385,7 @@ function _set_deep_dict_value ( Dict table, Array path, Number at, value ) {
 	}
 
 	let child := out.exists(key) ? out.get(key): {};
-	if ( typeof child ≢ "Dict" ) {
+	if ( not( child instanceof Dict ) ) {
 		die `TOML path '${key}' conflicts with non-table value`;
 	}
 	let updated_child := _set_deep_dict_value( child, path, at + 1, value );
@@ -419,9 +427,7 @@ function _join_lines ( Array lines ) {
 }
 
 function _normalize_for_encoding ( value ) {
-	let t := typeof value;
-
-	if ( t ≡ "Array" ) {
+	if ( value instanceof Array ) {
 		let out := [];
 		let i := 0;
 		while ( i < value.length() ) {
@@ -431,11 +437,11 @@ function _normalize_for_encoding ( value ) {
 		return out;
 	}
 
-	if ( t ≡ "Set" or t ≡ "Bag" ) {
+	if ( value instanceof Set or value instanceof Bag ) {
 		return _normalize_for_encoding( value.sortstr() );
 	}
 
-	if ( t ≡ "PairList" ) {
+	if ( value instanceof PairList ) {
 		let out := {};
 		let pairs := value.to_Array();
 		let i := 0;
@@ -450,7 +456,7 @@ function _normalize_for_encoding ( value ) {
 		return out;
 	}
 
-	if ( t ≡ "Dict" ) {
+	if ( value instanceof Dict ) {
 		let out := {};
 		let keys := value.sorted_keys();
 		let i := 0;
@@ -505,18 +511,17 @@ function _escape_string ( String text ) {
 }
 
 function _encode_value ( value, pretty, canonical, Number indent_level ) {
-	let t := typeof value;
-	if ( t ≡ "String" ) {
+	if ( value instanceof String ) {
 		return `"${_escape_string(value)}"`;
 	}
-	if ( t ≡ "Number" ) {
+	if ( value instanceof Number ) {
 		return "" _ value;
 	}
-	if ( t ≡ "Boolean" ) {
+	if ( value instanceof Boolean ) {
 		return value ? "true": "false";
 	}
 
-	if ( t ≡ "Array" ) {
+	if ( value instanceof Array ) {
 		let parts := [];
 		let i := 0;
 		while ( i < value.length() ) {
@@ -539,7 +544,7 @@ function _encode_value ( value, pretty, canonical, Number indent_level ) {
 		return out;
 	}
 
-	if ( t ≡ "Dict" ) {
+	if ( value instanceof Dict ) {
 		let keys := canonical ? value.sorted_keys(): value.keys();
 		let out := "{" ;
 		let i := 0;
@@ -567,7 +572,7 @@ function _encode_value ( value, pretty, canonical, Number indent_level ) {
 		return out;
 	}
 
-	die `Unsupported TOML type for encoding: ${t}`;
+	die `Unsupported TOML type for encoding: ${typeof value}`;
 }
 
 function _encode_table ( Dict table, Array path, pretty, canonical, Array out ) {
@@ -597,7 +602,7 @@ function _encode_table ( Dict table, Array path, pretty, canonical, Array out ) 
 	while ( i < keys.length() ) {
 		let key := keys[i];
 		let value := table.get(key);
-		if ( typeof value ≡ "Dict" ) {
+		if ( value instanceof Dict ) {
 			children.push(key);
 		}
 		else {
@@ -700,7 +705,7 @@ class TOML {
 	method encode (value) {
 		let normalized := _normalize_for_encoding(value);
 
-		if ( typeof normalized ≡ "Dict" ) {
+		if ( normalized instanceof Dict ) {
 			let lines := [];
 			_encode_table( normalized, [], pretty, canonical, lines );
 			return _join_lines(lines);
@@ -732,7 +737,7 @@ class TOML {
 		die "TOML.dump expects a std/io Path object" if not( path instanceof Path );
 		let normalized := _normalize_for_encoding(value);
 
-		if ( typeof normalized ≡ "Dict" ) {
+		if ( normalized instanceof Dict ) {
 			let lines := [];
 			_encode_table( normalized, [], pretty, canonical, lines );
 			path.spew_utf8( _join_lines(lines) );

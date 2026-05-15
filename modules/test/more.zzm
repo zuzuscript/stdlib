@@ -16,6 +16,7 @@ test/more - Write unit tests and integration tests in ZuzuScript.
 
 =cut
 
+
 let Number _COUNT := 0;
 let Number _PASSED := 0;
 let Number _FAILED := 0;
@@ -28,7 +29,7 @@ let TODO;
 
 function _directive () {
 	if ( TODO ) {
-		if ( typeof TODO eq "String" ) {
+		if ( TODO instanceof String ) {
 			return ` # TODO ${TODO}`;
 		}
 		else {
@@ -80,6 +81,10 @@ function _capability_is_available ( String capability ) {
 
 	return false;
 }
+
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
 
 =head1 DESCRIPTION
 
@@ -154,12 +159,10 @@ function _coerced_equal ( got, expected ) {
 		return true;
 	}
 
-	let got_type := typeof got;
-	let expected_type := typeof expected;
-	if ( got_type ≡ "Boolean" and expected_type ≡ "Number" ) {
+	if ( got instanceof Boolean and expected instanceof Number ) {
 		return ( got ? 1: 0 ) = expected;
 	}
-	if ( got_type ≡ "Number" and expected_type ≡ "Boolean" ) {
+	if ( got instanceof Number and expected instanceof Boolean ) {
 		return got = ( expected ? 1: 0 );
 	}
 

@@ -12,6 +12,13 @@ std/data/json - JSON encoding and decoding for ZuzuScript.
   let text  := codec.encode({ answer: 42 });
   let data  := codec.decode(text);
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by zuzu.pl, zuzu-rust, and zuzu-js on Node and
+Electron. It is partially supported by zuzu-js in the browser: in-memory
+JSON encode/decode coverage passes, but file-backed load/dump coverage is
+unsupported because browser filesystem capability is unavailable.
+
 =head1 DESCRIPTION
 
 This module provides a C<JSON> class for turning ZuzuScript values

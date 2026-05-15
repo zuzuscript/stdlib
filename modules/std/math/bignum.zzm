@@ -15,6 +15,10 @@ std/math/bignum - Arbitrary precision BigNum class.
   say m.badd(n).to_dec;
   say p.babs.to_dec;
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 This module exports C<BigNum>, a class for working with integers and

@@ -20,6 +20,13 @@ std/data/xml - XML parsing and DOM manipulation for ZuzuScript.
 
   let text := doc.toXML(true);
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by zuzu.pl, zuzu-rust, and zuzu-js on Node and
+Electron. It is partially supported by zuzu-js in the browser: core XML
+and ZPath pipeline coverage passes, but file-backed load/dump coverage is
+unsupported because browser filesystem capability is unavailable.
+
 =head1 DESCRIPTION
 
 This module provides in-memory XML parsing and DOM tree operations,

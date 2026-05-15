@@ -11,6 +11,10 @@ std/defer - Run a callback when a guard object is demolished.
   let guard := new Guard( callback: fn () { cleanup(); } );
   guard.disable();
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 C<Guard> is a small scope guard. It stores a callback and can be armed or

@@ -13,6 +13,12 @@ std/template/zz - ZZPath-backed template engine.
   );
   say( tmpl.process( { name: "Ada" } ) );
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by zuzu.pl, zuzu-rust, and zuzu-js on Node and
+Electron. It is partially supported by zuzu-js in the browser:
+filesystem-backed template loading is unsupported.
+
 =head1 DESCRIPTION
 
 C<std/template/zz> provides C<ZZTemplate>, a subclass of

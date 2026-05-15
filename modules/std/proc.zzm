@@ -24,6 +24,11 @@ std/proc - Process execution, environment, and signals.
 
   sleep(0.1);
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by zuzu.pl, zuzu-rust, and zuzu-js on Node and
+Electron. It is not supported by zuzu-js in the browser.
+
 =head1 DESCRIPTION
 
 This module provides OS process helpers, environment variable helpers,

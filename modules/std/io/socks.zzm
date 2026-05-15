@@ -15,6 +15,11 @@ std/io/socks - socket programming helpers for Zuzu.
   cli.say( "hello" );
   let line := peer.next_line();
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by zuzu.pl, zuzu-rust, and zuzu-js on Node and
+Electron. It is not supported by zuzu-js in the browser.
+
 =head1 DESCRIPTION
 
 This module provides a practical API for TCP, UDP, and Unix domain

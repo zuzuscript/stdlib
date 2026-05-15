@@ -18,6 +18,13 @@ std/data/ini - INI encoding and decoding for ZuzuScript.
   });
   let data := codec.decode(text);
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by zuzu.pl, zuzu-rust, and zuzu-js on Node and
+Electron. It is partially supported by zuzu-js in the browser: in-memory
+INI encode/decode coverage passes, but file-backed load/dump coverage is
+unsupported because browser filesystem capability is unavailable.
+
 =head1 DESCRIPTION
 
 This module provides a pure-Zuzu implementation of INI parsing and
@@ -68,6 +75,7 @@ License version 2.
 =cut
 
 from std/string import substr, index;
+
 
 function _is_space ( String ch ) {
 	return ch ≡ " " or ch ≡ "\t" or ch ≡ "\r" or ch ≡ "\n";
@@ -217,14 +225,13 @@ function _escape_string ( String text ) {
 }
 
 function _encode_value (value) {
-	let t := typeof value;
-	if ( t ≡ "Boolean" ) {
+	if ( value instanceof Boolean ) {
 		return value ? "true": "false";
 	}
-	if ( t ≡ "Number" ) {
+	if ( value instanceof Number ) {
 		return "" _ value;
 	}
-	if ( t ≡ "Array" ) {
+	if ( value instanceof Array ) {
 		let out := "[";
 		let i := 0;
 		while ( i < value.length() ) {
@@ -237,10 +244,10 @@ function _encode_value (value) {
 		out _= "]";
 		return out;
 	}
-	if ( t ≡ "String" ) {
+	if ( value instanceof String ) {
 		return `"${_escape_string(value)}"`;
 	}
-	die `Unsupported INI type for scalar value: ${t}`;
+	die `Unsupported INI type for scalar value: ${typeof value}`;
 }
 
 function _join_lines ( Array lines, Boolean pretty ) {
@@ -263,9 +270,7 @@ function _join_lines ( Array lines, Boolean pretty ) {
 }
 
 function _normalize_for_encoding ( value ) {
-	let t := typeof value;
-
-	if ( t ≡ "Array" ) {
+	if ( value instanceof Array ) {
 		let out := [];
 		let i := 0;
 		while ( i < value.length() ) {
@@ -275,11 +280,11 @@ function _normalize_for_encoding ( value ) {
 		return out;
 	}
 
-	if ( t ≡ "Set" or t ≡ "Bag" ) {
+	if ( value instanceof Set or value instanceof Bag ) {
 		return _normalize_for_encoding( value.sortstr() );
 	}
 
-	if ( t ≡ "PairList" ) {
+	if ( value instanceof PairList ) {
 		let out := {};
 		let pairs := value.to_Array();
 		let i := 0;
@@ -294,7 +299,7 @@ function _normalize_for_encoding ( value ) {
 		return out;
 	}
 
-	if ( t ≡ "Dict" ) {
+	if ( value instanceof Dict ) {
 		let out := {};
 		let keys := value.sorted_keys();
 		let i := 0;
@@ -314,7 +319,7 @@ function _ensure_section ( Dict root, String section ) {
 		root.set( section, {} );
 	}
 	let maybe := root.get(section);
-	die `INI section '${section}' must be a Dict` if typeof maybe ≢ "Dict";
+	die `INI section '${section}' must be a Dict` if not( maybe instanceof Dict );
 
 	return maybe;
 }
@@ -373,7 +378,7 @@ function _decode_ini ( String source ) {
 function _encode_ini ( Dict data, Boolean pretty, Boolean canonical ) {
 	let lines := [];
 	let top := data.exists("") ? data.get(""): {};
-	die "INI top-level default section must be a Dict" if typeof top ≢ "Dict";
+	die "INI top-level default section must be a Dict" if not( top instanceof Dict );
 	let top_keys := canonical ? top.sorted_keys(): top.keys();
 	let i := 0;
 
@@ -392,7 +397,7 @@ function _encode_ini ( Dict data, Boolean pretty, Boolean canonical ) {
 
 		if ( section ≢ "" ) {
 			let sec := data.get(section);
-			die `INI section '${section}' must map to Dict` if typeof sec ≢ "Dict";
+			die `INI section '${section}' must map to Dict` if not( sec instanceof Dict );
 			if ( pretty and lines.length() > 0 ) {
 				lines.push("");
 			}
@@ -420,7 +425,7 @@ class INI {
 
 	method encode (value) {
 		let normalized := _normalize_for_encoding(value);
-		die "INI encoder expects a Dict at top level" if typeof normalized ≢ "Dict";
+		die "INI encoder expects a Dict at top level" if not( normalized instanceof Dict );
 		return _encode_ini( normalized, pretty, canonical );
 	}
 
@@ -446,7 +451,7 @@ class INI {
 		die "INI.dump is denied by runtime policy" if __system__{deny_fs};
 		die "INI.dump expects a std/io Path object" if not( path instanceof Path );
 		let normalized := _normalize_for_encoding(value);
-		die "INI encoder expects a Dict at top level" if typeof normalized ≢ "Dict";
+		die "INI encoder expects a Dict at top level" if not( normalized instanceof Dict );
 		path.spew_utf8( _encode_ini( normalized, pretty, canonical ) );
 
 		return path;

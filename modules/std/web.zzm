@@ -28,6 +28,12 @@ std/web - Request, response, and routing helpers for ZuzuScript web apps.
     return routes.dispatch( new Request( env: env ) );
   }
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by zuzu.pl, zuzu-rust, and zuzu-js on Node and
+Electron. It is partially supported by zuzu-js in the browser (filesystem
+backed template rendering fails).
+
 =head1 DESCRIPTION
 
 This pure ZuzuScript module provides a small web framework layer over the
@@ -581,11 +587,11 @@ License version 2.
 from std/internals import load_module;
 from std/cache/lru import Cache;
 from std/data/json import JSON;
-from std/io import Path;
 from std/net/url import escape, unescape;
 from std/string import index, join, replace, split, substr;
 from std/template/z import ZTemplate;
 from std/template/zz import ZZTemplate;
+
 
 let _response_template_cache := new Cache( capacity: 64 );
 let _response_json := new JSON();
@@ -666,14 +672,14 @@ function _headers_from ( value ) {
 		return headers;
 	}
 
-	if ( typeof value ≡ "PairList" ) {
+	if ( value instanceof PairList ) {
 		for ( let p in value.enumerate() ) {
 			headers.add( _s( p.key ), _s( p.value ) );
 		}
 		return headers;
 	}
 
-	if ( typeof value ≡ "Dict" ) {
+	if ( value instanceof Dict ) {
 		for ( let p in value.enumerate() ) {
 			headers.add( _s( p.key ), _s( p.value ) );
 		}
@@ -706,15 +712,15 @@ function _header_remove ( PairList headers, name ) {
 
 function _looks_like_response_array ( value ) {
 	return (
-		typeof value ≡ "Array" and
+		value instanceof Array and
 		value.length() = 3 and
-		typeof value[0] ≡ "Number"
+		value[0] instanceof Number
 	);
 }
 
 function _dict_copy ( value ) {
 	let out := {};
-	if ( typeof value ≡ "Dict" or typeof value ≡ "PairList" ) {
+	if ( value instanceof Dict or value instanceof PairList ) {
 		for ( let p in value.enumerate() ) {
 			out.set( p.key, p.value );
 		}
@@ -722,22 +728,28 @@ function _dict_copy ( value ) {
 	return out;
 }
 
-function _response_template_cache_key ( Path path_obj ) {
-	let canonical := path_obj.realpath();
-	if ( canonical ≡ null ) {
-		canonical := path_obj.absolute();
-	}
-	if ( canonical ≡ null ) {
-		return path_obj.to_String;
-	}
-	if ( typeof canonical ≡ "Path" ) {
-		return canonical.to_String;
-	}
-	return "" _ canonical;
-}
-
 function _response_template ( template ) {
-	if ( typeof template ≡ "Path" ) {
+	from std/io try import Path;
+
+	function _response_template_cache_key ( path_obj ) {
+		let canonical := path_obj.realpath();
+		if ( canonical ≡ null ) {
+			canonical := path_obj.absolute();
+		}
+		if ( canonical ≡ null ) {
+			return path_obj.to_String;
+		}
+		if ( canonical instanceof Path ) {
+			return canonical.to_String;
+		}
+		return "" _ canonical;
+	}
+
+	if ( Path ≡ null ) {
+		return template;
+	}
+
+	if ( template instanceof Path ) {
 		let path_obj := template;
 		return _response_template_cache.get(
 			_response_template_cache_key(path_obj),
@@ -850,7 +862,7 @@ class Response {
 
 	method set_cookie ( name, value, options := {} ) {
 		let cookie := escape(name) _ "=" _ escape(value);
-		if ( typeof options ≡ "Dict" ) {
+		if ( options instanceof Dict ) {
 			for ( let key in [ "Path", "Domain", "Expires", "Max-Age" ] ) {
 				if ( options.exists(key) ) {
 					cookie _= "; " _ key _ "=" _ options.get(key);
@@ -1126,10 +1138,10 @@ function _regexp_match ( value, expected ) {
 	if ( typeof expected ≡ "Regexp" ) {
 		return _s(value) ~ expected;
 	}
-	if ( typeof expected ≡ "Array" ) {
+	if ( expected instanceof Array ) {
 		return expected.any( fn x -> _s(x) ≡ _s(value) );
 	}
-	if ( typeof expected ≡ "Function" ) {
+	if ( expected instanceof Function ) {
 		return expected(value);
 	}
 	return _s(value) ≡ _s(expected);
@@ -1330,7 +1342,7 @@ class Route {
 		if ( args.length() > 0 ) {
 			_methods := [];
 			let raw := args[0];
-			if ( typeof raw ≡ "Array" ) {
+			if ( raw instanceof Array ) {
 				for ( let m in raw ) {
 					_methods.push( uc(_s(m)) );
 				}
@@ -1436,26 +1448,26 @@ class Route {
 			_inline: inline,
 		);
 		let i := 0;
-		if ( args.length() > 0 and typeof args[0] ≡ "Array" ) {
+		if ( args.length() > 0 and args[0] instanceof Array ) {
 			route.methods(args[0]);
 			i := 1;
 		}
-		if ( i < args.length() and typeof args[i] ≡ "String" ) {
+		if ( i < args.length() and args[i] instanceof String ) {
 			route.parse(args[i]);
 			i++;
 		}
 		while ( i < args.length() ) {
 			let item := args[i];
-			if ( typeof item ≡ "Dict" or typeof item ≡ "PairList" ) {
+			if ( item instanceof Dict or item instanceof PairList ) {
 				route.to(item);
 			}
-			else if ( typeof item ≡ "Array" ) {
+			else if ( item instanceof Array ) {
 				route._apply_require_array(item);
 			}
-			else if ( typeof item ≡ "Function" ) {
+			else if ( item instanceof Function ) {
 				route.to( action: item );
 			}
-			else if ( typeof item ≡ "String" ) {
+			else if ( item instanceof String ) {
 				route.name(item);
 			}
 			i++;
@@ -1475,10 +1487,10 @@ class Route {
 
 	method requires ( value? ... PairList named ) {
 		if ( value ≢ null ) {
-			if ( typeof value ≡ "Array" ) {
+			if ( value instanceof Array ) {
 				self._apply_require_array(value);
 			}
-			else if ( typeof value ≡ "Dict" or typeof value ≡ "PairList" ) {
+			else if ( value instanceof Dict or value instanceof PairList ) {
 				for ( let p in value.enumerate() ) {
 					_requires.set( p.key, p.value );
 				}
@@ -1504,17 +1516,17 @@ class Route {
 
 	method to ( value? ... PairList named ) {
 		if ( value ≢ null ) {
-			if ( typeof value ≡ "String" and index( value, "#" ) >= 0 ) {
+			if ( value instanceof String and index( value, "#" ) >= 0 ) {
 				let parsed := _split_controller_string(value);
 				named.add( "controller", parsed{controller} );
 				named.add( "action", parsed{action} );
 			}
-			else if ( typeof value ≡ "Dict" or typeof value ≡ "PairList" ) {
+			else if ( value instanceof Dict or value instanceof PairList ) {
 				for ( let p in value.enumerate() ) {
 					named.add( p.key, p.value );
 				}
 			}
-			else if ( typeof value ≡ "Function" ) {
+			else if ( value instanceof Function ) {
 				named.add( "action", value );
 			}
 			else {
@@ -1538,7 +1550,7 @@ class Route {
 	}
 
 	method _set_controller ( value ) {
-		if ( typeof value ≡ "String" and index( value, "#" ) >= 0 ) {
+		if ( value instanceof String and index( value, "#" ) >= 0 ) {
 			let parsed := _split_controller_string(value);
 			_target_module := parsed{module};
 			_target_class := parsed{class};
@@ -1629,7 +1641,7 @@ class Route {
 	}
 
 	method _run ( Request req ) {
-		if ( typeof _target_action ≡ "Function" ) {
+		if ( _target_action instanceof Function ) {
 			return _target_action(req);
 		}
 
@@ -1637,7 +1649,7 @@ class Route {
 		if ( controller ≡ null ) {
 			die "Route has no controller or action";
 		}
-		if ( typeof _target_action ≢ "String" ) {
+		if ( not( _target_action instanceof String ) ) {
 			die "Route controller target requires a string action";
 		}
 		return controller.(_target_action)(req);

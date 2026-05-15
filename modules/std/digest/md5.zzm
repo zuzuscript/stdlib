@@ -14,6 +14,10 @@ std/digest/md5 - MD5 digests for BinaryString values.
   let hex := md5_hex(payload);
   let b64 := md5_b64(payload);
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 This module provides MD5 digest helpers.

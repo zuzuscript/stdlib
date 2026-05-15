@@ -16,6 +16,10 @@ std/data/xml/escape - XML entity escaping helpers.
     "&lt;tea&gt;&#x41;&#65;&lt;/tea&gt;"
   );
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 This module provides lightweight XML entity

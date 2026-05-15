@@ -17,6 +17,10 @@ std/string - String utilities for ZuzuScript modules.
   say( trim("  hello  ") );     # hello
   say( title("hello_world") );  # Hello World
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 This module provides helper functions that are useful when writing

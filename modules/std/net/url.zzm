@@ -20,6 +20,10 @@ std/net/url - URL parsing, escaping, and templates.
     { version: "v1", id: 7, q: "tea time" }
   );
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 This module provides small URL helpers.

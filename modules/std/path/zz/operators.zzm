@@ -4,6 +4,10 @@
 
 std/path/zz/operators - Operator definitions for ZZPath expressions.
 
+=head1 IMPLEMENTATION SUPPORT
+
+This module is supported by all implementations of ZuzuScript.
+
 =head1 DESCRIPTION
 
 This module extends the base ZPath operator model with
@@ -85,6 +89,7 @@ License version 2.
 =cut
 
 from std/path/z/operators import Operator as ZOperator;
+
 
 class Operator extends ZOperator;
 
@@ -450,8 +455,7 @@ function builtin_can ( value, method_name ) {
 		or method_name ≡ null
 		or method_name eq "";
 
-	const type := typeof value;
-	if ( type in [ "Array", "Bag", "Set" ] ) {
+	if ( value instanceof Array or value instanceof Bag or value instanceof Set ) {
 		return method_name in [
 			"length",
 			"empty",
@@ -462,7 +466,7 @@ function builtin_can ( value, method_name ) {
 			"to_Set",
 		];
 	}
-	if ( type in [ "Dict", "PairList" ] ) {
+	if ( value instanceof Dict or value instanceof PairList ) {
 		return method_name in [
 			"length",
 			"empty",
@@ -472,7 +476,7 @@ function builtin_can ( value, method_name ) {
 			"to_Array",
 		];
 	}
-	if ( type eq "String" or type eq "BinaryString" ) {
+	if ( value instanceof String or value instanceof BinaryString ) {
 		return method_name in [ "length" ];
 	}
 	return false;
