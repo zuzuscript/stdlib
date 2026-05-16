@@ -8,7 +8,7 @@ from std/data/xml import XML;
 from std/internals import object_slots, ref_id;
 from std/io try import Path;
 from std/string/base64 import decode, encode;
-from std/time import Time;
+from std/time import Time, TimeZone;
 from test/more import *;
 
 __global__{marshal_phase11_builds} := 0;
@@ -408,6 +408,14 @@ is(
 let time_roundtrip := load( dump( new Time(12345) ) );
 is( typeof time_roundtrip, "Time", "Time round trip type" );
 is( time_roundtrip.epoch(), 12345, "Time epoch survives round trip" );
+let zoned_time_roundtrip := load(
+	dump( new Time( 1778241600, timezone: TimeZone.named("Europe/London") ) ),
+);
+is(
+	zoned_time_roundtrip.timezone().to_String(),
+	"Europe/London",
+	"Time timezone survives round trip",
+);
 
 let repeated_time_graph := load( dump([ time_roundtrip, time_roundtrip ]) );
 is(

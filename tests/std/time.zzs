@@ -15,4 +15,32 @@ let parsed := parser.parse( "Sunday 3rd Nov, 1943" );
 is( parsed.day_of_month(), 3, "TimeParser.parse day", );
 is( parsed.mon(), 11, "TimeParser.parse month", );
 is( parsed.year(), 1943, "TimeParser.parse year", );
+let utc := TimeZone.utc();
+let london := TimeZone.named( "Europe/London" );
+let noon := new Time( 1778241600, timezone: utc );
+is( noon.with_timezone( london ).hour(), 13, "with_timezone display zone", );
+is( noon.hour(), 12, "with_timezone leaves original unchanged", );
+is( noon.add( Duration.minutes( 5 ) ).epoch(), 1778241900, "Duration add", );
+is( noon.subtract_seconds( 60 ).epoch(), 1778241540, "subtract_seconds", );
+is(
+	Time.parse( "2026-05-08T12:00:00Z" ).epoch(),
+	1778241600,
+	"Time.parse RFC3339",
+);
+is(
+	Time.parse( "Fri, 08 May 2026 12:00:00 +0000" ).epoch(),
+	1778241600,
+	"Time.parse RFC5322",
+);
+is(
+	TimeFormat.rfc3339().format( noon ),
+	"2026-05-08T12:00:00+00:00",
+	"TimeFormat format",
+);
+let before_dst := Time.parse( "2026-03-28T12:00:00", timezone: london );
+is( before_dst.add_days( 1 ).hour(), 12, "add_days keeps wall time", );
+ok(
+	exception( function () { Time.parse( "2026-05-08T12:00:00" ); } ),
+	"Time.parse requires timezone for zone-less input",
+);
 done_testing();
