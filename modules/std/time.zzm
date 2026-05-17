@@ -155,12 +155,12 @@ Returns immutable duration helper objects.
 
 Returns formatter/parser helper objects.
 
-=item C<< TimeFormat->format(Time time) >>
+=item C<< TimeFormat.format(Time time) >>
 
 Parameters: C<time> is a C<Time>. Returns: C<String>. Formats C<time>
 using the helper object's format.
 
-=item C<< TimeFormat->parse(String text, timezone: TimeZone|String?) >>
+=item C<< TimeFormat.parse(String text, timezone: TimeZone|String?) >>
 
 Parameters: C<text> is date-time text matching the helper object's format.
 RFC 5322 input may carry its own timezone. Zone-less input requires an
