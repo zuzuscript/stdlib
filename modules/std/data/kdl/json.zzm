@@ -201,8 +201,8 @@ function _jik_pairs ( obj ) {
 	return out;
 }
 
-let _jik_native_to_node;
-let _jik_native_to_nodes;
+function _jik_native_to_node;
+function _jik_native_to_nodes;
 
 function _jik_xml_nodes ( value ) {
 	return xml_to_kdl(value).nodes();
@@ -303,7 +303,7 @@ function _jik_make_object_node ( value, String name := "-" ) {
 	);
 }
 
-_jik_native_to_node := function ( value, String name := "-" ) {
+function _jik_native_to_node ( value, String name := "-" ) {
 	if ( _jik_is_literal_native(value) ) {
 		return new KDLNode( name: name, args: [ _jik_value(value) ] );
 	}
@@ -321,14 +321,14 @@ _jik_native_to_node := function ( value, String name := "-" ) {
 		);
 	}
 	die `Cannot convert ${typeof value} to JSON-in-KDL`;
-};
+}
 
-_jik_native_to_nodes := function ( value, String name := "-" ) {
+function _jik_native_to_nodes ( value, String name := "-" ) {
 	if ( _jik_is_kdl_native(value) or _jik_is_xml_native(value) ) {
 		return _jik_structural_nodes( value, name );
 	}
 	return [ _jik_native_to_node( value, name ) ];
-};
+}
 
 function _jik_node_has_only_dash_children ( KDLNode node ) {
 	return node.children().all( fn child -> child.name() ≡ "-" );
@@ -357,7 +357,7 @@ function _jik_node_kind ( KDLNode node ) {
 	die "Empty JSON-in-KDL node must be annotated as array or object";
 }
 
-let _jik_node_to_native;
+function _jik_node_to_native;
 
 function _jik_array_from_node ( KDLNode node, PairList opts ) {
 	die "JSON-in-KDL array node cannot contain properties"
@@ -419,7 +419,7 @@ function _jik_object_from_node ( KDLNode node, PairList opts ) {
 	return out;
 }
 
-_jik_node_to_native := function ( KDLNode node, PairList opts ) {
+function _jik_node_to_native ( KDLNode node, PairList opts ) {
 	let kind := _jik_node_kind(node);
 	if ( kind ≡ "literal" ) {
 		die "JSON-in-KDL literal node must contain one argument only"
@@ -435,7 +435,7 @@ _jik_node_to_native := function ( KDLNode node, PairList opts ) {
 		return _jik_object_from_node( node, opts );
 	}
 	die `Unknown JSON-in-KDL node kind '${kind}'`;
-};
+}
 
 function kdl_to_json ( value, ... PairList opts ) {
 	if ( value instanceof KDLNode ) {

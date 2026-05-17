@@ -153,7 +153,7 @@ function _xik_text_node_text ( KDLNode node ) {
 	return escape_xml( _xik_single_string_arg( node, "XML-in-KDL text node" ) );
 }
 
-let _xik_node_text;
+function _xik_node_text;
 
 function _xik_element_text ( KDLNode node ) {
 	die `XML-in-KDL element '${node.name()}' cannot have type annotations`
@@ -189,7 +189,7 @@ function _xik_element_text ( KDLNode node ) {
 	return `<${node.name()}${attrs}>${body}</${node.name()}>`;
 }
 
-_xik_node_text := function ( KDLNode node ) {
+function _xik_node_text ( KDLNode node ) {
 	let name := node.name();
 	if ( name ≡ "-" ) {
 		return _xik_text_node_text(node);
@@ -204,7 +204,7 @@ _xik_node_text := function ( KDLNode node ) {
 		return _xik_pi_text(node);
 	}
 	return _xik_element_text(node);
-};
+}
 
 function _xik_is_element_node ( KDLNode node ) {
 	let name := node.name();
@@ -263,7 +263,7 @@ function _xik_xml_comment_to_kdl ( xml_node ) {
 	);
 }
 
-let _xik_xml_node_to_kdl;
+function _xik_xml_node_to_kdl;
 
 function _xik_xml_pi_to_kdl ( xml_node ) {
 	return new KDLNode(
@@ -315,7 +315,7 @@ function _xik_xml_element_to_kdl ( xml_node ) {
 	);
 }
 
-_xik_xml_node_to_kdl := function ( xml_node ) {
+function _xik_xml_node_to_kdl ( xml_node ) {
 	switch ( 0 + xml_node.nodeType() ) {
 		case 1:
 			return _xik_xml_element_to_kdl(xml_node);
@@ -329,7 +329,7 @@ _xik_xml_node_to_kdl := function ( xml_node ) {
 			return _xik_xml_doctype_to_kdl(xml_node);
 	}
 	return null;
-};
+}
 
 function _xik_xml_document_nodes ( xml_doc ) {
 	let raw_nodes := null;

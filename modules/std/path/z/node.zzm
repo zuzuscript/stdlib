@@ -190,7 +190,7 @@ from std/string import index, substr;
 from std/time import Time;
 
 
-let determine_class;
+function determine_class;
 let _widget_class_loaded := false;
 let _widget_class := null;
 
@@ -1308,7 +1308,7 @@ class WidgetNode extends Node {
 // Need to define the body of this function late so it can refer back to
 // classes that have been declared.
 
-determine_class := function ( obj ) {
+function determine_class ( obj ) {
 	let Klass;
 	
 	let real_obj := obj;
@@ -1379,4 +1379,4 @@ determine_class := function ( obj ) {
 	}
 	
 	return Klass ?: Node;
-};
+}

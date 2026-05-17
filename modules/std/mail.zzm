@@ -246,10 +246,10 @@ from std/string/base64 import
 from std/string/quoted_printable import decode as _qp_decode;
 from std/time import Time, TimeZone;
 
-let _parse_one_address := null;
-let _parse_address_list := null;
-let _parse_address_header := null;
-let _mail_send_serialize_body := null;
+function _parse_one_address;
+function _parse_address_list;
+function _parse_address_header;
+function _mail_send_serialize_body;
 
 function _has_crlf ( String text ) {
 	return index( text, "\r" ) >= 0 or index( text, "\n" ) >= 0;
@@ -1442,7 +1442,7 @@ class Address {
 	}
 }
 
-_parse_one_address := function ( String raw ) {
+function _parse_one_address ( String raw ) {
 	let text := trim(raw);
 	_assert_no_crlf( text, "invalid_address" );
 
@@ -1476,9 +1476,9 @@ _parse_one_address := function ( String raw ) {
 
 	let spec := _parse_addr_spec(text);
 	return new Address( local: spec{local}, domain: spec{domain} );
-};
+}
 
-_parse_address_list := function ( String text ) {
+function _parse_address_list ( String text ) {
 	_assert_no_crlf( text, "invalid_address" );
 
 	let out := [];
@@ -1524,14 +1524,14 @@ _parse_address_list := function ( String text ) {
 	}
 
 	return out;
-};
+}
 
-_parse_address_header := function ( value ) {
+function _parse_address_header ( value ) {
 	if ( value == null ) {
 		return [];
 	}
 	return Address.parse_list(value);
-};
+}
 
 function _mail_send_addresses_from_headers ( head, Array names ) {
 	let out := [];
@@ -2721,6 +2721,6 @@ class Serializer {
 	}
 }
 
-_mail_send_serialize_body := function ( message ) {
+function _mail_send_serialize_body ( message ) {
 	return ( new Serializer() ).serialize_body(message);
-};
+}

@@ -463,8 +463,7 @@ function _decode_text ( String text, Boolean pairlists, Number indent, Boolean s
 		return strict ? spaces / indent : floor( spaces / indent );
 	}
 
-	let parse_object_block := null;
-	let parse_array_ref := null;
+	function parse_object_block;
 
 	function parse_array_from_header ( header, Number depth ) {
 		let arr := [];
@@ -534,12 +533,17 @@ function _decode_text ( String text, Boolean pairlists, Number indent, Boolean s
 			if ( payload ≡ "" ) { arr.push( _mk_obj(pairlists) ); next; }
 			let ih := _parse_header( payload, strict );
 			if ( ih ≢ null and ih.get("key") ≡ null ) {
-				arr.push( parse_array_ref( ih, child ) );
+				arr.push( parse_array_from_header( ih, child ) );
 				next;
 			}
 			if ( ih ≢ null and ih.get("key") ≢ null ) {
 				let obj := _mk_obj(pairlists);
-				_obj_add( obj, ih.get("key"), parse_array_ref( ih, child + 1 ), pairlists );
+				_obj_add(
+					obj,
+					ih.get("key"),
+					parse_array_from_header( ih, child + 1 ),
+					pairlists,
+				);
 				while ( i < n ) {
 					let r2 := lines[i];
 					if ( _trim(r2) ≡ "" ) { if ( strict ) { die "Blank line inside array"; } i++; next; }
@@ -553,7 +557,12 @@ function _decode_text ( String text, Boolean pairlists, Number indent, Boolean s
 					let ah2 := _parse_header( l2, strict );
 					if ( ah2 ≢ null and ah2.get("key") ≢ null ) {
 						i++;
-						_obj_add( obj, ah2.get("key"), parse_array_ref( ah2, child + 1 ), pairlists );
+						_obj_add(
+							obj,
+							ah2.get("key"),
+							parse_array_from_header( ah2, child + 1 ),
+							pairlists,
+						);
 						next;
 					}
 					let c2 := _has_unquoted_colon(l2);
@@ -626,7 +635,12 @@ function _decode_text ( String text, Boolean pairlists, Number indent, Boolean s
 					let ah2 := _parse_header( l2, strict );
 					if ( ah2 ≢ null and ah2.get("key") ≢ null ) {
 						i++;
-						_obj_add( obj, ah2.get("key"), parse_array_ref( ah2, child + 1 ), pairlists );
+						_obj_add(
+							obj,
+							ah2.get("key"),
+							parse_array_from_header( ah2, child + 1 ),
+							pairlists,
+						);
 						next;
 					}
 					let c2 := _has_unquoted_colon(l2);
@@ -663,9 +677,7 @@ function _decode_text ( String text, Boolean pairlists, Number indent, Boolean s
 		return arr;
 	}
 
-	parse_array_ref := parse_array_from_header;
-
-	parse_object_block := function ( Number depth ) {
+	function parse_object_block ( Number depth ) {
 		let obj := _mk_obj(pairlists);
 		while ( i < n ) {
 			let raw := lines[i];
@@ -719,7 +731,7 @@ function _decode_text ( String text, Boolean pairlists, Number indent, Boolean s
 			}
 		}
 		return obj;
-	};
+	}
 
 	while ( i < n and _trim(lines[i]) ≡ "" ) { i++; }
 	if ( i >= n ) { return _mk_obj(pairlists); }
