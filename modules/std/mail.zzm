@@ -1236,148 +1236,8 @@ function _is_identity_transfer_encoding ( encoding ) {
 	return encoding in [ "identity", "7bit", "8bit", "binary" ];
 }
 
-const _MAIL_MONTHS := {
-	jan: 1,
-	january: 1,
-	feb: 2,
-	february: 2,
-	mar: 3,
-	march: 3,
-	apr: 4,
-	april: 4,
-	may: 5,
-	jun: 6,
-	june: 6,
-	jul: 7,
-	july: 7,
-	aug: 8,
-	august: 8,
-	sep: 9,
-	sept: 9,
-	september: 9,
-	oct: 10,
-	october: 10,
-	nov: 11,
-	november: 11,
-	dec: 12,
-	december: 12,
-};
-
-const _MAIL_WEEKDAYS := {
-	sun: 0,
-	sunday: 0,
-	mon: 1,
-	monday: 1,
-	tue: 2,
-	tues: 2,
-	tuesday: 2,
-	wed: 3,
-	weds: 3,
-	wednesday: 3,
-	thu: 4,
-	thur: 4,
-	thurs: 4,
-	thursday: 4,
-	fri: 5,
-	friday: 5,
-	sat: 6,
-	saturday: 6,
-};
-
-const _MAIL_MONTH_NAMES := [
-	null,
-	"Jan",
-	"Feb",
-	"Mar",
-	"Apr",
-	"May",
-	"Jun",
-	"Jul",
-	"Aug",
-	"Sep",
-	"Oct",
-	"Nov",
-	"Dec",
-];
-
-const _MAIL_WEEKDAY_NAMES := [
-	"Sun",
-	"Mon",
-	"Tue",
-	"Wed",
-	"Thu",
-	"Fri",
-	"Sat",
-];
-
 function _invalid_datetime ( String message ) {
 	die "mail.invalid_datetime: " _ message;
-}
-
-function _strip_trailing_period ( String text ) {
-	let out := text;
-	while ( length out > 0 and substr( out, length out - 1, 1 ) eq "." ) {
-		out := substr( out, 0, length out - 1 );
-	}
-	return out;
-}
-
-function _mail_month_number ( String token ) {
-	let key := lc( _strip_trailing_period(token) );
-	return null if not _MAIL_MONTHS.exists(key);
-	return _MAIL_MONTHS.get(key);
-}
-
-function _mail_weekday_number ( String token ) {
-	let key := lc( _strip_trailing_period(token) );
-	return null if not _MAIL_WEEKDAYS.exists(key);
-	return _MAIL_WEEKDAYS.get(key);
-}
-
-function _leap_year ( Number year ) {
-	return false if year mod 4 != 0;
-	return true if year mod 100 != 0;
-	return year mod 400 == 0;
-}
-
-function _days_in_month ( Number year, Number month ) {
-	return 31 if month in [ 1, 3, 5, 7, 8, 10, 12 ];
-	return 30 if month in [ 4, 6, 9, 11 ];
-	return _leap_year(year) ? 29 : 28 if month == 2;
-	return 0;
-}
-
-function _days_from_civil ( Number year, Number month, Number day ) {
-	let y := year;
-	y-- if month <= 2;
-	let era := _div_floor( y, 400 );
-	let yoe := y - era * 400;
-	let mp := month > 2 ? month - 3 : month + 9;
-	let doy := _div_floor( 153 * mp + 2, 5 ) + day - 1;
-	let doe := yoe * 365 + _div_floor( yoe, 4 )
-		- _div_floor( yoe, 100 ) + doy;
-	return era * 146097 + doe - 719468;
-}
-
-function _civil_from_days ( Number days ) {
-	let z := days + 719468;
-	let era := _div_floor( z, 146097 );
-	let doe := z - era * 146097;
-	let yoe := _div_floor(
-		doe - _div_floor( doe, 1460 )
-			+ _div_floor( doe, 36524 )
-			- _div_floor( doe, 146096 ),
-		365,
-	);
-	let year := yoe + era * 400;
-	let doy := doe - (
-		365 * yoe + _div_floor( yoe, 4 ) - _div_floor( yoe, 100 )
-	);
-	let mp := _div_floor( 5 * doy + 2, 153 );
-	let day := doy - _div_floor( 153 * mp + 2, 5 ) + 1;
-	let month := mp < 10 ? mp + 3 : mp - 9;
-	year++ if month <= 2;
-	return { year: year, month: month, day: day };
 }
 
 function _numeric_zone_seconds ( String zone ) {
@@ -1388,81 +1248,6 @@ function _numeric_zone_seconds ( String zone ) {
 	let minutes := int( substr( zone, 3, 2 ) );
 	return null if hours > 23 or minutes > 59;
 	return sign * ( hours * 3600 + minutes * 60 );
-}
-
-function _parse_datetime_zone ( String zone ) {
-	let numeric := _numeric_zone_seconds(zone);
-	return numeric if not( numeric == null );
-
-	let key := uc(zone);
-	return 0 if key in [ "UT", "UTC", "GMT", "Z" ];
-
-	if ( key eq "EST" ) {
-		return -5 * 3600;
-	}
-	if ( key eq "EDT" ) {
-		return -4 * 3600;
-	}
-	if ( key eq "CST" ) {
-		return -6 * 3600;
-	}
-	if ( key eq "CDT" ) {
-		return -5 * 3600;
-	}
-	if ( key eq "MST" ) {
-		return -7 * 3600;
-	}
-	if ( key eq "MDT" ) {
-		return -6 * 3600;
-	}
-	if ( key eq "PST" ) {
-		return -8 * 3600;
-	}
-	if ( key eq "PDT" ) {
-		return -7 * 3600;
-	}
-
-	if ( length key == 1 and key ne "J" and key ~ /^[A-Z]$/ ) {
-		let alpha := "ABCDEFGHIKLMNOPQRSTUVWXYZ";
-		let pos := index( alpha, key );
-		if ( pos >= 0 ) {
-			if ( pos < 12 ) {
-				return ( pos + 1 ) * 3600;
-			}
-			return -( pos - 11 ) * 3600;
-		}
-	}
-
-	return null;
-}
-
-function _pad_digits ( Number value, Number width ) {
-	let text := "" _ abs(int(value));
-	while ( length text < width ) {
-		text := "0" _ text;
-	}
-	return value < 0 ? "-" _ text : text;
-}
-
-function _pad2 ( Number value ) {
-	return _pad_digits( value, 2 );
-}
-
-function _pad4 ( Number value ) {
-	return _pad_digits( value, 4 );
-}
-
-function _format_zone ( Number offset_seconds ) {
-	let sign := offset_seconds < 0 ? "-" : "+";
-	let total := abs(offset_seconds);
-	let minutes := _div_floor( total, 60 );
-	let hours := _div_floor( minutes, 60 );
-	minutes := minutes mod 60;
-	return sign _ _pad2(hours) _ _pad2(minutes);
-}
-
-function _datetime_day_of_week ( Number days ) {
-	return ( ( days + 4 ) mod 7 + 7 ) mod 7;
 }
 
 function _datetime_apply_option ( Dict opts, Dict seen, key, value ) {
@@ -1544,85 +1329,27 @@ function _datetime_options ( options, PairList named_options ) {
 	return opts;
 }
 
+function _datetime_parse_error_message ( e ) {
+	let message := lc( "" _ e );
+	return "invalid time zone" if index( message, "invalid time zone" ) >= 0;
+	return "invalid time zone" if index( message, "timezone offset" ) >= 0;
+	return "invalid date" if index( message, "invalid date" ) >= 0;
+	return "invalid time" if index( message, "invalid time" ) >= 0;
+	return "invalid month" if index( message, "invalid month" ) >= 0;
+	return "invalid weekday" if index( message, "invalid weekday" ) >= 0;
+	return "invalid year" if index( message, "invalid year" ) >= 0;
+	return "expected RFC 5322 date-time";
+}
+
 function parse_datetime ( String text ) {
 	_assert_no_crlf( text, "invalid_datetime" );
 
-	let source := trim(text);
-	let m := source ~ /^([A-Za-z.]+),\s*([0-9]{1,2})\s+([A-Za-z.]+)\s+([0-9]{2}|[0-9]{4})\s+([0-9]{1,2}):([0-9]{2})(?::([0-9]{2}))?\s+([+-][0-9]{4}|[A-Za-z]{1,5})$/i;
-	let weekday := null;
-	let day_text := null;
-	let month_text := null;
-	let year_text := null;
-	let hour_text := null;
-	let minute_text := null;
-	let second_text := null;
-	let zone_text := null;
-
-	if ( m instanceof Array ) {
-		weekday := m[1];
-		day_text := m[2];
-		month_text := m[3];
-		year_text := m[4];
-		hour_text := m[5];
-		minute_text := m[6];
-		second_text := m[7];
-		zone_text := m[8];
+	try {
+		return Time.parse( trim(text) );
 	}
-	else {
-		m := source ~ /^([0-9]{1,2})\s+([A-Za-z.]+)\s+([0-9]{2}|[0-9]{4})\s+([0-9]{1,2}):([0-9]{2})(?::([0-9]{2}))?\s+([+-][0-9]{4}|[A-Za-z]{1,5})$/i;
-		if ( not( m instanceof Array ) ) {
-			_invalid_datetime("expected RFC 5322 date-time");
-		}
-		day_text := m[1];
-		month_text := m[2];
-		year_text := m[3];
-		hour_text := m[4];
-		minute_text := m[5];
-		second_text := m[6];
-		zone_text := m[7];
+	catch ( Exception e ) {
+		_invalid_datetime( _datetime_parse_error_message(e) );
 	}
-	if ( not( weekday == null ) and _mail_weekday_number(weekday) == null ) {
-		_invalid_datetime("invalid weekday");
-	}
-
-	let day := int(day_text);
-	let month := _mail_month_number(month_text);
-	if ( month == null ) {
-		_invalid_datetime("invalid month");
-	}
-
-	let year := int(year_text);
-	if ( length year_text == 2 ) {
-		year += year >= 50 ? 1900 : 2000;
-	}
-	if ( year < 1 ) {
-		_invalid_datetime("invalid year");
-	}
-
-	let hour := int(hour_text);
-	let minute := int(minute_text);
-	let second := 0;
-	if ( second_text instanceof String and length second_text > 0 ) {
-		second := int(second_text);
-	}
-	if ( hour > 23 or minute > 59 or second > 59 ) {
-		_invalid_datetime("invalid time");
-	}
-
-	let max_day := _days_in_month( year, month );
-	if ( day < 1 or day > max_day ) {
-		_invalid_datetime("invalid date");
-	}
-
-	let offset_seconds := _parse_datetime_zone(zone_text);
-	if ( offset_seconds == null ) {
-		_invalid_datetime("invalid time zone");
-	}
-
-	let days := _days_from_civil( year, month, day );
-	let epoch := days * 86400 + hour * 3600 + minute * 60 + second
-		- offset_seconds;
-	return new Time( epoch, timezone: TimeZone.offset(offset_seconds) );
 }
 
 function format_datetime (
@@ -1635,26 +1362,10 @@ function format_datetime (
 	}
 
 	let opts := _datetime_options( options, named_options );
-	let offset_seconds := opts{utc} ? 0 : opts{offset_seconds};
-	let epoch := floor( time.epoch() ) + offset_seconds;
-	let days := _div_floor( epoch, 86400 );
-	let sod := epoch - days * 86400;
-	let civil := _civil_from_days(days);
-	let hour := _div_floor( sod, 3600 );
-	sod -= hour * 3600;
-	let minute := _div_floor( sod, 60 );
-	let second := sod - minute * 60;
-	let date := _pad2( civil{day} ) _ " "
-		_ _MAIL_MONTH_NAMES[ civil{month} ] _ " "
-		_ _pad4( civil{year} ) _ " "
-		_ _pad2(hour) _ ":" _ _pad2(minute) _ ":" _ _pad2(second) _ " "
-		_ _format_zone(offset_seconds);
-
-	if ( opts{include_weekday} ) {
-		return _MAIL_WEEKDAY_NAMES[ _datetime_day_of_week(days) ] _ ", "
-			_ date;
-	}
-	return date;
+	let zoned := opts{utc}
+		? time.with_timezone( TimeZone.utc() )
+		: time.with_timezone( TimeZone.offset(opts{offset_seconds}) );
+	return zoned.to_rfc5322( include_weekday: opts{include_weekday} );
 }
 
 class Address {

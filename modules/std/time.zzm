@@ -91,10 +91,12 @@ and time layouts.
 Parameters: C<format> is a strftime format string. Returns: C<String>.
 Formats the time with C<format>.
 
-=item C<< time.to_iso8601() >>, C<< time.to_rfc3339() >>, C<< time.to_rfc5322() >>
+=item C<< time.to_iso8601() >>, C<< time.to_rfc3339() >>, C<< time.to_rfc5322(include_weekday: Boolean?) >>
 
-Parameters: none. Returns: C<String>. Serializes the time using common
-machine and mail date formats.
+Parameters: C<include_weekday> is an optional Boolean for C<to_rfc5322>.
+Returns: C<String>. Serializes the time using common machine and mail date
+formats. C<to_rfc5322> includes a weekday by default; pass
+C<include_weekday: false> to omit it.
 
 =item C<< time.tzoffset() >>
 
@@ -136,7 +138,9 @@ or boolean comparison results.
 
 =item C<< Time.parse(String text, timezone: TimeZone|String?) >>
 
-Parameters: C<text> is ISO 8601/RFC 3339 or RFC 5322 text. Zone-less input
+Parameters: C<text> is ISO 8601/RFC 3339 or RFC 5322 text. RFC 5322 input
+accepts common obsolete mail-date spellings including two-digit years,
+legacy US zones, and military zones other than C<J>. Zone-less ISO input
 requires an explicit C<timezone>. Returns: C<Time>.
 
 =item C<< TimeZone.utc() >>, C<< TimeZone.local() >>, C<< TimeZone.named(String name) >>, C<< TimeZone.offset(Number seconds) >>
