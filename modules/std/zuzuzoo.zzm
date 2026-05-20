@@ -11,14 +11,18 @@ Electron. It is not supported by zuzu-js in the browser.
 
 =head1 DESCRIPTION
 
-This phase of C<std/zuzuzoo> provides installed distribution metadata
-queries, source archive inspection, dependency-aware install planning,
-distribution test execution, file installation, planned target-root
-removal execution, installed metadata writing, standalone safe removal
-planning and execution, installed-file verification, latest-version
-checks, upgrade checks, and canonical pretty JSON formatting.
+C<std/zuzuzoo> provides the package-management engine used by the
+command-line C<zuzuzoo> tool. It supports installed distribution
+metadata queries, source archive inspection, dependency-aware install
+planning, distribution test execution, file installation, planned
+target-root removal execution, installed metadata writing, standalone
+safe removal planning and execution, installed-file verification,
+latest-version checks, upgrade checks, and canonical pretty JSON
+formatting.
 
-It does not yet provide the command-line C<zuzuzoo> replacement.
+The command-line C<zuzuzoo> wrapper delegates package behaviour to this
+module and handles argument parsing, user prompts, output formatting,
+JSON output selection, and exit-code translation.
 
 =head1 EXPORTS
 

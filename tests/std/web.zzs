@@ -1,4 +1,4 @@
-from std/web import Request, Response, Routes;
+from std/web import Request, Response, Routes, Session, SessionHandler;
 from std/template/z import ZTemplate;
 from test/more import *;
 
@@ -17,6 +17,51 @@ class ObjectController {
 class TemplateLike {
 	method process ( data ) {
 		return "like:" _ data{name};
+	}
+}
+
+class TestSession with Session {
+	let Boolean finalized := false;
+
+	method finalize () {
+		finalized := true;
+		return self;
+	}
+
+	method is_finalized () {
+		return finalized;
+	}
+
+	method id () {
+		return "custom-id";
+	}
+
+	method age () {
+		return 0;
+	}
+
+	method cookie_name () {
+		return "custom_session";
+	}
+
+	method cookie_value () {
+		return "custom-value";
+	}
+
+	method cookie_options () {
+		return { Path: "/", HttpOnly: true };
+	}
+}
+
+class TestSessionHandler with SessionHandler {
+	let session := null;
+
+	method __build__ () {
+		session := new TestSession();
+	}
+
+	method session_for ( request ) {
+		return session;
 	}
 }
 
@@ -55,6 +100,49 @@ is(
 	"request uri is built from env",
 );
 is( req.base(), "https://example.test/app", "request base includes script name" );
+
+Request.set_session_handler(null);
+is( Request.get_session_handler(), null, "session handler can be cleared" );
+is( req.session(), null, "no handler preserves env session fallback" );
+
+let env_session_req := new Request( env: { session: "middleware-session" } );
+is(
+	env_session_req.session(),
+	"middleware-session",
+	"no handler returns env session value",
+);
+
+let custom_handler := new TestSessionHandler();
+Request.set_session_handler(custom_handler);
+let custom_req := new Request( env: { headers: new PairList() } );
+is(
+	custom_req.session(),
+	custom_handler{session},
+	"configured handler supplies request session",
+);
+is(
+	custom_req.session(),
+	custom_handler{session},
+	"request caches handler session",
+);
+let custom_response := new Response( session: custom_req.session() );
+let custom_out := custom_response.finalize();
+is(
+	custom_handler{session}{finalized},
+	true,
+	"response finalizes attached session",
+);
+is(
+	custom_out[1].get("Set-Cookie"),
+	"custom_session=custom-value; Path=/; HttpOnly",
+	"response uses session cookie contract",
+);
+is(
+	custom_response.finalize()[1].get_all("Set-Cookie").length(),
+	1,
+	"response only sets session cookie once",
+);
+Request.set_session_handler(null);
 
 let response := new Response(
 	status: 201,

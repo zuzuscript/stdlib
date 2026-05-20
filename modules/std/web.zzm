@@ -49,6 +49,17 @@ C<__request__(env)>.
 
 =over
 
+=item * C<set_session_handler(handler)>
+
+Parameters: C<handler> is a C<SessionHandler> object or C<null>.
+Returns: the handler. Sets the process-local session handler used by
+C<session()>.
+
+=item * C<get_session_handler()>
+
+Parameters: none. Returns: C<SessionHandler> or C<null>. Returns the
+process-local session handler.
+
 =item * C<set_route_match(captures, route)>
 
 Parameters: C<captures> is a C<Dict> or C<null>; C<route> is a
@@ -165,8 +176,10 @@ authenticated user from the environment.
 
 =item * C<session()>
 
-Parameters: none. Returns: any value or C<null>. Returns the session
-object supplied by middleware or the host.
+Parameters: none. Returns: C<Session>, any value, or C<null>. Returns
+the request session from the configured C<SessionHandler>. If no handler
+is configured, it preserves the middleware/host fallback and returns the
+C<session> environment value.
 
 =item * C<session_options()>
 
@@ -332,6 +345,12 @@ C<Response>. Encodes C<data> as compact JSON, sets the response body to
 the JSON text, and sets C<Content-Type> to
 C<application/json; charset=UTF-8>.
 
+=item * C<session(value?)>
+
+Parameters: optional C<value> is a C<Session> object. Returns:
+C<Session> or C<Response>. Gets or sets the session object that should
+contribute a response cookie.
+
 =item * C<content_length(value?)>
 
 Parameters: optional C<value> is a C<String> or C<Number>. Returns:
@@ -370,8 +389,61 @@ C<Max-Age>, C<HttpOnly>, C<Secure>, and C<SameSite>.
 
 =item * C<finalize()>
 
-Parameters: none. Returns: C<Array>. Returns the raw
-C<[ status, headers, body ]> response array.
+Parameters: none. Returns: C<Array>. Finalizes any attached C<Session>,
+sets its cookie, and returns the raw C<[ status, headers, body ]>
+response array.
+
+=back
+
+=head2 C<SessionHandler>
+
+C<SessionHandler> is the trait enforced by C<Request.session()>.
+Implementations return an object that does C<Session>.
+
+=over
+
+=item * C<session_for(request)>
+
+Parameters: C<request> is a C<Request>. Returns: C<Session>. Loads or
+creates the request session.
+
+=back
+
+=head2 C<Session>
+
+C<Session> is the trait enforced by C<Response.finalize()>.
+
+=over
+
+=item * C<finalize()>
+
+Parameters: none. Returns: C<Session>. Writes pending data, is
+idempotent, and returns the session object.
+
+=item * C<is_finalized()>
+
+Parameters: none. Returns: C<Boolean>.
+
+=item * C<id()>
+
+Parameters: none. Returns: C<String>.
+
+=item * C<age()>
+
+Parameters: none. Returns: C<Number>.
+
+=item * C<cookie_name()>
+
+Parameters: none. Returns: C<String>.
+
+=item * C<cookie_value()>
+
+Parameters: none. Returns: C<String>.
+
+=item * C<cookie_options()>
+
+Parameters: none. Returns: C<Dict>. Returns options suitable for
+C<Response.set_cookie()>.
 
 =back
 
@@ -595,6 +667,7 @@ from std/template/zz import ZZTemplate;
 
 let _response_template_cache := new Cache( capacity: 64 );
 let _response_json := new JSON();
+let _session_handler := null;
 
 function _s ( value ) {
 	return value ≡ null ? "" : "" _ value;
@@ -759,20 +832,60 @@ function _response_template ( template ) {
 	return template;
 }
 
+trait SessionHandler {
+	method session_for ( request ) {
+		die "SessionHandler.session_for is not implemented";
+	}
+}
+
+trait Session {
+	method finalize () {
+		die "Session.finalize is not implemented";
+	}
+
+	method is_finalized () {
+		die "Session.is_finalized is not implemented";
+	}
+
+	method id () {
+		die "Session.id is not implemented";
+	}
+
+	method age () {
+		die "Session.age is not implemented";
+	}
+
+	method cookie_name () {
+		die "Session.cookie_name is not implemented";
+	}
+
+	method cookie_value () {
+		die "Session.cookie_value is not implemented";
+	}
+
+	method cookie_options () {
+		die "Session.cookie_options is not implemented";
+	}
+}
+
 class Response {
 	let Number status := 200;
 	let headers := null;
 	let body := [];
+	let session := null;
 	let Dict cookies := {};
 	let Number _status := 200;
 	let PairList _headers := new PairList();
 	let _body := [];
+	let _session := null;
 	let Dict _cookies := {};
+	let Boolean _session_cookie_set := false;
 
 	method __build__ () {
 		_status := status;
 		_headers := _headers_from(headers);
 		_body := body;
+		_session := session;
 		_cookies := cookies;
 	}
 
@@ -824,6 +937,15 @@ class Response {
 		_body := _response_json.encode(data);
 		self.content_type("application/json; charset=UTF-8");
 		return self;
+	}
+
+	method session ( value? ) {
+		if ( value ≢ null ) {
+			_session := value;
+			_session_cookie_set := false;
+			return self;
+		}
+		return _session;
 	}
 
 	method content_type ( value? ) {
@@ -878,7 +1000,20 @@ class Response {
 		return self;
 	}
 
+	method _finalize_session () {
+		return self if _session ≡ null or _session_cookie_set;
+		_session := _session.finalize() unless _session.is_finalized();
+		self.set_cookie(
+			_session.cookie_name(),
+			_session.cookie_value(),
+			_session.cookie_options(),
+		);
+		_session_cookie_set := true;
+		return self;
+	}
+
 	method finalize () {
+		self._finalize_session();
 		return [ _status, _headers, _body ];
 	}
 }
@@ -892,6 +1027,17 @@ class Request {
 	let _body_parameters := null;
 	let _parameters := null;
 	let _cookies := null;
+	let _session := null;
+	let Boolean _session_loaded := false;
+
+	static method set_session_handler ( handler ) {
+		_session_handler := handler;
+		return handler;
+	}
+
+	static method get_session_handler () {
+		return _session_handler;
+	}
 
 	method set_route_match ( captures, route ) {
 		_captures := captures ≡ null ? {} : captures;
@@ -993,7 +1139,13 @@ class Request {
 	}
 
 	method session () {
-		return env.get( "session", null );
+		let handler := Request.get_session_handler();
+		return env.get( "session", null ) if handler ≡ null;
+		if ( not _session_loaded ) {
+			_session := handler.session_for(self);
+			_session_loaded := true;
+		}
+		return _session;
 	}
 
 	method session_options () {
@@ -1120,6 +1272,7 @@ class Request {
 			status: status,
 			headers: headers,
 			body: body,
+			session: named.get( "session", null ),
 		);
 	}
 }
@@ -1249,10 +1402,13 @@ function _match_parts ( parts, pi, segs, si, captures, types ) {
 		let end := segs.length();
 		while ( end >= si ) {
 			let copy := _dict_copy(captures);
-			copy.set(
-				part{name},
-				join( "/", segs.slice( si, end - si ).map( fn s -> unescape(s) ) ),
-			);
+			let captured := [];
+			let i := si;
+			while ( i < end ) {
+				captured.push( unescape( segs[i] ) );
+				i++;
+			}
+			copy.set( part{name}, join( "/", captured ) );
 			let matched := _match_parts( parts, pi + 1, segs, end, copy, types );
 			return matched if matched ≢ null;
 			end--;
