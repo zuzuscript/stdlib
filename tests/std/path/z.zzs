@@ -814,4 +814,65 @@ is(
 	"exists-style filters treat present null fields as existing",
 );
 
+let pairlist_query_blob := {{ tag: "perl", page: 1, tag: "zuzu" }};
+is(
+	first( pairlist_query_blob, "/#1/@key", "missing" ),
+	"page",
+	"pairlist global index exposes pair key",
+);
+is(
+	first( pairlist_query_blob, "/#1/@value", "missing" ),
+	1,
+	"pairlist global index exposes pair value",
+);
+
+let pairlist_tag_values := query( pairlist_query_blob, "/tag/@value" );
+is( pairlist_tag_values.length(), 2, "pairlist name query preserves duplicates" );
+is( pairlist_tag_values[0], "perl", "pairlist name query returns first duplicate" );
+is( pairlist_tag_values[1], "zuzu", "pairlist name query returns second duplicate" );
+is(
+	first( pairlist_query_blob, "/tag#1/@value", "missing" ),
+	"zuzu",
+	"pairlist name#index uses per-key occurrence index",
+);
+
+let pairlist_assign_blob := {{ tag: "perl", page: 1, tag: "zuzu" }};
+is(
+	assign_first( pairlist_assign_blob, "/tag#1", "ruby" ),
+	"ruby",
+	"pairlist pair assignment returns assigned value",
+);
+let pairlist_assigned_values := query( pairlist_assign_blob, "/tag/@value" );
+is(
+	pairlist_assigned_values[0],
+	"perl",
+	"pairlist pair assignment leaves first duplicate unchanged",
+);
+is(
+	pairlist_assigned_values[1],
+	"ruby",
+	"pairlist pair assignment updates selected duplicate",
+);
+is(
+	first( pairlist_assign_blob, "/#1/@key", "missing" ),
+	"page",
+	"pairlist pair assignment preserves pair order",
+);
+
+is(
+	assign_first( pairlist_assign_blob, "/tag#1/@value", "zuzu" ),
+	"zuzu",
+	"pairlist pair value assignment returns assigned value",
+);
+is(
+	first( pairlist_assign_blob, "/tag#1/@value", "missing" ),
+	"zuzu",
+	"pairlist pair value assignment updates selected duplicate",
+);
+is(
+	first( pairlist_assign_blob, "/#1/@value", "missing" ),
+	1,
+	"pairlist pair value assignment preserves unrelated pair",
+);
+
 done_testing();

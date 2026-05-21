@@ -59,6 +59,11 @@ public query, assignment, and reference methods from C<ZPath>.
 Parameters: none. Returns: C<ZZEvaluator>. Returns the evaluator used
 for this path.
 
+=item C<< node.find(path) >>
+
+C<ZZPath> inherits from C<ZPath>, so a C<ZZPath> object can be passed to
+C<std/path/z/node> C<Node.find()>.
+
 =back
 
 =back

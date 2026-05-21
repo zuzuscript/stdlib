@@ -106,8 +106,9 @@ the node.
 
 =item C<< node.find(zpath) >>
 
-Parameters: C<zpath> is a path string or compatible path object. Returns:
-C<Array>. Evaluates a nested path from this node.
+Parameters: C<zpath> is a C<ZPath> object or subclass, such as C<ZZPath>.
+Returns: C<Array>. Evaluates a nested path from this node and returns
+selected node objects.
 
 =item C<< node.do_action(action) >>, C<< node.do_action_on_child(child, action) >>
 
@@ -130,7 +131,9 @@ C<type>, C<string_value>, or C<number_value> where appropriate.
 
 Collection node wrappers. They inherit the C<Node> API and override
 child, attribute, assignment, and reference methods appropriate to their
-collection type.
+collection type. PairList children are C<PairNode> objects in pair order;
+C<indexed_child> uses global pair index, while C<named_indexed_child> uses
+the occurrence index among pairs with the same key.
 
 =item C<KDLDocumentNode>, C<KDLNodeNode>, C<KDLValueNode>
 
@@ -186,7 +189,7 @@ from std/data/kdl import KDLDocument, KDLNode, KDLValue;
 from std/internals import class_name, load_module, ref_id;
 from std/io try import Path;
 from std/math import Math;
-from std/string import index, substr;
+from std/string import substr;
 from std/time import Time;
 
 
@@ -605,8 +608,12 @@ class Node {
 	}
 
 	method find ( zpath ) {
-		// Stub for now.
-		die "Node.find is not implemented yet";
+		from std/path/z import ZPath;
+
+		die "Node.find expects a ZPath object"
+			unless zpath instanceof ZPath;
+
+		return zpath.evaluate(self);
 	}
 
 	method do_action ( action ) {
@@ -804,7 +811,16 @@ class PairListNode extends Node {
 	}
 	
 	method children () {
-		die "TODO";
+		let raw := self.raw;
+		let pairs := raw.to_Array();
+		let out := [];
+		let i := 0;
+		while ( i < pairs.length() ) {
+			let pair := pairs[i];
+			out.push( Node.wrap( pair, self, pair.key, i ) );
+			i++;
+		}
+		return out;
 	}
 	
 	method can_have_named_children () {
@@ -819,27 +835,65 @@ class PairListNode extends Node {
 		return true;
 	}
 
+	method named_child ( name ) {
+		return self.named_indexed_child( name, 0 );
+	}
+
+	method indexed_child ( i ) {
+		let pairs := self.raw().to_Array();
+		return null if i < 0 or i >= pairs.length();
+		let pair := pairs[i];
+		return Node.wrap( pair, self, pair.key, i );
+	}
+
+	method named_indexed_child ( name, i ) {
+		let pairs := self.raw().to_Array();
+		let seen := 0;
+		let pos := 0;
+		while ( pos < pairs.length() ) {
+			let pair := pairs[pos];
+			if ( pair.key ≡ name ) {
+				if ( seen = i ) {
+					return Node.wrap( pair, self, pair.key, pos );
+				}
+				seen++;
+			}
+			pos++;
+		}
+		return null;
+	}
+
+	method _replace_value_at ( pair_ix, value ) {
+		let container := self.raw();
+		let pairs := container.to_Array();
+		die "Path assignment expects numeric pairlist index"
+			if pair_ix ≡ null or pair_ix < 0 or pair_ix >= pairs.length();
+
+		container.clear();
+		let i := 0;
+		while ( i < pairs.length() ) {
+			let pair := pairs[i];
+			container.add( pair.key, i = pair_ix ? value : pair.value );
+			i++;
+		}
+		return value;
+	}
+
 	method do_action_on_child ( child, action ) {
 		return super( child, action ) if action{op} ne ":=";
 
-		const key := child.key();
-		die "Path assignment expects string pairlist key" if key ≡ null;
-
-		let hash := index( key, "#" );
-		let pair_key := hash < 0 ? key : substr( key, 0, hash );
-		let container := self.raw();
-		container.set( pair_key, action{value} );
-		return action{value};
+		return self._replace_value_at( child.ix(), action{value} );
 	}
 
 	method ref_on_child ( child ) {
-		const key := child.key();
-		die "Path assignment expects string pairlist key" if key ≡ null;
-
-		let hash := index( key, "#" );
-		let pair_key := hash < 0 ? key : substr( key, 0, hash );
-		let container := self.raw();
-		return \ container{(pair_key)};
+		let pair_ix := child.ix();
+		return function ( ... args ) {
+			let current := self.indexed_child(pair_ix);
+			die "Path assignment target pairlist entry no longer exists"
+				if current ≡ null;
+			return current.raw().value if args.length() = 0;
+			return self._replace_value_at( pair_ix, args[0] );
+		};
 	}
 }
 
@@ -849,6 +903,25 @@ class PairNode extends Node {
 		let raw := self.raw;
 		return [ "key", "value" ]
 			.map( fn a → Node.wrap( raw.(a)(), self, `@${a}` ) );
+	}
+
+	method do_action_on_child ( child, action ) {
+		return super( child, action ) if action{op} ne ":=";
+		return super( child, action ) if child.key() ne "@value";
+
+		let container := self.parent();
+		return super( child, action )
+			if container ≡ null or not ( container instanceof PairListNode );
+		return container.do_action_on_child( self, action );
+	}
+
+	method ref_on_child ( child ) {
+		return super(child) if child.key() ne "@value";
+
+		let container := self.parent();
+		return super(child)
+			if container ≡ null or not ( container instanceof PairListNode );
+		return container.ref_on_child(self);
 	}
 }
 

@@ -164,6 +164,9 @@ C<< /foo >> will retrieve C<< foo: 11 >>, C<< foo: 22 >>, and C<< foo: 33 >>.
 C<< /foo#2 >> (0-based index on just values with key "foo") will retrieve C<< foo: 33 >>.
 
 Note that rather than just retrieving the value, a Pair object is retrieved.
+The selected Pair exposes C<< @key >> and C<< @value >> attributes. Path
+assignment to a selected Pair, or to its C<< @value >> attribute, replaces
+that pair entry's value while preserving pair order and duplicate keys.
 
 =item B<< Pair >>
 
