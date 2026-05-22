@@ -12,10 +12,10 @@ let dbh := DB.connect( `dbi:mysql:database=zuzutest;user=${db_user}` );
 
 dbh.prepare( "drop table if exists zuzu_author_mysql" ).execute();
 dbh.prepare(
-	`create table zuzu_author_mysql (
+	```create table zuzu_author_mysql (
 		id integer primary key,
 		name varchar(64) not null
-	)`,
+	)```,
 ).execute();
 
 let insert := dbh.prepare(

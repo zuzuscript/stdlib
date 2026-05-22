@@ -14,10 +14,10 @@ let dbh := DB.connect(
 
 dbh.prepare( "drop table if exists zuzu_author_postgresql" ).execute();
 dbh.prepare(
-	`create table zuzu_author_postgresql (
+	```create table zuzu_author_postgresql (
 		id bigint primary key,
 		name text not null
-	)`,
+	)```,
 ).execute();
 
 let insert := dbh.prepare(
