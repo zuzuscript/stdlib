@@ -58,10 +58,20 @@ Constructs a TOON codec. Returns: C<TOON>.
 Parameters: C<text> is TOON text. Returns: value. Decodes TOON text into
 ZuzuScript data.
 
+=item C<< codec.decode_binarystring(BinaryString bytes) >>
+
+Parameters: C<bytes> is UTF-8 TOON bytes. Returns: value. Decodes TOON
+bytes into ZuzuScript data.
+
 =item C<< codec.encode(value) >>
 
 Parameters: C<value> is a TOON-encodable value. Returns: C<String>.
 Encodes C<value> as TOON text.
+
+=item C<< codec.encode_binarystring(value) >>
+
+Parameters: C<value> is a TOON-encodable value. Returns:
+C<BinaryString>. Encodes C<value> as UTF-8 TOON bytes.
 
 =item C<< codec.load(Path path) >>
 
@@ -970,6 +980,10 @@ class TOON {
 		return _decode_text( text, pairlists, indent, strict, expandPaths );
 	}
 
+	method decode_binarystring ( BinaryString raw ) {
+		return self.decode( to_string(raw) );
+	}
+
 	method encode ( value ) {
 		if ( value instanceof Array ) {
 			return _join( _encode_array( null, value, 0, indent, delimiter ), "\n" );
@@ -982,18 +996,22 @@ class TOON {
 		return _encode_scalar( value, delimiter, false );
 	}
 
+	method encode_binarystring ( value ) {
+		return to_binary( self.encode(value) );
+	}
+
 	method load ( path ) {
 		from std/io import Path;
 		die "TOON.load is denied by runtime policy" if __system__{deny_fs};
 		die "TOON.load expects a std/io Path object" if not( path instanceof Path );
-		return _decode_text( path.slurp_utf8(), pairlists, indent, strict, expandPaths );
+		return self.decode_binarystring( path.slurp() );
 	}
 
 	method dump ( path, value ) {
 		from std/io import Path;
 		die "TOON.dump is denied by runtime policy" if __system__{deny_fs};
 		die "TOON.dump expects a std/io Path object" if not( path instanceof Path );
-		path.spew_utf8( self.encode(value) );
+		path.spew( self.encode_binarystring(value) );
 		return path;
 	}
 }

@@ -3,6 +3,13 @@ from std/data/json import JSON;
 from test/more import *;
 
 let fixture_json := new JSON( pairlists: true );
+let binary_codec := new TOON( pairlists: true );
+ok( binary_codec.encode_binarystring( { name: "Ada" } ) instanceof BinaryString, "encode_binarystring returns BinaryString" );
+is(
+	binary_codec.decode_binarystring( to_binary("name: café\n") ).get("name"),
+	"café",
+	"decode_binarystring decodes UTF-8 TOON bytes",
+);
 
 function _opt ( opts, String key, fallback ) {
 	if ( opts ≡ null ) {

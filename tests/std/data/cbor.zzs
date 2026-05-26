@@ -9,6 +9,8 @@ let encoded_map := codec.encode( { answer: 42 } );
 is( encoded_map, decode("oWZhbnN3ZXIYKg=="), "encode map to known CBOR bytes", );
 let decoded_map := codec.decode( encoded_map );
 is( decoded_map.get("answer"), 42, "decode returns dict with value", );
+ok( codec.encode_binarystring( { answer: 42 } ) instanceof BinaryString, "encode_binarystring returns BinaryString" );
+is( codec.decode_binarystring(encoded_map).get("answer"), 42, "decode_binarystring decodes CBOR bytes" );
 
 let text := "hello";
 let text_roundtrip := codec.decode( codec.encode(text) );

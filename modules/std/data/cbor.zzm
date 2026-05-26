@@ -50,10 +50,18 @@ decoded maps return as C<PairList> values instead of C<Dict> values.
 Parameters: C<value> is any CBOR-encodable ZuzuScript value. Returns:
 C<BinaryString>. Encodes C<value> as CBOR bytes.
 
+=item C<< codec.encode_binarystring(value) >>
+
+Alias for C<codec.encode(value)>.
+
 =item C<< codec.decode(BinaryString raw) >>
 
 Parameters: C<raw> is CBOR data. Returns: value. Decodes CBOR bytes into
 the equivalent ZuzuScript value.
+
+=item C<< codec.decode_binarystring(BinaryString raw) >>
+
+Alias for C<codec.decode(raw)>.
 
 =item C<< codec.load(Path path) >>
 
@@ -456,12 +464,20 @@ class CBOR {
 		return _bytes_to_binary(out);
 	}
 
+	method encode_binarystring ( value ) {
+		return self.encode(value);
+	}
+
 	method decode ( BinaryString raw ) {
 		_DECODE_MAP_AS := pairlists ? "PairList" : "Dict";
 		let bytes := _binary_to_bytes(raw);
 		let parsed := _decode_at( bytes, 0 );
 		die "Trailing bytes after CBOR value" if parsed[1] < bytes.length();
 		return parsed[0];
+	}
+
+	method decode_binarystring ( BinaryString raw ) {
+		return self.decode(raw);
 	}
 
 	method load ( path ) {

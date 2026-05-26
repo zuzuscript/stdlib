@@ -232,10 +232,20 @@ C<KDL> is the codec class for KDL text.
 Parameters: C<text> is KDL text. Returns: C<KDLDocument>. Parses KDL
 text.
 
+=item C<< codec.decode_binarystring(BinaryString bytes) >>
+
+Parameters: C<bytes> is UTF-8 KDL bytes. Returns: C<KDLDocument>.
+Parses KDL bytes.
+
 =item C<< codec.encode(value) >>
 
 Parameters: C<value> is a C<KDLDocument>, C<KDLNode>, or compatible
 value. Returns: C<String>. Serializes KDL data to text.
+
+=item C<< codec.encode_binarystring(value) >>
+
+Parameters: C<value> is a C<KDLDocument>, C<KDLNode>, or compatible
+value. Returns: C<BinaryString>. Serializes KDL data to UTF-8 bytes.
 
 =item C<< codec.load(path) >>
 
@@ -1580,6 +1590,10 @@ class KDL {
 		return new _KDLParser( text: text, pos: 0 )._parse_document();
 	}
 
+	method decode_binarystring ( BinaryString raw ) {
+		return self.decode( to_string(raw) );
+	}
+
 	method encode ( value ) {
 		if ( value instanceof KDLDocument ) {
 			return _kdl_encode_document( value, canonical );
@@ -1596,18 +1610,22 @@ class KDL {
 		die "KDL.encode expects a KDLDocument, KDLNode, or Array of KDLNode";
 	}
 
+	method encode_binarystring ( value ) {
+		return to_binary( self.encode(value) );
+	}
+
 	method load ( path ) {
 		from std/io import Path;
 		die "KDL.load is denied by runtime policy" if __system__{deny_fs};
 		die "KDL.load expects a std/io Path object" if not( path instanceof Path );
-		return self.decode( path.slurp_utf8() );
+		return self.decode_binarystring( path.slurp() );
 	}
 
 	method dump ( path, value ) {
 		from std/io import Path;
 		die "KDL.dump is denied by runtime policy" if __system__{deny_fs};
 		die "KDL.dump expects a std/io Path object" if not( path instanceof Path );
-		path.spew_utf8( self.encode(value) );
+		path.spew( self.encode_binarystring(value) );
 		return path;
 	}
 }

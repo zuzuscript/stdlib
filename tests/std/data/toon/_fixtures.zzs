@@ -35,7 +35,7 @@ function _new_codec ( opts ) {
 }
 
 function _run_fixture_file ( path ) {
-	let doc := fixture_json.decode( path.slurp() );
+	let doc := fixture_json.decode_binarystring( path.slurp() );
 	let category := doc.get("category");
 	let tests := doc.get("tests");
 	for ( const t in tests ) {

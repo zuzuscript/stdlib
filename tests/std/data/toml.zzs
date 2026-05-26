@@ -10,6 +10,9 @@ is( parsed{title}, "Example", "decoded title" );
 is( parsed{owner}{name}, "Tom", "decoded nested table" );
 is( parsed{owner}{active}, true, "decoded bool" );
 is( parsed{owner}{ports} [1], 8001, "decoded array values" );
+ok( t.encode_binarystring( { title: "Example" } ) instanceof BinaryString, "encode_binarystring returns BinaryString" );
+let parsed_binary := t.decode_binarystring( to_binary("title = \"café\"\n") );
+is( parsed_binary{title}, "café", "decode_binarystring decodes UTF-8 TOML bytes" );
 let setv := [ 3, 2, 1 ].to_Set();
 let bagv := [ 3, 2, 1, 1 ].to_Bag();
 let nested := {{

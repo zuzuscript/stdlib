@@ -38,9 +38,10 @@ The constructor accepts named options:
 
 =over
 
-=item * C<utf8> (default true)
+=item * C<utf8>
 
-Emit UTF-8 encoded bytes when encoding.
+Accepted for compatibility with older runtime implementations. Use
+C<encode_binarystring> when UTF-8 bytes are required.
 
 =item * C<pretty> (default false)
 
@@ -62,13 +63,22 @@ decoding.)
 =item C<< codec.encode(value) >>
 
 Parameters: C<value> is any JSON-encodable ZuzuScript value. Returns:
-C<String> or C<BinaryString>. Encodes C<value> as JSON text, or bytes
-when C<utf8> is true.
+C<String>. Encodes C<value> as JSON text.
+
+=item C<< codec.encode_binarystring(value) >>
+
+Parameters: C<value> is any JSON-encodable ZuzuScript value. Returns:
+C<BinaryString>. Encodes C<value> as UTF-8 JSON bytes.
 
 =item C<< codec.decode(String json) >>
 
 Parameters: C<json> is JSON text. Returns: value. Decodes JSON into the
 equivalent ZuzuScript value.
+
+=item C<< codec.decode_binarystring(BinaryString json) >>
+
+Parameters: C<json> is UTF-8 JSON bytes. Returns: value. Decodes JSON
+into the equivalent ZuzuScript value.
 
 =item C<< codec.load(Path path) >>
 

@@ -8,6 +8,9 @@ let parsed := ini.decode( "project = \"zuzu\"\n[app]\nport = 5000\ndebug = true\
 is( parsed{""}{project}, "zuzu", "decode reads default section" );
 is( parsed{app}{port}, 5000, "decode reads numeric scalar" );
 is( parsed{app}{ debug }, true, "decode reads boolean scalar" );
+ok( ini.encode_binarystring( { "": { project: "zuzu" } } ) instanceof BinaryString, "encode_binarystring returns BinaryString" );
+let parsed_binary := ini.decode_binarystring( to_binary("project = \"zuzu\"\n[app]\nname = \"café\"\n") );
+is( parsed_binary{app}{name}, "café", "decode_binarystring decodes UTF-8 INI bytes" );
 let setv := [ 3, 2, 1 ].to_Set();
 let bagv := [ 3, 2, 1, 1 ].to_Bag();
 let nested := {

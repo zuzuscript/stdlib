@@ -8,6 +8,7 @@ std/internals - Runtime internals helpers for advanced modules.
 
   from std/internals import class_name, classof, object_slots, ansi_esc,
     ref_id, to_String, to_Number, to_Boolean, to_Regexp,
+    to_Regexp_with_flags,
     make_instance, setprop, getprop, load_module;
 
   let obj_class := class_name(some_object);
@@ -82,6 +83,12 @@ C<value> using the same rules as logical operators and conditions.
 Parameters: C<value> is a regexp or pattern-like value. Returns:
 C<Regexp>. Returns C<value> unchanged when it is a regexp, otherwise
 coerces it to a string and compiles it as a regexp.
+
+=item * C<to_Regexp_with_flags(value, flags)>
+
+Parameters: C<value> is a regexp or pattern-like value and C<flags> is a
+string of regexp flags. Returns: C<Regexp>. Coerces C<value> to a pattern
+and compiles it using C<flags>.
 
 =item * C<make_instance(klass, dict := null)>
 

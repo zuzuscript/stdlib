@@ -10,6 +10,14 @@ let doc := kdl.decode( """// ignored
 }
 """ );
 
+ok( kdl.encode_binarystring(doc) instanceof BinaryString, "encode_binarystring returns BinaryString" );
+let binary_doc := kdl.decode_binarystring( to_binary("node label=\"café\"\n") );
+is(
+	binary_doc.nodes()[0].props().get("label").native_value(),
+	"café",
+	"decode_binarystring decodes UTF-8 KDL bytes",
+);
+
 is( doc.nodes().length(), 1, "decode returns one top-level node" );
 let package := doc.nodes()[0];
 is( package.name(), "package", "node exposes name" );

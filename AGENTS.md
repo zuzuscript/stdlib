@@ -67,3 +67,33 @@ uncuddled `else`, whitespace around binary operators, and semicolons as
 terminators. Keep code lines under 80 columns where practical.
 
 POD documentation should use spaces in code samples, not tabs.
+
+## Module Documentation
+
+Standard modules are documented with POD at the top of each `.zzm` file.
+Use `=encoding utf8`, then the standard headings in this order where they
+apply:
+
+- `NAME`: `std/module/path - concise purpose.`
+- `SYNOPSIS`: a short runnable example, normally importing from the module
+  and showing the common path through the API.
+- `IMPLEMENTATION SUPPORT`: which runtimes support the module, plus any
+  host-capability caveats.
+- `DESCRIPTION`: user-facing semantics, scope, and important behaviour.
+- `EXPORTS`: public functions, classes, variables, and constants.
+- Optional topical headings such as `SUPPORTED TYPES`, `PORTABILITY`, or
+  `USE WITH ...` when the module needs them.
+- `COPYRIGHT AND LICENCE`: the standard Toby Inkster dual-licence notice.
+
+Under `EXPORTS`, group public API with `=head2 Functions`, `=head2 Classes`,
+or similar headings, then use `=over` and `=item C<...>` entries. Document
+parameters, return values, observable errors, and runtime differences when
+they matter. Class entries may include a nested list of constructor and
+instance methods; for large classes, group related methods instead of
+repeating boilerplate for each one.
+
+Aim for enough detail that a user can use the public API without reading the
+implementation. Do not document private helpers, test fixture mechanics,
+internal evaluation steps, or incidental implementation details. Mention
+limitations only when they are part of the user-visible contract or a
+portability concern.

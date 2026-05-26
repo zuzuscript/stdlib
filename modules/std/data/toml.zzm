@@ -37,13 +37,22 @@ Constructs a TOML codec. Returns: C<TOML>.
 =item C<< codec.encode(value) >>
 
 Parameters: C<value> is a C<Dict> or compatible mapping. Returns:
-C<String> or C<BinaryString>. Encodes C<value> as TOML text, or bytes
-when C<utf8> is true.
+C<String>. Encodes C<value> as TOML text.
+
+=item C<< codec.encode_binarystring(value) >>
+
+Parameters: C<value> is a C<Dict> or compatible mapping. Returns:
+C<BinaryString>. Encodes C<value> as UTF-8 TOML bytes.
 
 =item C<< codec.decode(String text) >>
 
 Parameters: C<text> is TOML text. Returns: C<Dict>. Decodes TOML text
 into a dictionary.
+
+=item C<< codec.decode_binarystring(BinaryString bytes) >>
+
+Parameters: C<bytes> is UTF-8 TOML bytes. Returns: C<Dict>. Decodes TOML
+bytes into a dictionary.
 
 =item C<< codec.load(Path path) >>
 
@@ -714,6 +723,10 @@ class TOML {
 		die "TOML encoder expects a Dict at top level";
 	}
 
+	method encode_binarystring (value) {
+		return to_binary( self.encode(value) );
+	}
+
 	method decode ( String text ) {
 		let src := text;
 		src := "" if src ≡ null;
@@ -721,31 +734,22 @@ class TOML {
 		return _parse_document(src);
 	}
 
+	method decode_binarystring ( BinaryString raw ) {
+		return self.decode( to_string(raw) );
+	}
+
 	method load (path) {
 		from std/io import Path;
 		die "TOML.load is denied by runtime policy" if __system__{deny_fs};
 		die "TOML.load expects a std/io Path object" if not( path instanceof Path );
-		let src := path.slurp_utf8();
-		src := "" if src ≡ null;
-
-		return _parse_document(src);
+		return self.decode_binarystring( path.slurp() );
 	}
 
 	method dump ( path, value ) {
 		from std/io import Path;
 		die "TOML.dump is denied by runtime policy" if __system__{deny_fs};
 		die "TOML.dump expects a std/io Path object" if not( path instanceof Path );
-		let normalized := _normalize_for_encoding(value);
-
-		if ( normalized instanceof Dict ) {
-			let lines := [];
-			_encode_table( normalized, [], pretty, canonical, lines );
-			path.spew_utf8( _join_lines(lines) );
-			return path;
-		}
-
-		die "TOML encoder expects a Dict at top level";
-
+		path.spew( self.encode_binarystring(value) );
 		return path;
 	}
 

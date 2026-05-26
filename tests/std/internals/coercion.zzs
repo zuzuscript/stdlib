@@ -3,7 +3,8 @@ from std/internals import
 	to_String,
 	to_Number,
 	to_Boolean,
-	to_Regexp;
+	to_Regexp,
+	to_Regexp_with_flags;
 
 class CoercionProbe {
 
@@ -134,6 +135,11 @@ is( to_Boolean(probe), false, "to_Boolean calls object to_Boolean" );
 
 is( typeof to_Regexp(/x/), "Regexp", "to_Regexp preserves regexps" );
 is( ("abbc" ~ to_Regexp("b+"))[0], "bb", "to_Regexp compiles strings" );
+is(
+	("ABC" ~ to_Regexp_with_flags("abc", "i"))[0],
+	"ABC",
+	"to_Regexp_with_flags compiles strings with flags",
+);
 is(
 	("abbc" ~ to_Regexp(new RegexpProbe()))[0],
 	"bb",

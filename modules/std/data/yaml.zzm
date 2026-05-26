@@ -57,10 +57,20 @@ Accepted for API compatibility with C<std/data/json> and C<std/data/toml>.
 Parameters: C<value> is any YAML-encodable ZuzuScript value. Returns:
 C<String>. Encodes C<value> as YAML text.
 
+=item C<< codec.encode_binarystring(value) >>
+
+Parameters: C<value> is any YAML-encodable ZuzuScript value. Returns:
+C<BinaryString>. Encodes C<value> as UTF-8 YAML bytes.
+
 =item C<< codec.decode(String yaml) >>
 
 Parameters: C<yaml> is YAML text. Returns: value. Decodes YAML into the
 equivalent ZuzuScript value.
+
+=item C<< codec.decode_binarystring(BinaryString yaml) >>
+
+Parameters: C<yaml> is UTF-8 YAML bytes. Returns: value. Decodes YAML
+into the equivalent ZuzuScript value.
 
 =item C<< codec.load(Path path) >>
 

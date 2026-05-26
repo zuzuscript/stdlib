@@ -66,20 +66,41 @@ Instance methods:
 Parameters: C<text> is delimited text. Returns: C<Array>. Parses a whole
 string into rows, returning C<Dict> rows when headers are enabled.
 
+=item C<< csv.decode_binarystring(bytes) >>
+
+Parameters: C<bytes> is UTF-8 delimited text as C<BinaryString>. Returns:
+C<Array>. Parses a whole byte string into rows.
+
 =item C<< csv.decode_report(text) >>
 
 Parameters: C<text> is delimited text. Returns: C<Dict>. Decodes while
 collecting parse errors in C<rows> and C<errors>.
+
+=item C<< csv.decode_report_binarystring(bytes) >>
+
+Parameters: C<bytes> is UTF-8 delimited text as C<BinaryString>.
+Returns: C<Dict>. Decodes while collecting parse errors in C<rows> and
+C<errors>.
 
 =item C<< csv.encode(rows) >>
 
 Parameters: C<rows> is an array of row values. Returns: C<String>.
 Encodes rows into a delimited text string.
 
+=item C<< csv.encode_binarystring(rows) >>
+
+Parameters: C<rows> is an array of row values. Returns: C<BinaryString>.
+Encodes rows into UTF-8 delimited text bytes.
+
 =item C<< csv.encode_row(row) >>
 
 Parameters: C<row> is an array, dictionary, or row-like value. Returns:
 C<String>. Encodes a single row as delimited text.
+
+=item C<< csv.encode_row_binarystring(row) >>
+
+Parameters: C<row> is an array, dictionary, or row-like value. Returns:
+C<BinaryString>. Encodes a single row as UTF-8 delimited text bytes.
 
 =item C<< csv.load(path) >>
 
@@ -110,6 +131,11 @@ writer settings. Returns: C<CSVWriter>. Opens a streaming writer.
 
 Parameters: C<text_or_path> is delimited text or a C<Path>. Returns:
 C<Dict>. Guesses delimiter and likely header presence.
+
+=item C<< csv.sniff_binarystring(bytes) >>
+
+Parameters: C<bytes> is UTF-8 delimited text as C<BinaryString>.
+Returns: C<Dict>. Guesses delimiter and likely header presence.
 
 =item C<< csv.transpose(rows) >>
 

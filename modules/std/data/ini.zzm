@@ -43,13 +43,22 @@ Constructs an INI codec. Returns: C<INI>.
 =item C<< codec.encode(value) >>
 
 Parameters: C<value> is a C<Dict> or compatible mapping. Returns:
-C<String> or C<BinaryString>. Encodes C<value> as INI text, or bytes
-when C<utf8> is true.
+C<String>. Encodes C<value> as INI text.
+
+=item C<< codec.encode_binarystring(value) >>
+
+Parameters: C<value> is a C<Dict> or compatible mapping. Returns:
+C<BinaryString>. Encodes C<value> as UTF-8 INI bytes.
 
 =item C<< codec.decode(String text) >>
 
 Parameters: C<text> is INI text. Returns: C<Dict>. Decodes INI text
 into a dictionary.
+
+=item C<< codec.decode_binarystring(BinaryString bytes) >>
+
+Parameters: C<bytes> is UTF-8 INI bytes. Returns: C<Dict>. Decodes INI
+bytes into a dictionary.
 
 =item C<< codec.load(Path path) >>
 
@@ -429,6 +438,10 @@ class INI {
 		return _encode_ini( normalized, pretty, canonical );
 	}
 
+	method encode_binarystring (value) {
+		return to_binary( self.encode(value) );
+	}
+
 	method decode ( String text ) {
 		let src := text;
 		src := "" if src ≡ null;
@@ -436,23 +449,22 @@ class INI {
 		return _decode_ini(src);
 	}
 
+	method decode_binarystring ( BinaryString raw ) {
+		return self.decode( to_string(raw) );
+	}
+
 	method load (path) {
 		from std/io import Path;
 		die "INI.load is denied by runtime policy" if __system__{deny_fs};
 		die "INI.load expects a std/io Path object" if not( path instanceof Path );
-		let src := path.slurp_utf8();
-		src := "" if src ≡ null;
-
-		return _decode_ini(src);
+		return self.decode_binarystring( path.slurp() );
 	}
 
 	method dump ( path, value ) {
 		from std/io import Path;
 		die "INI.dump is denied by runtime policy" if __system__{deny_fs};
 		die "INI.dump expects a std/io Path object" if not( path instanceof Path );
-		let normalized := _normalize_for_encoding(value);
-		die "INI encoder expects a Dict at top level" if not( normalized instanceof Dict );
-		path.spew_utf8( _encode_ini( normalized, pretty, canonical ) );
+		path.spew( self.encode_binarystring(value) );
 
 		return path;
 	}

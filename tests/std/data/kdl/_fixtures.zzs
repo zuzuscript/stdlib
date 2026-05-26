@@ -26,13 +26,13 @@ let parser := new KDL();
 
 for ( let file in files ) {
 	let name := file.basename();
-	let input := file.slurp_utf8();
+	let input := file.slurp();
 	let should_fail := name ~ /_fail\.kdl$/;
 	let expected := expected_root.child(name);
 
 	if ( should_fail ) {
 		let e := exception( function () {
-			parser.decode(input);
+			parser.decode_binarystring(input);
 		} );
 		isnt( e, null, name _ " throws" );
 		next;
@@ -40,7 +40,7 @@ for ( let file in files ) {
 
 	let doc;
 	let e := exception( function () {
-		doc := parser.decode(input);
+		doc := parser.decode_binarystring(input);
 	} );
 	is( e, null, name _ " parses" );
 	next if e;
