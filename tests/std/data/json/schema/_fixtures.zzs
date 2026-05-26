@@ -13,15 +13,20 @@ const expected_optional_passes := [
 	"optional/bignum.json",
 	"optional/dynamicRef.json",
 	"optional/anchor.json",
+	"optional/dependencies-compatibility.json",
 	"optional/format/ecmascript-regex.json",
 	"optional/format/date.json",
+	"optional/format/date-time.json",
+	"optional/format/email.json",
 	"optional/format/ipv4.json",
 	"optional/format/idn-email.json",
 	"optional/format/iri.json",
+	"optional/format/iri-reference.json",
 	"optional/format/json-pointer.json",
 	"optional/format/regex.json",
 	"optional/format/relative-json-pointer.json",
 	"optional/format/unknown.json",
+	"optional/format/uri-reference.json",
 	"optional/format/uri-template.json",
 	"optional/format/uuid.json",
 	"optional/format-assertion.json",
@@ -323,7 +328,7 @@ is(
 
 is(
 	expected_optional_ran,
-	278,
+	400,
 	"all expected-passing optional draft2020-12 fixture assertions ran",
 );
 

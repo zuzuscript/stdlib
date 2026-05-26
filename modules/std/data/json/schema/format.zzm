@@ -84,7 +84,12 @@ License version 2.
 from std/internals import to_Regexp_with_flags;
 from std/path/jsonpointer import JSONPointer;
 from std/data/json/schema/relative_pointer import valid_relative_json_pointer;
-from std/string import index, substr, split;
+from std/string import index, ord, substr, split;
+
+function _fmt_ipv4_ok;
+function _fmt_ipv6_ok;
+function _fmt_uri_reference_ok;
+function _fmt_regex_hex;
 
 function _fmt_regex ( String pattern ) {
 	return fn value -> value instanceof String
@@ -111,14 +116,25 @@ function _fmt_date_parts_ok ( String value ) {
 }
 
 function _fmt_time_ok ( String value ) {
-	let m := value ~ /^([0-9]{2}):([0-9]{2}):([0-9]{2})(?:\.[0-9]+)?(?:Z|[+-][0-9]{2}:[0-9]{2})$/;
+	let m := value ~ /^([0-9]{2}):([0-9]{2}):([0-9]{2})(?:\.[0-9]+)?(?:[Zz]|([+-])([0-9]{2}):([0-9]{2}))$/;
 	if ( not m ) { return false; }
-	return int(m[1]) <= 23 and int(m[2]) <= 59 and int(m[3]) <= 60;
+	let hour := int(m[1]);
+	let minute := int(m[2]);
+	let second := int(m[3]);
+	let has_offset := m[4] instanceof String and m[4] ne "";
+	if ( hour > 23 or minute > 59 ) { return false; }
+	if ( second > 60 ) { return false; }
+	if ( has_offset ) {
+		if ( int(m[5]) > 23 or int(m[6]) > 59 ) { return false; }
+	}
+	if ( second == 60 and minute != 59 ) { return false; }
+	if ( second == 60 and not has_offset and hour != 23 ) { return false; }
+	return true;
 }
 
 function _fmt_date_time_ok ( value ) {
 	if ( not( value instanceof String ) ) { return false; }
-	let m := value ~ /^([0-9]{4}-[0-9]{2}-[0-9]{2})[Tt]([0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?(?:Z|[+-][0-9]{2}:[0-9]{2}))$/;
+	let m := value ~ /^([0-9]{4}-[0-9]{2}-[0-9]{2})[Tt]([0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?(?:[Zz]|[+-][0-9]{2}:[0-9]{2}))$/;
 	return m and _fmt_date_parts_ok(m[1]) and _fmt_time_ok(m[2]);
 }
 
@@ -151,8 +167,24 @@ function _fmt_hostname_ok ( value ) {
 
 function _fmt_email_ok ( value ) {
 	if ( not( value instanceof String ) ) { return false; }
-	let m := value ~ /^([^@\s]+)@([^@\s]+)$/;
-	return m and _fmt_hostname_ok(m[2]);
+	let address;
+	try {
+		from std/mail import Address;
+		address := Address.parse(value);
+	}
+	catch {
+		return false;
+	}
+	if ( address.display_name() ≢ null ) { return false; }
+	let domain := address.domain();
+	if ( substr( domain, 0, 1 ) eq "[" ) {
+		let inner := substr( domain, 1, length domain - 2 );
+		if ( substr( inner, 0, 5 ) eq "IPv6:" ) {
+			return _fmt_ipv6_ok( substr( inner, 5 ) );
+		}
+		return _fmt_ipv4_ok(inner);
+	}
+	return _fmt_hostname_ok(domain);
 }
 
 function _fmt_idn_hostname_ok ( value ) {
@@ -197,11 +229,33 @@ function _fmt_ipv6_ok ( value ) {
 
 function _fmt_uri_ok ( value ) {
 	return value instanceof String
-		and value ~ /^[A-Za-z][A-Za-z0-9+.-]*:[^\s]*$/;
+		and value ~ /^[A-Za-z][A-Za-z0-9+.-]*:[^\s]*$/
+		and _fmt_uri_reference_ok(value);
+}
+
+function _fmt_uri_chars_ok ( String value, Boolean allow_non_ascii ) {
+	if ( value ~ /[\s\\]/ ) { return false; }
+	let i := 0;
+	while ( i < length value ) {
+		let ch := substr( value, i, 1 );
+		let cp := ord(ch);
+		if ( ch eq "%" ) {
+			if ( not _fmt_regex_hex( value, i + 1, 2 ) ) {
+				return false;
+			}
+			i += 3;
+			next;
+		}
+		if ( not allow_non_ascii and cp > 127 ) {
+			return false;
+		}
+		i++;
+	}
+	return true;
 }
 
 function _fmt_uri_reference_ok ( value ) {
-	return value instanceof String and not( value ~ /\s/ );
+	return value instanceof String and _fmt_uri_chars_ok( value, false );
 }
 
 function _fmt_last_index ( String value, String needle ) {
@@ -266,10 +320,23 @@ function _fmt_iri_authority_ok ( String authority ) {
 
 function _fmt_iri_ok ( value ) {
 	if ( not( value instanceof String ) ) { return false; }
-	if ( value ~ /[\s\\]/ ) { return false; }
+	if ( not _fmt_uri_chars_ok( value, true ) ) { return false; }
 	if ( not( value ~ /^[A-Za-z][A-Za-z0-9+.-]*:/ ) ) { return false; }
 	let authority := _fmt_authority_from_iri(value);
 	return authority ≡ null or _fmt_iri_authority_ok(authority);
+}
+
+function _fmt_iri_reference_ok ( value ) {
+	if ( not( value instanceof String ) ) { return false; }
+	if ( not _fmt_uri_chars_ok( value, true ) ) { return false; }
+	if ( value ~ /^[A-Za-z][A-Za-z0-9+.-]*:/ ) {
+		return _fmt_iri_ok(value);
+	}
+	if ( substr( value, 0, 2 ) eq "//" ) {
+		let authority := _fmt_authority_from_iri( "x:" _ value );
+		return authority ≢ null and _fmt_iri_authority_ok(authority);
+	}
+	return true;
 }
 
 function _fmt_regex_hex ( String value, Number start, Number count ) {
@@ -485,7 +552,7 @@ class FormatRegistry {
 		self.register( "uri", _fmt_uri_ok );
 		self.register( "uri-reference", _fmt_uri_reference_ok );
 		self.register( "iri", _fmt_iri_ok );
-		self.register( "iri-reference", _fmt_uri_reference_ok );
+		self.register( "iri-reference", _fmt_iri_reference_ok );
 		self.register( "uuid", _fmt_regex(
 			"^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$",
 		) );

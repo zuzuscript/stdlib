@@ -187,6 +187,61 @@ formats as annotations.
 
 =back
 
+=head1 KNOWN OPTIONAL FIXTURE GAPS
+
+The validator covers all required JSON Schema draft 2020-12 fixture files
+and many optional fixture files. The following optional fixture files are not
+yet promoted to the expected-passing set.
+
+=over
+
+=item F<optional/cross-draft.json>
+
+References into older schema drafts are resolved, but draft-specific
+validation semantics for referenced historic drafts are not yet applied.
+
+=item F<optional/float-overflow.json>
+
+Very large numeric values still use the host numeric model, so overflow and
+precision edge cases for C<multipleOf> are not fully handled.
+
+=item F<optional/ecmascript-regex.json>
+
+The JavaScript runtime passes this fixture, but the Perl and Rust runtimes do
+not yet emulate enough ECMAScript regular-expression semantics.
+
+=item F<optional/format/duration.json>
+
+The C<duration> format checker accepts basic duration shapes, but does not
+yet implement the full RFC 3339 duration grammar.
+
+=item F<optional/format/hostname.json>
+
+Hostname validation is intentionally conservative and does not yet fully
+validate A-label, Punycode, and IDNA edge cases.
+
+=item F<optional/format/idn-hostname.json>
+
+Internationalized hostname validation does not yet implement the full IDNA
+Unicode category, normalization, and bidirectional-text rules.
+
+=item F<optional/format/ipv6.json>
+
+IPv6 validation is still simplified and misses some invalid compression and
+group-length edge cases.
+
+=item F<optional/format/time.json>
+
+Time validation handles common RFC 3339 forms, but still has some leap-second
+and timezone-offset edge cases.
+
+=item F<optional/format/uri.json>
+
+URI validation is stricter than a plain string check, but still accepts some
+invalid authority, userinfo, character, and port cases.
+
+=back
+
 =head1 PORTABILITY
 
 The module is pure ZuzuScript. Behaviour that depends on regular expression

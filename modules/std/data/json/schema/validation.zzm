@@ -1038,6 +1038,57 @@ class _SchemaEvaluator {
 					}
 				}
 			}
+			if ( jschema_object_has( schema, "dependencies" ) ) {
+				let deps := jschema_object_get( schema, "dependencies" );
+				if ( jschema_is_object(deps) ) {
+					for ( let entry in jschema_object_entries(deps) ) {
+						if ( jschema_object_has( instance, entry[0] ) ) {
+							if ( entry[1] instanceof Array ) {
+								for ( let dep in entry[1] ) {
+									if ( not jschema_object_has( instance, dep ) ) {
+										self._invalid(
+											result,
+											DependentRequiredPropertyError,
+											jschema_pointer_join( kwloc, "dependencies" ),
+											instloc,
+											`Dependent property '${dep}' is missing.`,
+											"dependencies",
+										);
+										if ( not collect ) {
+											return;
+										}
+									}
+								}
+							}
+							else {
+								let child := self._child(
+									entry[1],
+									instance,
+									jschema_pointer_join(
+										jschema_pointer_join( kwloc, "dependencies" ),
+										entry[0],
+									),
+									instloc,
+									base_uri,
+								);
+								result.merge(child);
+								if ( not child.valid() ) {
+									result.add_error( self._subschema_error(
+										jschema_pointer_join(
+											jschema_pointer_join( kwloc, "dependencies" ),
+											entry[0],
+										),
+										instloc,
+										child.errors(),
+										"dependencies",
+									) );
+									if ( not collect ) { return result; }
+								}
+							}
+						}
+					}
+				}
+			}
 		}
 
 		let matched_properties := [];
