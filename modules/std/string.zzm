@@ -12,6 +12,8 @@ std/string - String utilities for ZuzuScript modules.
   say( substr( s, 1, 3 ) );     # bcd
   say( index( s, "cd" ) );      # 2
   say( replace( s, "cd", "XY" ) );
+  let label := "Zia.+";
+  let safe := /^${quotemeta(label)}:/i;
   let rx := pattern_to_regexp( "cd", true );
   say( search( s, rx ) );       # CD (if present)
   say( trim("  hello  ") );     # hello
@@ -98,6 +100,13 @@ true when C<text> matches C<pattern>.
 Parameters: C<pattern> is a pattern string and C<case_insensitive>
 requests case-insensitive matching. Returns: C<Regexp>. Compiles a
 regexp from a string pattern.
+
+=item * C<quotemeta(String text)>
+
+Parameters: C<text> is source text. Returns: C<String>. Prefixes
+regexp metacharacters, slash delimiters, and quote characters with
+C<\> so the result can be safely interpolated into a regexp as literal
+text, for example C<< /^${quotemeta(label)}:/i >>.
 
 =item * C<sprint(String format, ...args)>
 

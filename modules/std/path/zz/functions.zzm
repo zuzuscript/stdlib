@@ -609,6 +609,16 @@ STANDARD_FUNCTIONS.push(
 		},
 	),
 	new Func(
+		spelling: "quotemeta",
+		f: function ( funk, ev, ast, ctx, args ) {
+			from std/string import quotemeta;
+			die "Too many arguments for quotemeta()" if args.length() > 1;
+			return funk.wrap( quotemeta(
+				nth_string_arg( "quotemeta", ev, ctx, args, 0 ),
+			) );
+		},
+	),
+	new Func(
 		spelling: "sprint",
 		f: function ( funk, ev, ast, ctx, args ) {
 			from std/string import sprint;

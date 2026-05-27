@@ -39,6 +39,20 @@ is( search( "abcfooxyz", built ), "foo", "pattern_to_regexp builds regexp object
 is( "" _ built, "fo{2}", "pattern_to_regexp preserves source pattern" );
 let built_ci := pattern_to_regexp( "fo{2}", true );
 is( search( "abcFOOxyz", built_ci ), "FOO", "pattern_to_regexp supports case-insensitive flag" );
+is(
+	quotemeta( "Zia.+(nap)?/[den]\"'\\" ),
+	```Zia\.\+\(nap\)\?\/\[den\]\"\'\\```,
+	"quotemeta escapes regexp metacharacters, slash, quotes, and backslash",
+);
+let raw_label := "Zia.+";
+ok(
+	"zia.+: sleepy" ~ /^${quotemeta(raw_label)}:/i,
+	"quotemeta output can be interpolated into regexp literals",
+);
+ok(
+	not( "Ziax: sleepy" ~ /^${quotemeta(raw_label)}:/ ),
+	"quotemeta prevents metacharacters from matching as regexp syntax",
+);
 is( sprint( "%s = %d", "count", 7 ), "count = 7", "sprint formats strings", );
 let pieces := split( "alpha,beta,gamma","," );
 is( pieces.length(), 3, "split wrapper" );

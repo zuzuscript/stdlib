@@ -5,7 +5,7 @@ from test/more import *;
 
 ok( typeof Func eq "Class", "Func class is importable" );
 ok( typeof STANDARD_FUNCTIONS eq "Array", "STANDARD_FUNCTIONS is importable" );
-is( STANDARD_FUNCTIONS.length(), 58, "ZZPath standard function table is limited" );
+is( STANDARD_FUNCTIONS.length(), 59, "ZZPath standard function table is limited" );
 
 function find_z ( spelling ) {
 	return Z_STANDARD_FUNCTIONS.first( fn f → f.has_name(spelling) );
@@ -72,6 +72,7 @@ for ( let spelling in [
 	"ends_with",
 	"matches",
 	"pattern_to_regexp",
+	"quotemeta",
 	"sprint",
 	"split",
 	"join",
@@ -346,6 +347,11 @@ is(
 		.first(data),
 	"Al",
 	"pattern_to_regexp() exposes std/string.pattern_to_regexp",
+);
+is(
+	( new ZZPath( path: "quotemeta(\"Zia.+\")" ) ).first(data),
+	```Zia\.\+```,
+	"quotemeta() exposes std/string.quotemeta",
 );
 is(
 	( new ZZPath( path: "sprint(\"%s = %d\", \"count\", 7)" ) ).first(data),
