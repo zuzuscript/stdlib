@@ -62,6 +62,17 @@ function archive_path () {
 					data: to_binary("say \"tool\";\n"),
 				},
 				{
+					path: "install-basic-1.0.0/scripts/zuzu-tool",
+					data: to_binary(
+						"#!/usr/bin/env zuzu\n" _
+						"say \"zuzu tool\";\n",
+					),
+				},
+				{
+					path: "install-basic-1.0.0/scripts/not-a-tool",
+					data: to_binary("say \"not installed\";\n"),
+				},
+				{
 					path: "install-basic-1.0.0/tests/basic.zzs",
 					data: to_binary(
 						"from test/more import *;\n" _
@@ -107,6 +118,16 @@ is(
 	"script is copied to bin_dir",
 );
 is(
+	target{bin_obj}.child("zuzu-tool").slurp_utf8(),
+	"#!/usr/bin/env zuzu\n" _
+		"say \"zuzu tool\";\n",
+	"extensionless Zuzu shebang script is copied to bin_dir",
+);
+ok(
+	not target{bin_obj}.child("not-a-tool").exists(),
+	"extensionless non-Zuzu script is not installed",
+);
+is(
 	target{bin_obj}.child("basic-tool.zzs").stat(){mode} & 511,
 	493,
 	"POSIX script is chmodded to 0755",
@@ -121,8 +142,8 @@ is(
 	"installed metadata records module destination",
 );
 is(
-	installed{installed}{scripts}[0]{install_as},
-	"basic-tool.zzs",
+	installed{installed}{scripts}.map( fn s -> s{install_as} ),
+	[ "basic-tool.zzs", "zuzu-tool" ],
 	"installed metadata records script destination",
 );
 is(

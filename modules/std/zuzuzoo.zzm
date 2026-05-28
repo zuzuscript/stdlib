@@ -623,6 +623,53 @@ function _discover_files ( root, dir_name, extension ) {
 	return found.sort( fn ( a, b ) -> a cmp b );
 }
 
+function _has_extension ( String basename ) {
+	return contains( basename, "." );
+}
+
+function _has_zuzu_shebang ( path ) {
+	let text := "";
+	try {
+		text := path.slurp_utf8();
+	}
+	catch {
+		return false;
+	}
+
+	let lines := split( text, "\n" );
+	let first_line := lines.length() == 0 ? "" : lines[0];
+	return starts_with( first_line, "#!" ) and contains( first_line, "zuzu" );
+}
+
+function _discover_scripts ( root ) {
+	let base := root.child("scripts");
+	return [] if not base.exists();
+	return [] if not base.is_dir();
+
+	let found := [];
+	function walk ( path ) {
+		for ( let child in path.children() ) {
+			if ( child.is_dir() ) {
+				walk(child);
+			}
+			else if ( child.is_file() ) {
+				let basename := child.basename();
+				if (
+					ends_with( basename, ".zzs" ) or
+					(
+						not _has_extension(basename) and
+						_has_zuzu_shebang(child)
+					)
+				) {
+					found.push( _relative_path( root, child ) );
+				}
+			}
+		}
+	}
+	walk(base);
+	return found.sort( fn ( a, b ) -> a cmp b );
+}
+
 function _module_install_name ( String source ) {
 	return substr( source, length "modules/" );
 }
@@ -2358,11 +2405,7 @@ class Zuzuzoo {
 				"modules",
 				".zzm",
 			);
-			let script_sources := _discover_files(
-				root_dir,
-				"scripts",
-				".zzs",
-			);
+			let script_sources := _discover_scripts(root_dir);
 			let tests := _discover_files( root_dir, "tests", ".zzs" );
 			let modules := module_sources.map( function ( source ) {
 				return {
