@@ -190,12 +190,17 @@ function parse_lines ( Array lines ) {
 		}
 	}
 
+	let skip_all_plan := false;
+	if ( planned ≡ 0 and plan_directive ~ /^skip\b/i ) {
+		skip_all_plan := true;
+	}
+
 	return {
 		top_level: top_level,
 		assertions: assertions,
 		planned: planned,
 		plan_directive: plan_directive,
-		skip_all: planned ≡ 0 and plan_directive ~ /^skip\b/i,
+		skip_all: skip_all_plan,
 		tests: tests,
 	};
 }
