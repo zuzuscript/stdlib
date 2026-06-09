@@ -80,7 +80,7 @@ apply:
 - `IMPLEMENTATION SUPPORT`: which runtimes support the module, plus any
   host-capability caveats.
 - `DESCRIPTION`: user-facing semantics, scope, and important behaviour.
-- `EXPORTS`: public functions, classes, variables, and constants.
+- `EXPORTS`: public functions, classes, traits, variables, and constants.
 - Optional topical headings such as `SUPPORTED TYPES`, `PORTABILITY`, or
   `USE WITH ...` when the module needs them.
 - `COPYRIGHT AND LICENCE`: the standard Toby Inkster dual-licence notice.
