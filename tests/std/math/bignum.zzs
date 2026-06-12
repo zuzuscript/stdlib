@@ -1,7 +1,7 @@
 from test/more import *;
 from std/math/bignum import *;
 
-plan(34);
+plan(36);
 
 let n := BigNum.from_dec("12345");
 let m := BigNum.from_hex("0xABCDEF");
@@ -35,7 +35,10 @@ while ( i < 1000 ) {
 	big_expected _= "0";
 	i++;
 }
+let big_pow_plain := BigNum.from_dec("10").bpow(1000);
 is( big_pow.to_String, big_expected, "bpow handles large integer exponents" );
+like( big_pow.to_String, /^10{1000}$/, "bpow handles huge powers with regular expression check" );
+like( big_pow_plain.to_String, /^10{1000}$/, "bpow handles plain integer exponent form with large powers" );
 
 is( BigNum.from_dec("0").bsin.to_dec, "0", "bsin works" );
 is( BigNum.from_dec("0").bcos.to_dec, 1, "bcos works" );
