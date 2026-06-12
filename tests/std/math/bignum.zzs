@@ -1,7 +1,7 @@
 from test/more import *;
 from std/math/bignum import *;
 
-plan(29);
+plan(34);
 
 let n := BigNum.from_dec("12345");
 let m := BigNum.from_hex("0xABCDEF");
@@ -28,6 +28,14 @@ is( n.bdiv(3).to_dec, 4115, "bdiv works" );
 is( n.bmod(10).to_dec, 5, "bmod works" );
 is( BigNum.from_dec("2").bpow(10).to_dec, 1024, "bpow works" );
 is( n.binv.to_dec, n.binv.to_dec, "binv works" );
+let big_pow := BigNum.from_dec("10").bpow( BigNum.from_dec("1000") );
+let big_expected := "1";
+let i := 0;
+while ( i < 1000 ) {
+	big_expected _= "0";
+	i++;
+}
+is( big_pow.to_String, big_expected, "bpow handles large integer exponents" );
 
 is( BigNum.from_dec("0").bsin.to_dec, "0", "bsin works" );
 is( BigNum.from_dec("0").bcos.to_dec, 1, "bcos works" );
