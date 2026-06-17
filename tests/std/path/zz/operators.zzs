@@ -26,7 +26,7 @@ for ( let spelling in [ "+", "-", "√", "!", "¬", "~" ] ) {
 	ok( op ≢ null, `unary ${spelling} operator exists` );
 	ok( op.is_unary(), `unary ${spelling} is marked unary` );
 	ok( not op.is_binary(), `unary ${spelling} is not binary` );
-	is( op.get_precedence(), 20, `unary ${spelling} precedence is set` );
+	is( op.get_precedence(), 40, `unary ${spelling} precedence is set` );
 	ok( op{f} ≢ null, `unary ${spelling} has implementation callback` );
 }
 
@@ -39,7 +39,7 @@ for ( let spelling in [ "**" ] ) {
 	let op := find_binary(spelling);
 	ok( op ≢ null, `binary ${spelling} operator exists` );
 	ok( op.is_binary(), `binary ${spelling} is marked binary` );
-	is( op.get_precedence(), 13, `binary ${spelling} precedence is set` );
+	is( op.get_precedence(), 26, `binary ${spelling} precedence is set` );
 	ok( op.is_right_associative(), `binary ${spelling} is right-associative` );
 	ok( op.requires_whitespace(), `binary ${spelling} enforces whitespace` );
 	ok( op{f} ≢ null, `binary ${spelling} has implementation callback` );
@@ -49,7 +49,7 @@ for ( let spelling in [ "×", "*", "÷", "/", "mod" ] ) {
 	let op := find_binary(spelling);
 	ok( op ≢ null, `binary ${spelling} operator exists` );
 	ok( op.is_binary(), `binary ${spelling} is marked binary` );
-	is( op.get_precedence(), 12, `binary ${spelling} precedence is set` );
+	is( op.get_precedence(), 24, `binary ${spelling} precedence is set` );
 	ok( op{f} ≢ null, `binary ${spelling} has implementation callback` );
 }
 
@@ -68,7 +68,7 @@ for ( let spelling in [ "+", "-" ] ) {
 	let op := find_binary(spelling);
 	ok( op ≢ null, `binary ${spelling} operator exists` );
 	ok( op.is_binary(), `binary ${spelling} is marked binary` );
-	is( op.get_precedence(), 11, `binary ${spelling} precedence is set` );
+	is( op.get_precedence(), 22, `binary ${spelling} precedence is set` );
 	ok( op.requires_whitespace(), `binary ${spelling} enforces whitespace` );
 	ok( op{f} ≢ null, `binary ${spelling} has implementation callback` );
 }
@@ -92,7 +92,7 @@ for ( let spelling in [
 	let op := find_binary(spelling);
 	ok( op ≢ null, `binary ${spelling} operator exists` );
 	ok( op.is_binary(), `binary ${spelling} is marked binary` );
-	is( op.get_precedence(), 5, `binary ${spelling} precedence is set` );
+	is( op.get_precedence(), 10, `binary ${spelling} precedence is set` );
 	ok( op{f} ≢ null, `binary ${spelling} has implementation callback` );
 }
 
@@ -121,7 +121,7 @@ ok(
 	let op := find_binary("_");
 	ok( op ≢ null, "binary _ operator exists" );
 	ok( op.is_binary(), "binary _ is marked binary" );
-	is( op.get_precedence(), 10.5, "binary _ precedence is set" );
+	is( op.get_precedence(), 21, "binary _ precedence is set" );
 	ok( op.requires_whitespace(), "binary _ enforces whitespace" );
 	ok( op{f} ≢ null, "binary _ has implementation callback" );
 }
@@ -146,7 +146,7 @@ for ( let spelling in [
 	let op := find_binary(spelling);
 	ok( op ≢ null, `binary ${spelling} operator exists` );
 	ok( op.is_binary(), `binary ${spelling} is marked binary` );
-	is( op.get_precedence(), 5, `binary ${spelling} precedence is set` );
+	is( op.get_precedence(), 10, `binary ${spelling} precedence is set` );
 	ok( op{f} ≢ null, `binary ${spelling} has implementation callback` );
 }
 
@@ -157,13 +157,13 @@ ok(
 );
 
 for ( let spec in [
-	[ "«", 9 ],
-	[ "<<", 9 ],
-	[ "»", 9 ],
-	[ ">>", 9 ],
-	[ "&", 8 ],
-	[ "^", 7 ],
-	[ "|", 6 ],
+	[ "«", 18 ],
+	[ "<<", 18 ],
+	[ "»", 18 ],
+	[ ">>", 18 ],
+	[ "&", 16 ],
+	[ "^", 14 ],
+	[ "|", 12 ],
 ] ) {
 	let spelling := spec[0];
 	let op := find_binary(spelling);
@@ -183,38 +183,38 @@ ok(
 );
 
 for ( let spec in [
-	[ "⋀", 3.5 ],
-	[ "and", 3.5 ],
-	[ "⋀?", 3.5 ],
-	[ "and?", 3.5 ],
-	[ "⊼", 3.5 ],
-	[ "nand", 3.5 ],
-	[ "⊼?", 3.5 ],
-	[ "nand?", 3.5 ],
-	[ "⊭", 3.5 ],
-	[ "butnot", 3.5 ],
-	[ "⊭?", 3.5 ],
-	[ "butnot?", 3.5 ],
-	[ "⊻", 2.5 ],
-	[ "xor", 2.5 ],
-	[ "⊻?", 2.5 ],
-	[ "xor?", 2.5 ],
-	[ "⊽", 2.5 ],
-	[ "nor", 2.5 ],
-	[ "⊽?", 2.5 ],
-	[ "nor?", 2.5 ],
-	[ "↔", 2.5 ],
-	[ "xnor", 2.5 ],
-	[ "↔?", 2.5 ],
-	[ "xnor?", 2.5 ],
-	[ "⊨", 2 ],
-	[ "onlyif", 2 ],
-	[ "⊨?", 2 ],
-	[ "onlyif?", 2 ],
-	[ "⋁", 1 ],
-	[ "or", 1 ],
-	[ "⋁?", 1 ],
-	[ "or?", 1 ],
+	[ "⋀", 7 ],
+	[ "and", 7 ],
+	[ "⋀?", 7 ],
+	[ "and?", 7 ],
+	[ "⊼", 7 ],
+	[ "nand", 7 ],
+	[ "⊼?", 7 ],
+	[ "nand?", 7 ],
+	[ "⊭", 7 ],
+	[ "butnot", 7 ],
+	[ "⊭?", 7 ],
+	[ "butnot?", 7 ],
+	[ "⊻", 5 ],
+	[ "xor", 5 ],
+	[ "⊻?", 5 ],
+	[ "xor?", 5 ],
+	[ "⊽", 5 ],
+	[ "nor", 5 ],
+	[ "⊽?", 5 ],
+	[ "nor?", 5 ],
+	[ "↔", 5 ],
+	[ "xnor", 5 ],
+	[ "↔?", 5 ],
+	[ "xnor?", 5 ],
+	[ "⊨", 4 ],
+	[ "onlyif", 4 ],
+	[ "⊨?", 4 ],
+	[ "onlyif?", 4 ],
+	[ "⋁", 2 ],
+	[ "or", 2 ],
+	[ "⋁?", 2 ],
+	[ "or?", 2 ],
 ] ) {
 	let spelling := spec[0];
 	let op := find_binary(spelling);
@@ -306,21 +306,21 @@ ok(
 );
 
 for ( let spec in [
-	[ "⋃", 10 ],
-	[ "union", 10 ],
-	[ "⋂", 10 ],
-	[ "intersection", 10 ],
-	[ "∖", 10 ],
-	[ "\\", 10 ],
-	[ "∈", 5 ],
-	[ "in", 5 ],
-	[ "∉", 5 ],
-	[ "⊂", 5 ],
-	[ "subsetof", 5 ],
-	[ "⊃", 5 ],
-	[ "supersetof", 5 ],
-	[ "⊂⊃", 5 ],
-	[ "equivalentof", 5 ],
+	[ "⋃", 20 ],
+	[ "union", 20 ],
+	[ "⋂", 20 ],
+	[ "intersection", 20 ],
+	[ "∖", 20 ],
+	[ "\\", 20 ],
+	[ "∈", 10 ],
+	[ "in", 10 ],
+	[ "∉", 10 ],
+	[ "⊂", 10 ],
+	[ "subsetof", 10 ],
+	[ "⊃", 10 ],
+	[ "supersetof", 10 ],
+	[ "⊂⊃", 10 ],
+	[ "equivalentof", 10 ],
 ] ) {
 	let spelling := spec[0];
 	let op := find_binary(spelling);
@@ -361,11 +361,11 @@ ok(
 );
 
 for ( let spec in [
-	[ "≡", 4 ],
-	[ "==", 4 ],
-	[ "≢", 4 ],
-	[ "!=", 4 ],
-	[ "can", 5 ],
+	[ "≡", 8 ],
+	[ "==", 8 ],
+	[ "≢", 8 ],
+	[ "!=", 8 ],
+	[ "can", 10 ],
 ] ) {
 	let spelling := spec[0];
 	let op := find_binary(spelling);
@@ -404,7 +404,7 @@ for ( let spelling in [
 	let op := find_binary("?:");
 	ok( op ≢ null, "Elvis operator exists" );
 	is( op.get_kind(), "ELVIS", "Elvis operator kind is set" );
-	is( op.get_precedence(), 1, "Elvis operator precedence is set" );
+	is( op.get_precedence(), 2, "Elvis operator precedence is set" );
 	ok( op.lexer_should_ignore(), "Elvis is handled by the guarded lexer branch" );
 	is( op{f}, null, "Elvis operator uses parser and evaluator support" );
 }
