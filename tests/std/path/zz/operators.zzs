@@ -3,7 +3,7 @@ from test/more import *;
 
 ok( typeof Operator eq "Class", "Operator class is importable" );
 ok( typeof STANDARD_OPERATORS eq "Array", "STANDARD_OPERATORS is importable" );
-is( STANDARD_OPERATORS.length(), 73, "phase 4.8 operator table is populated" );
+is( STANDARD_OPERATORS.length(), 104, "operator table is populated" );
 
 function find_op ( spelling ) {
 	return STANDARD_OPERATORS.first( fn op → op.get_spelling() eq spelling );
@@ -85,6 +85,9 @@ for ( let spelling in [
 	"≶",
 	"<=>",
 	"≷",
+	"∣",
+	"divides",
+	"∤",
 ] ) {
 	let op := find_binary(spelling);
 	ok( op ≢ null, `binary ${spelling} operator exists` );
@@ -109,12 +112,16 @@ ok(
 	find_binary("≷"){f} ≡ find_binary("<=>"){f},
 	"reverse numeric comparison alias shares an implementation callback",
 );
+ok(
+	find_binary("∣"){f} ≡ find_binary("divides"){f},
+	"divides aliases share an implementation callback",
+);
 
 {
 	let op := find_binary("_");
 	ok( op ≢ null, "binary _ operator exists" );
 	ok( op.is_binary(), "binary _ is marked binary" );
-	is( op.get_precedence(), 10, "binary _ precedence is set" );
+	is( op.get_precedence(), 10.5, "binary _ precedence is set" );
 	ok( op.requires_whitespace(), "binary _ enforces whitespace" );
 	ok( op{f} ≢ null, "binary _ has implementation callback" );
 }
@@ -150,6 +157,10 @@ ok(
 );
 
 for ( let spec in [
+	[ "«", 9 ],
+	[ "<<", 9 ],
+	[ "»", 9 ],
+	[ ">>", 9 ],
 	[ "&", 8 ],
 	[ "^", 7 ],
 	[ "|", 6 ],
@@ -162,15 +173,48 @@ for ( let spec in [
 	ok( op{f} ≢ null, `binary ${spelling} has implementation callback` );
 }
 
+ok(
+	find_binary("«"){f} ≡ find_binary("<<"){f},
+	"left shift aliases share an implementation callback",
+);
+ok(
+	find_binary("»"){f} ≡ find_binary(">>"){f},
+	"right shift aliases share an implementation callback",
+);
+
 for ( let spec in [
-	[ "⋀", 3 ],
-	[ "and", 3 ],
-	[ "⊼", 3 ],
-	[ "nand", 3 ],
-	[ "⊻", 2 ],
-	[ "xor", 2 ],
+	[ "⋀", 3.5 ],
+	[ "and", 3.5 ],
+	[ "⋀?", 3.5 ],
+	[ "and?", 3.5 ],
+	[ "⊼", 3.5 ],
+	[ "nand", 3.5 ],
+	[ "⊼?", 3.5 ],
+	[ "nand?", 3.5 ],
+	[ "⊭", 3.5 ],
+	[ "butnot", 3.5 ],
+	[ "⊭?", 3.5 ],
+	[ "butnot?", 3.5 ],
+	[ "⊻", 2.5 ],
+	[ "xor", 2.5 ],
+	[ "⊻?", 2.5 ],
+	[ "xor?", 2.5 ],
+	[ "⊽", 2.5 ],
+	[ "nor", 2.5 ],
+	[ "⊽?", 2.5 ],
+	[ "nor?", 2.5 ],
+	[ "↔", 2.5 ],
+	[ "xnor", 2.5 ],
+	[ "↔?", 2.5 ],
+	[ "xnor?", 2.5 ],
+	[ "⊨", 2 ],
+	[ "onlyif", 2 ],
+	[ "⊨?", 2 ],
+	[ "onlyif?", 2 ],
 	[ "⋁", 1 ],
 	[ "or", 1 ],
+	[ "⋁?", 1 ],
+	[ "or?", 1 ],
 ] ) {
 	let spelling := spec[0];
 	let op := find_binary(spelling);
@@ -185,25 +229,89 @@ ok(
 	"logical and aliases share an implementation callback",
 );
 ok(
+	find_binary("⋀?"){f} ≡ find_binary("and?"){f},
+	"value-preserving logical and aliases share an implementation callback",
+);
+ok(
 	find_binary("⊼"){f} ≡ find_binary("nand"){f},
 	"logical nand aliases share an implementation callback",
+);
+ok(
+	find_binary("⊼?"){f} ≡ find_binary("nand?"){f},
+	"value-preserving logical nand aliases share an implementation callback",
+);
+ok(
+	find_binary("⊭"){f} ≡ find_binary("butnot"){f},
+	"logical butnot aliases share an implementation callback",
+);
+ok(
+	find_binary("⊭?"){f} ≡ find_binary("butnot?"){f},
+	"value-preserving logical butnot aliases share an implementation callback",
 );
 ok(
 	find_binary("⊻"){f} ≡ find_binary("xor"){f},
 	"logical xor aliases share an implementation callback",
 );
 ok(
+	find_binary("⊻?"){f} ≡ find_binary("xor?"){f},
+	"value-preserving logical xor aliases share an implementation callback",
+);
+ok(
+	find_binary("⊽"){f} ≡ find_binary("nor"){f},
+	"logical nor aliases share an implementation callback",
+);
+ok(
+	find_binary("⊽?"){f} ≡ find_binary("nor?"){f},
+	"value-preserving logical nor aliases share an implementation callback",
+);
+ok(
+	find_binary("↔"){f} ≡ find_binary("xnor"){f},
+	"logical xnor aliases share an implementation callback",
+);
+ok(
+	find_binary("↔?"){f} ≡ find_binary("xnor?"){f},
+	"value-preserving logical xnor aliases share an implementation callback",
+);
+ok(
+	find_binary("⊨"){f} ≡ find_binary("onlyif"){f},
+	"logical onlyif aliases share an implementation callback",
+);
+ok(
+	find_binary("⊨?"){f} ≡ find_binary("onlyif?"){f},
+	"value-preserving logical onlyif aliases share an implementation callback",
+);
+ok(
+	find_binary("⊨").is_right_associative(),
+	"logical onlyif sign is right-associative",
+);
+ok(
+	find_binary("onlyif").is_right_associative(),
+	"logical onlyif word is right-associative",
+);
+ok(
+	find_binary("⊨?").is_right_associative(),
+	"value-preserving logical onlyif sign is right-associative",
+);
+ok(
+	find_binary("onlyif?").is_right_associative(),
+	"value-preserving logical onlyif word is right-associative",
+);
+ok(
 	find_binary("⋁"){f} ≡ find_binary("or"){f},
 	"logical or aliases share an implementation callback",
 );
+ok(
+	find_binary("⋁?"){f} ≡ find_binary("or?"){f},
+	"value-preserving logical or aliases share an implementation callback",
+);
 
 for ( let spec in [
-	[ "⋃", 9 ],
-	[ "union", 9 ],
-	[ "⋂", 9 ],
-	[ "intersection", 9 ],
-	[ "∖", 9 ],
-	[ "\\", 9 ],
+	[ "⋃", 10 ],
+	[ "union", 10 ],
+	[ "⋂", 10 ],
+	[ "intersection", 10 ],
+	[ "∖", 10 ],
+	[ "\\", 10 ],
 	[ "∈", 5 ],
 	[ "in", 5 ],
 	[ "∉", 5 ],
