@@ -36,6 +36,27 @@ function make_tempdir () {
 	return dir;
 }
 
+function make_tempdir_record () {
+	let dir := Path.tempdir();
+	let child := dir.child("nested").child("payload.txt");
+	child.parent().mkdir();
+	child.spew_utf8("temporary");
+	return {
+		dir_obj: dir,
+		child_obj: child,
+		path: dir.to_String(),
+	};
+}
+
+function hold_tempdir_record () {
+	let record := make_tempdir_record();
+	ok(
+		record{child_obj}.exists(),
+		"returned tempdir in dict is alive while caller keeps the dict",
+	);
+	return record{path};
+}
+
 let tempfile_path := make_tempfile_path();
 is(
 	(new Path(tempfile_path)).exists(),
@@ -65,5 +86,12 @@ ok(
 	"returned tempdir is not deleted while caller keeps a reference",
 );
 returned_dir.remove_tree();
+
+let returned_record_path := hold_tempdir_record();
+is(
+	(new Path(returned_record_path)).exists(),
+	0,
+	"returned tempdir in dict is deleted when dict owner leaves scope",
+);
 
 done_testing();
