@@ -1,0 +1,69 @@
+from test/more import *;
+
+requires_capability( "fs" );
+
+from std/io import Path;
+
+function make_tempfile_path () {
+	let file := Path.tempfile();
+	let path := file.to_String();
+	ok( file.exists(), "tempfile exists while owner is in scope", );
+	file.spew_utf8("temporary");
+	return path;
+}
+
+function make_tempdir_path () {
+	let dir := Path.tempdir();
+	let path := dir.to_String();
+	let child := dir.child("nested").child("payload.txt");
+	child.parent().mkdir();
+	child.spew_utf8("temporary");
+	ok( child.exists(), "tempdir child exists while owner is in scope", );
+	return path;
+}
+
+function make_tempfile () {
+	let file := Path.tempfile();
+	file.spew_utf8("temporary");
+	return file;
+}
+
+function make_tempdir () {
+	let dir := Path.tempdir();
+	let child := dir.child("nested").child("payload.txt");
+	child.parent().mkdir();
+	child.spew_utf8("temporary");
+	return dir;
+}
+
+let tempfile_path := make_tempfile_path();
+is(
+	(new Path(tempfile_path)).exists(),
+	0,
+	"tempfile is deleted when owner leaves scope",
+);
+
+let tempdir_path := make_tempdir_path();
+is(
+	(new Path(tempdir_path)).exists(),
+	0,
+	"tempdir is recursively deleted when owner leaves scope",
+);
+
+let returned_file := make_tempfile();
+let returned_file_path := returned_file.to_String();
+ok(
+	returned_file.exists(),
+	"returned tempfile is not deleted while caller keeps a reference",
+);
+returned_file.remove();
+
+let returned_dir := make_tempdir();
+let returned_dir_path := returned_dir.to_String();
+ok(
+	returned_dir.child("nested").child("payload.txt").exists(),
+	"returned tempdir is not deleted while caller keeps a reference",
+);
+returned_dir.remove_tree();
+
+done_testing();
