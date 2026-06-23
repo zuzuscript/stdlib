@@ -11,3 +11,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `std/math/bignum` tests now define `BigNum.to_dec` and
   `BigNum.to_String` as String-returning APIs, leaving `BigNum.to_Number`
   as the numeric conversion API.
+
+- Minor formatting cleanup in `std/mail.zzm` improves readability in the
+  internal base64 conversion helper.
