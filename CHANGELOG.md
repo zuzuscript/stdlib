@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+### Added
+
+- Added `std/string.repeat` for repeating `String` or `BinaryString` values
+  with optional same-type separators.
+
 ### Fixed
 
 - `std/math/bignum` tests now define `BigNum.to_dec` and
