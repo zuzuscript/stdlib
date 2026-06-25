@@ -68,6 +68,12 @@ terminators. Keep code lines under 80 columns where practical.
 
 POD documentation should use spaces in code samples, not tabs.
 
+In POD, a totally blank line between two indented code blocks separates them
+into two code samples. Use a whitespace-only line, typically two spaces, only
+when the intended result is one code sample containing a blank line. When the
+intended meaning is two separate examples, leave the separator totally blank;
+if the split is not obvious, add explanatory prose before one or both samples.
+
 ## Module Documentation
 
 Standard modules are documented with POD at the top of each `.zzm` file.
