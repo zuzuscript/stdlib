@@ -42,7 +42,21 @@ skip_all( "planned skip" );
 let empty_file := temp.child("empty.zzs");
 empty_file.spew_utf8("");
 
-function _run_zuzuprove ( Array files ) {
+let nested_file := temp.child("nested.zzs");
+nested_file.spew_utf8("""
+from test/more import *;
+
+ok( true, "top" );
+subtest( "outer", function () {
+	ok( true, "inner" );
+	subtest( "nested", function () {
+		ok( true, "deep" );
+	} );
+} );
+done_testing();
+""");
+
+function _run_zuzuprove ( Array files, Array extra_args := [] ) {
 	let args := [
 		"-I" _ module_root.to_String(),
 		script.to_String(),
@@ -51,6 +65,9 @@ function _run_zuzuprove ( Array files ) {
 		zuzu,
 		"-I" _ module_root.to_String(),
 	];
+	for ( let arg in extra_args ) {
+		args.push(arg);
+	}
 	for ( let file in files ) {
 		args.push(file.to_String());
 	}
@@ -93,6 +110,23 @@ like(
 	failing{stdout},
 	/script failed before TAP assertions/,
 	"zuzuprove keeps the no-TAP failure diagnostic",
+);
+
+let nested := _run_zuzuprove([ nested_file ], [ "--verbose" ]);
+like(
+	nested{stdout},
+	/\n  . \[passed\] top\n/,
+	"zuzuprove verbose output keeps top-level assertions at base indent",
+);
+like(
+	nested{stdout},
+	/\n    . \[passed\] inner\n/,
+	"zuzuprove verbose output indents subtest assertions",
+);
+like(
+	nested{stdout},
+	/\n      . \[passed\] deep\n/,
+	"zuzuprove verbose output indents nested subtest assertions",
 );
 
 done_testing();

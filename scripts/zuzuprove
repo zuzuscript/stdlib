@@ -5,7 +5,7 @@ from std/io import Path;
 from std/math import Math;
 from std/math/range import abbreviate;
 from std/proc import Proc, Env;
-from std/string import join, sprint, replace, substr, starts_with;
+from std/string import join, repeat, sprint, replace, substr, starts_with;
 from test/parser import parse;
 
 let String _RESET := "\x1b[0m";
@@ -157,6 +157,10 @@ function _parse_failed_tests ( Dict summary, verbose ) {
 		return failed;
 	}
 	return abbreviate( failed_numbers );
+}
+
+function _verbose_indent ( Dict test_row ) {
+	return repeat( test_row.get( "depth", 0 ) + 1, "  " );
 }
 
 function _zuzu_command ( Dict opts ) {
@@ -338,7 +342,9 @@ function __main__ ( argv ) {
 				let desc := test_row{description} ≡ ""
 					? `test ${test_row{number}}`
 					: test_row{description};
-				say( `  ${marker} [${test_row{bucket}}] ${desc}` );
+				say(
+					`${_verbose_indent( test_row )}${marker} [${test_row{bucket}}] ${desc}`
+				);
 			}
 		}
 	}
